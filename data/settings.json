@@ -1,0 +1,31 @@
+{
+  "tournament_name": "S.P. BADMINTON TOURNEY 3",
+  "tournament_subtitle": "Men's Doubles · Knockout · Suryodaya Park",
+  "venue": "Suryodaya Park Court",
+  "dates": "28–30 Aug 2026",
+  "flash_message": "Registrations are OPEN! Limited team slots available.",
+  "flash_active": "NO",
+  "registration_status": "OPEN",
+  "admin_pin": "9903",
+  "upi_id": "blistedx@okhdfcbank",
+  "upi_name": "S.P. Badminton Club",
+  "upi_qr_url": "qr_code.png",
+  "entry_fee": "500",
+  "stat_categories": "02",
+  "stat_players": "50+",
+  "stat_days": "03",
+  "categories": [
+    {
+      "name": "Below 35",
+      "status": "ACTIVE",
+      "fee": "500",
+      "maxPairs": "32"
+    },
+    {
+      "name": "Above 35",
+      "status": "ACTIVE",
+      "fee": "500",
+      "maxPairs": "32"
+    }
+  ]
+}

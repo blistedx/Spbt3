@@ -1,0 +1,28 @@
+{
+  "matchId": "Court 1",
+  "p1Name": "Singh / Patel",
+  "p2Name": "Kumar / Reddy",
+  "category": "Below 35",
+  "targetPoints": 21,
+  "score": "0-0",
+  "status": "UPCOMING",
+  "isLive": false,
+  "isComplete": false,
+  "server": 1,
+  "currentGame": 0,
+  "games": [
+    [0, 0],
+    [0, 0],
+    [0, 0]
+  ],
+  "setsWon": [0, 0],
+  "interval": {
+    "active": false,
+    "secondsLeft": 0,
+    "intervalTakenForGame": [false, false, false]
+  },
+  "rallyLog": [],
+  "updatedAt": 0,
+  "action": "updateLiveMatch",
+  "ts": 0
+}

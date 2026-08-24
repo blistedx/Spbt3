@@ -1,0 +1,37 @@
+{
+  "name": "sp-badminton-tourney-3",
+  "version": "3.0.0",
+  "description": "Professional Full-Stack Tournament Management Application for S.P. Badminton Tourney 3 with MongoDB, Express, Socket.io Realtime Scoring & TV Overlay",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "build": "cd client && npm install && npm run build && node -e \"const fs=require('fs'), path=require('path'); ['index.html','admin.html','scorer.html','tv.html','config.js','qr_code.png','logo.png','alert-modal.js'].forEach(f => { const src=path.join('..', f); if(fs.existsSync(src)) fs.copyFileSync(src, path.join('dist', f)); });\" && cd .. && node -e \"const fs=require('fs'); if(fs.existsSync('client/dist')){ if(!fs.existsSync('dist')) fs.mkdirSync('dist'); fs.cpSync('client/dist', 'dist', {recursive: true}); }\"",
+    "seed": "node seed.js"
+  },
+  "keywords": [
+    "badminton",
+    "tournament-management",
+    "mongodb",
+    "express",
+    "socket.io",
+    "live-scoring",
+    "tv-broadcast"
+  ],
+  "author": "S.P. Badminton",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^9.0.5",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^10.1.3"
+  }
+}
