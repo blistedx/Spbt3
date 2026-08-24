@@ -1,8 +1,8 @@
 const nodemailer = require('nodemailer');
 
 function getTransporter() {
-  const user = process.env.SMTP_USER || process.env.EMAIL_USER || process.env.GMAIL_USER || 'blistedx@gmail.com';
-  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.GMAIL_APP_PASS || 'aiucgzihdzioffox';
+  const user = process.env.SMTP_USER || process.env.EMAIL_USER || process.env.GMAIL_USER;
+  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.GMAIL_APP_PASS;
 
   if (!user || !pass) {
     return null;
@@ -21,11 +21,10 @@ function getTransporter() {
 }
 
 function getAdminEmails() {
-  const defaultAdmins = ['nitessh.sharma@gmail.com', 'Hemantkalra2006@gmail.com', 'blistedx@gmail.com'];
   if (process.env.ADMIN_EMAILS) {
     return process.env.ADMIN_EMAILS.split(',').map(e => e.trim()).filter(Boolean);
   }
-  return defaultAdmins;
+  return [];
 }
 
 /**
