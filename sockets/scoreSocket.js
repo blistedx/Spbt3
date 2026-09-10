@@ -1,16 +1,20 @@
-const mongoose = require('mongoose');
-const Match = require('../models/Match');
+/**
+ * S.P. Badminton Tourney 3 · Live Courtside Score Socket Engine
+ * 0ms instant broadcast to all connected clients (Spectator, TV, Scorer, Admin)
+ * Synchronized persistence directly to online Neon PostgreSQL database
+ */
 const dataStore = require('../config/dataStore');
 
 function setupScoreSocket(io) {
   io.on('connection', (socket) => {
-    // 1. Send latest live match on connection immediately from memory cache (0ms)
+    // 1. Send latest live match on connection immediately from Neon-backed cache (0ms)
     try {
       const liveMatch = dataStore.getLiveMatch();
       if (liveMatch) {
         socket.emit('match_state', liveMatch);
         socket.emit('tv_score_update', liveMatch);
         socket.emit('score_update', liveMatch);
+        socket.emit('court:update', liveMatch);
         socket.emit('score_updated', { matchId: liveMatch.matchId || 'Court 1', match: liveMatch });
       }
     } catch (e) {}
@@ -21,17 +25,18 @@ function setupScoreSocket(io) {
       socket.join(room);
       socket.join('tv_broadcast');
 
-      // Send latest live match immediately from RAM (0ms)
+      // Send latest live match immediately (0ms)
       try {
         const liveMatch = dataStore.getLiveMatch();
         if (liveMatch) {
           socket.emit('match_state', liveMatch);
           socket.emit('tv_score_update', liveMatch);
           socket.emit('score_update', liveMatch);
+          socket.emit('court:update', liveMatch);
           socket.emit('score_updated', { matchId: liveMatch.matchId || 'Court 1', match: liveMatch });
         }
       } catch (err) {
-        console.error('Error fetching live match on join:', err);
+        console.error('[ScoreSocket] Error fetching live match on join:', err.message);
       }
     });
 
@@ -43,11 +48,12 @@ function setupScoreSocket(io) {
           socket.emit('match_state', liveMatch);
           socket.emit('tv_score_update', liveMatch);
           socket.emit('score_update', liveMatch);
+          socket.emit('court:update', liveMatch);
         }
       } catch (e) {}
     });
 
-    // Score point / match update event (Instant 0ms in-memory broadcast)
+    // Score point / match update event (Instant 0ms broadcast & Neon PostgreSQL persistence)
     socket.on('score_point', (data) => {
       handleMatchUpdate(data);
     });
@@ -65,11 +71,28 @@ function setupScoreSocket(io) {
         if (!data) return;
         const matchId = data.matchId || 'Court 1';
 
-        // 1. Full match object from scorer desk -> Update RAM & Broadcast in 0ms
+        // 1. Full match object from scorer desk -> Update Neon live_match & matches tables
         if (data.p1Name || data.p2Name || data.games || data.score || data.status || data.setsWon) {
           const updatedLive = dataStore.saveLiveMatch(data);
 
-          // ⚡ INSTANT 0MS BROADCAST (NO WAITING FOR DATABASE WRITE)
+          // Sync to Neon matches table as well
+          const p1 = updatedLive.p1Name || 'Player 1';
+          const p2 = updatedLive.p2Name || 'Player 2';
+          dataStore.addOrUpdateMatch({
+            matchId: matchId,
+            p1Name: p1,
+            p2Name: p2,
+            team1_name: p1,
+            team2_name: p2,
+            category: updatedLive.category || 'Below 35',
+            court: updatedLive.court || 'Court 1',
+            status: updatedLive.status || (updatedLive.isLive ? 'LIVE' : 'UPCOMING'),
+            winner: updatedLive.winner || '',
+            scores: updatedLive.games || [],
+            sets: updatedLive.setsWon || [0, 0]
+          });
+
+          // ⚡ INSTANT 0MS BROADCAST TO ALL CONNECTED CLIENTS & HOSTS
           io.emit('score_update', updatedLive);
           io.emit('tv_score_update', updatedLive);
           io.emit('match_state', updatedLive);
@@ -77,26 +100,6 @@ function setupScoreSocket(io) {
           io.emit('score_updated', { matchId, match: updatedLive });
           io.to('tv_broadcast').emit('tv_score_update', updatedLive);
           io.to('court_1').emit('match_state', updatedLive);
-
-          // Background non-blocking persistence (async)
-          if (mongoose.connection.readyState === 1 && Match && Match.findOneAndUpdate) {
-            Match.findOneAndUpdate(
-              { matchId },
-              {
-                ...updatedLive,
-                p1Name: updatedLive.p1Name,
-                p2Name: updatedLive.p2Name,
-                category: updatedLive.category || 'Below 35',
-                score: updatedLive.score,
-                games: updatedLive.games,
-                setsWon: updatedLive.setsWon,
-                isLive: (updatedLive.status === 'LIVE' || updatedLive.status === 'Live' || updatedLive.status === 'IN PROGRESS'),
-                status: updatedLive.status || 'LIVE',
-                updatedAt: new Date()
-              },
-              { upsert: true, new: true }
-            ).catch(() => {});
-          }
           return;
         }
 
@@ -122,23 +125,29 @@ function setupScoreSocket(io) {
 
         const updated = dataStore.saveLiveMatch(currentMatch);
 
+        // Sync to Neon matches table
+        dataStore.addOrUpdateMatch({
+          matchId: matchId,
+          p1Name: updated.p1Name,
+          p2Name: updated.p2Name,
+          team1_name: updated.p1Name,
+          team2_name: updated.p2Name,
+          category: updated.category || 'Below 35',
+          court: updated.court || 'Court 1',
+          status: 'LIVE',
+          winner: updated.winner || '',
+          scores: updated.games || [],
+          sets: updated.setsWon || [0, 0]
+        });
+
         // ⚡ INSTANT 0MS BROADCAST
         io.emit('score_update', updated);
         io.emit('tv_score_update', updated);
         io.emit('match_state', updated);
         io.emit('court:update', updated);
         io.emit('score_updated', { matchId, match: updated });
-
-        // Background non-blocking persistence
-        if (mongoose.connection.readyState === 1 && Match && Match.findOneAndUpdate) {
-          Match.findOneAndUpdate(
-            { matchId },
-            { ...updated, updatedAt: new Date() },
-            { upsert: true }
-          ).catch(() => {});
-        }
       } catch (err) {
-        console.error('Error handling score_point:', err);
+        console.error('[ScoreSocket] Error handling score_point:', err.message);
       }
     }
 
@@ -167,7 +176,7 @@ function setupScoreSocket(io) {
         io.emit('match_state', updated);
         io.emit('score_updated', { matchId, match: updated });
       } catch (err) {
-        console.error('Error handling undo_point:', err);
+        console.error('[ScoreSocket] Error handling undo_point:', err.message);
       }
     });
 
@@ -194,7 +203,7 @@ function setupScoreSocket(io) {
         io.emit('tv_score_update', updated);
         io.emit('match_state', updated);
       } catch (err) {
-        console.error('Error handling switch_sides:', err);
+        console.error('[ScoreSocket] Error handling switch_sides:', err.message);
       }
     });
 
@@ -210,7 +219,7 @@ function setupScoreSocket(io) {
           io.emit('match_state', updated);
         }
       } catch (err) {
-        console.error('Error handling change_server:', err);
+        console.error('[ScoreSocket] Error handling change_server:', err.message);
       }
     });
 
@@ -226,7 +235,7 @@ function setupScoreSocket(io) {
           io.emit('match_state', updated);
         }
       } catch (err) {
-        console.error('Error handling interval_update:', err);
+        console.error('[ScoreSocket] Error handling interval_update:', err.message);
       }
     });
 
@@ -240,7 +249,7 @@ function setupScoreSocket(io) {
         io.emit('tv_score_update', updated);
         io.emit('match_state', updated);
       } catch (err) {
-        console.error('Error handling broadcast_message:', err);
+        console.error('[ScoreSocket] Error handling broadcast_message:', err.message);
       }
     });
 
@@ -251,7 +260,7 @@ function setupScoreSocket(io) {
           handleMatchUpdate(data.match);
         }
       } catch (err) {
-        console.error('Error handling set_won:', err);
+        console.error('[ScoreSocket] Error handling set_won:', err.message);
       }
     });
 

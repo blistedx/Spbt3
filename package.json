@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "build": "cd client && npm install && npm run build && node -e \"const fs=require('fs'), path=require('path'); ['index.html','admin.html','scorer.html','tv.html','config.js','qr_code.png','logo.png','alert-modal.js'].forEach(f => { const src=path.join('..', f); if(fs.existsSync(src)) fs.copyFileSync(src, path.join('dist', f)); });\" && cd .. && node -e \"const fs=require('fs'); if(fs.existsSync('client/dist')){ if(!fs.existsSync('dist')) fs.mkdirSync('dist'); fs.cpSync('client/dist', 'dist', {recursive: true}); }\"",
+    "build": "cd client && npm install && npm run build && node -e \"const fs=require('fs'), path=require('path'); ['index.html','admin.html','scorer.html','tv.html','privacy.html','terms.html','404.html','manifest.json','sw.js','cookie-consent.js','pwa-install.js','analytics.js','social-share.js','robots.txt','sitemap.xml','favicon.ico','favicon.png','favicon-32x32.png','favicon-16x16.png','apple-touch-icon.png','icon-192.png','icon-512.png','icon-maskable-512.png','config.js','qr_code.png','logo.png','alert-modal.js'].forEach(f => { const src=path.join('..', f); if(fs.existsSync(src)) fs.copyFileSync(src, path.join('dist', f)); });\" && cd .. && node -e \"const fs=require('fs'); if(fs.existsSync('client/dist')){ if(!fs.existsSync('dist')) fs.mkdirSync('dist'); fs.cpSync('client/dist', 'dist', {recursive: true}); }\"",
     "seed": "node seed.js"
   },
   "keywords": [
@@ -22,6 +22,7 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -29,9 +30,11 @@
     "mongoose": "^8.9.5",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^9.0.5",
+    "pg": "^8.23.0",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
-    "mongodb-memory-server": "^10.1.3"
+    "mongodb-memory-server": "^10.1.3",
+    "socket.io-client": "^4.8.3"
   }
 }

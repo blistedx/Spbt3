@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms &amp; Tournament Rules · S.P. Badminton Tourney 3</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#16a34a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Official Tournament Rules & Regulations for S.P. Badminton Tourney Season 3 at Suryodaya Park. Eligibility, scoring, walkover rules, and code of conduct.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tournament Rules & Terms · S.P. Badminton Tourney 3">
+  <meta property="og:description" content="Official Match Rules, Eligibility Criteria, Code of Conduct & Tournament Regulations.">
+  <meta property="og:image" content="/logo.png">
+  <meta name="twitter:card" content="summary">
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('sp3_theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <style>
+    :root {
+      --ink: #14180F;
+      --paper: #F6F5EE;
+      --paper-dim: #EDECE2;
+      --court: #1E7A45;
+      --court-deep: #123F26;
+      --court-light: #e2ece4;
+      --cork: #D9722C;
+      --line: rgba(20, 24, 15, 0.12);
+      --card-bg: #ffffff;
+      --card-border: rgba(20, 24, 15, 0.08);
+      --text-muted: #64748b;
+    }
+    [data-theme="dark"] {
+      --ink: #f8fafc;
+      --paper: #090e0c;
+      --paper-dim: #111815;
+      --court: #22c55e;
+      --court-deep: #16a34a;
+      --court-light: #13271d;
+      --cork: #f97316;
+      --line: rgba(255, 255, 255, 0.12);
+      --card-bg: #0f1714;
+      --card-border: rgba(34, 197, 94, 0.22);
+      --text-muted: #94a3b8;
+      color-scheme: dark;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--paper);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.65;
+      padding-top: 80px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Outfit', 'Inter', sans-serif;
+    }
+    a {
+      color: var(--court);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Header */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: rgba(246, 245, 238, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1.5px solid var(--line);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+    [data-theme="dark"] .site-header {
+      background: rgba(9, 14, 12, 0.94);
+      border-bottom-color: rgba(34, 197, 94, 0.25);
+    }
+    .header-container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: inherit;
+      text-decoration: none;
+    }
+    .logo-img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: contain;
+    }
+    .logo-text-title {
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+    }
+    .logo-text-sub {
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--court);
+      font-weight: 700;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none !important;
+      transition: all 0.2s ease;
+      border: 1.5px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+    }
+    .btn:hover {
+      border-color: var(--court);
+      color: var(--court);
+      transform: translateY(-1px);
+    }
+    .btn-solid {
+      background: var(--court);
+      color: #fff !important;
+      border-color: var(--court);
+      box-shadow: 0 4px 14px rgba(30, 122, 69, 0.25);
+    }
+    .btn-solid:hover {
+      background: var(--court-deep);
+      border-color: var(--court-deep);
+      box-shadow: 0 6px 18px rgba(30, 122, 69, 0.35);
+    }
+    .theme-toggle-btn {
+      background: rgba(20, 24, 15, 0.05);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    [data-theme="dark"] .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    .content-wrapper {
+      max-width: 900px;
+      width: 100%;
+      margin: 32px auto 60px;
+      padding: 0 24px;
+      flex: 1;
+    }
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .breadcrumb a {
+      color: var(--text-muted);
+    }
+    .breadcrumb a:hover {
+      color: var(--court);
+    }
+
+    .page-hero {
+      margin-bottom: 36px;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: rgba(30, 122, 69, 0.12);
+      color: var(--court);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(30, 122, 69, 0.25);
+    }
+    .page-title {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 680px;
+    }
+
+    /* Rule Cards */
+    .rule-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    [data-theme="dark"] .rule-card {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .rule-card:hover {
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+    }
+    .rule-num {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--cork);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .rule-heading {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .rule-card p {
+      font-size: 14.5px;
+      color: inherit;
+      opacity: 0.9;
+      margin-bottom: 14px;
+    }
+    .rule-card p:last-child {
+      margin-bottom: 0;
+    }
+    .rule-card ul {
+      padding-left: 20px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .rule-card li {
+      margin-bottom: 8px;
+    }
+
+    .callout-box {
+      background: rgba(217, 114, 44, 0.08);
+      border-left: 4px solid var(--cork);
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 13.5px;
+      color: inherit;
+    }
+
+    /* Quick CTA Box */
+    .cta-banner {
+      background: linear-gradient(135deg, rgba(30, 122, 69, 0.12), rgba(217, 114, 44, 0.12));
+      border: 1.5px solid rgba(30, 122, 69, 0.25);
+      border-radius: 20px;
+      padding: 32px;
+      text-align: center;
+      margin-top: 40px;
+    }
+    [data-theme="dark"] .cta-banner {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(249, 115, 22, 0.1));
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+    .cta-banner h3 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .cta-banner p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* Footer */
+    .site-footer {
+      background: var(--paper-dim);
+      border-top: 1.5px solid var(--line);
+      padding: 36px 0;
+      margin-top: auto;
+      font-size: 13.5px;
+    }
+    [data-theme="dark"] .site-footer {
+      background: #070c0a;
+      border-top-color: rgba(34, 197, 94, 0.2);
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      color: var(--court);
+    }
+
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 28px;
+      }
+      .rule-card {
+        padding: 20px;
+      }
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="/" class="logo-link">
+        <img src="/logo.png" alt="S.P. Badminton Tourney" class="logo-img">
+        <div>
+          <div class="logo-text-title">SURYODAYA PARK</div>
+          <div class="logo-text-sub">BADMINTON 2026</div>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a href="/" class="btn">🏸 Back to Court</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleDarkTheme()" title="Toggle Dark/Light Mode">
+          <span class="theme-icon">🌙</span> <span class="theme-text">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="content-wrapper">
+    <div class="breadcrumb">
+      <a href="/">Home</a>
+      <span>&rsaquo;</span>
+      <span>Tournament Rules &amp; Terms</span>
+    </div>
+
+    <div class="page-hero">
+      <div class="badge-pill">⚖️ Official Tournament Bylaws</div>
+      <h1 class="page-title">Terms &amp; Conditions</h1>
+      <p class="page-subtitle">
+        Official Match Rules, Eligibility Criteria, Code of Conduct &amp; Tournament Regulations for S.P. Badminton Tourney Season 3.
+      </p>
+    </div>
+
+    <!-- Rule 1: Age & Eligibility -->
+    <div class="rule-card">
+      <span class="rule-num">Rule 01</span>
+      <h2 class="rule-heading">🏸 1. Age Categories &amp; Player Eligibility</h2>
+      <p>
+        The tournament is an open Men's Doubles competition organized into two distinct age divisions:
+      </p>
+      <ul>
+        <li><strong>Below 35 Category:</strong> Both players in the pair must be strictly under 35 years of age based on their official Date of Birth (DOB).</li>
+        <li><strong>35 &amp; Above Category:</strong> Both players in the pair must be 35 years of age or older.</li>
+      </ul>
+      <div class="callout-box">
+        <strong>Mandatory Desk Verification:</strong> Both players must carry their original Government-issued Photo ID (Aadhaar Card, Driving License, Voter ID, or Passport) to the tournament desk before their first match. Any age discrepancy will lead to immediate disqualification without refund.
+      </div>
+    </div>
+
+    <!-- Rule 2: Entry Policy & Registration Fee -->
+    <div class="rule-card">
+      <span class="rule-num">Rule 02</span>
+      <h2 class="rule-heading">💳 2. Team Entry Policy &amp; Fee Confirmation</h2>
+      <ul>
+        <li><strong>Single Entry Restriction:</strong> A player is strictly allowed to participate in <strong>only one team/pair</strong> throughout the tournament. Dual entries or playing for multiple teams is prohibited.</li>
+        <li><strong>Entry Fee:</strong> The official entry fee is <strong>₹1000 per pair</strong>.</li>
+        <li><strong>Slot Confirmation:</strong> Registration entries remain <em>Pending Verification</em> until payment transaction ID (UTR) is reconciled by the admin team.</li>
+        <li><strong>Strict No-Refund Policy:</strong> Once verified and placed into the tournament draw, the registration fee is 100% <strong>non-refundable</strong> and non-transferable under any circumstances.</li>
+      </ul>
+    </div>
+
+    <!-- Rule 3: Match Format & Scoring -->
+    <div class="rule-card">
+      <span class="rule-num">Rule 03</span>
+      <h2 class="rule-heading">⚡ 3. Match Format &amp; Scoring System</h2>
+      <p>
+        All matches follow the single-elimination straight-knockout tournament structure:
+      </p>
+      <ul>
+        <li><strong>Set Format:</strong> Best of 3 Sets to 21 Points per set.</li>
+        <li><strong>Rally Point Scoring:</strong> Standard BWF (Badminton World Federation) 21-point rally scoring system applies. At 20-all, the side which gains a 2-point lead first wins the set. At 29-all, the side scoring the 30th point wins the game.</li>
+        <li><strong>Official Shuttles:</strong> Official tournament standard <strong>Yonex Mavis 350 (Green Cap)</strong> nylon shuttlecocks will be provided for all fixtures.</li>
+        <li><strong>Intervals:</strong> A 60-second interval is allowed when the leading score reaches 11 points. A 120-second interval is allowed between sets.</li>
+      </ul>
+    </div>
+
+    <!-- Rule 4: Reporting & Walkover -->
+    <div class="rule-card">
+      <span class="rule-num">Rule 04</span>
+      <h2 class="rule-heading">⏰ 4. Reporting Time &amp; Walkover Rules</h2>
+      <p>
+        Punctuality is crucial to ensure the schedule runs on time:
+      </p>
+      <ul>
+        <li>Both players of a pair must report to the official Suryodaya Park desk at least <strong>30 minutes</strong> before their scheduled match fixture.</li>
+        <li><strong>Walkover Grace Period:</strong> If a pair fails to report on court within <strong>15 minutes</strong> after the second official court call, an automatic walkover (concession) will be awarded to the opposing team.</li>
+        <li>No rescheduling will be granted for late arrivals or personal schedule conflicts.</li>
+      </ul>
+    </div>
+
+    <!-- Rule 5: Code of Conduct -->
+    <div class="rule-card">
+      <span class="rule-num">Rule 05</span>
+      <h2 class="rule-heading">🤝 5. Sportsmanship &amp; Code of Conduct</h2>
+      <ul>
+        <li>Players must wear proper athletic sportswear and non-marking badminton shoes on the court.</li>
+        <li>Aggressive arguments with line judges, umpires, organizers, or opponents, abusive language, or racket throwing will result in an immediate yellow card (warning), red card (fault), or black card (disqualification).</li>
+        <li>The decision of the On-Court Umpire and Chief Tournament Referee on any call or score is <strong>final, conclusive, and binding</strong>.</li>
+      </ul>
+    </div>
+
+    <!-- Rule 6: Liability & Health Disclaimer -->
+    <div class="rule-card">
+      <span class="rule-num">Rule 06</span>
+      <h2 class="rule-heading">🩹 6. Health, Injury &amp; Liability Disclaimer</h2>
+      <p>
+        Badminton is an active, high-intensity sport. By registering and stepping onto the court, players confirm they are medically fit to compete.
+      </p>
+      <p>
+        The S.P. Badminton Tourney organizing committee, sponsors, and venue administration assume no financial or legal liability for any bodily injury, muscle strain, dehydration, or medical emergency sustained during play, nor for loss or damage to personal belongings at the court. Basic first-aid kits and ice packs will be available at the tournament desk.
+      </p>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="cta-banner">
+      <h3>Ready to Take the Court?</h3>
+      <p>Review the bracket, verify your pair's entry status, or submit your registration today.</p>
+      <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+        <a href="/" class="btn btn-solid">Register Pair on Portal</a>
+        <a href="/privacy.html" class="btn">View Privacy Policy</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <div>&copy; 2026 <strong>S.P. Badminton Tourney 3</strong>. All rights reserved.</div>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Organized at Suryodaya Park · Superadmin: Abhishek Shukla</div>
+      </div>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/terms.html" style="font-weight:600; color:var(--court);">Terms &amp; Conditions</a>
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="javascript:void(0)" id="cookieSettingsLink">Cookie Settings</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/cookie-consent.js"></script>
+  <script src="/pwa-install.js"></script>
+  <script src="/analytics.js" defer></script>
+  <script src="/social-share.js" defer></script>
+  <script>
+    function toggleDarkTheme() {
+      try {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const nextTheme = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        localStorage.setItem('sp3_theme', nextTheme);
+        updateThemeButtons();
+      } catch (e) {}
+    }
+    function updateThemeButtons() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.querySelector('.theme-icon').innerText = isDark ? '☀️' : '🌙';
+        btn.querySelector('.theme-text').innerText = isDark ? 'Light' : 'Dark';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', updateThemeButtons);
+  </script>
+</body>
+</html>

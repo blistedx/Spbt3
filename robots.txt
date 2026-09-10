@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /privacy
+Allow: /terms
+Allow: /tv
+Allow: /manifest.json
+Allow: /logo.png
+Allow: /favicon.ico
+
+# Disallow administrative control panel and internal APIs
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /api/
+Disallow: /uploads/
+
+Sitemap: https://spbadminton.in/sitemap.xml

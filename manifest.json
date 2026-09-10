@@ -1,0 +1,72 @@
+{
+  "name": "S.P. Badminton Tourney 3",
+  "short_name": "SP Tourney 3",
+  "description": "Official Tournament Portal for S.P. Badminton Tourney Season 3 - Live Scoring, Fixtures, Knockout Draws & Registrations",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#090e0c",
+  "theme_color": "#16a34a",
+  "categories": ["sports", "entertainment"],
+  "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Draws & Fixtures",
+      "short_name": "Draws",
+      "description": "View tournament knockout bracket and live fixtures",
+      "url": "/#draws",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Live TV Broadcast",
+      "short_name": "Live TV",
+      "description": "Courtside full-screen match broadcast",
+      "url": "/tv",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Courtside Scorer Desk",
+      "short_name": "Scorer",
+      "description": "Official match scoring tablet panel",
+      "url": "/scorer",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Register Pair",
+      "short_name": "Register",
+      "description": "Register your doubles team",
+      "url": "/#categories",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

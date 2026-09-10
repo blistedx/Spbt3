@@ -6,29 +6,12 @@ const cors = require('cors');
 const fs = require('fs');
 const { Server } = require('socket.io');
 
-const mongoose = require('mongoose');
-const { connectDB } = require('./config/db');
-const { seedDatabase } = require('./seed');
+const { initPostgres, query } = require('./config/postgres');
 const { setupScoreSocket } = require('./sockets/scoreSocket');
 const dataStore = require('./config/dataStore');
 const emailService = require('./services/emailService');
 
-// Models
-const Settings = require('./models/Settings');
-const Registration = require('./models/Registration');
-const Match = require('./models/Match');
-const MatchHistory = require('./models/MatchHistory');
-const { Expense, Sponsor } = require('./models/Financials');
-
-// Active TV Presence Database Model & Memory Cache
-const tvPresenceSchema = new mongoose.Schema({
-  deviceId: { type: String, required: true, unique: true },
-  name: { type: String, default: 'Courtside TV Screen' },
-  screen: { type: String, default: '1920x1080' },
-  lastSeen: { type: Date, default: Date.now }
-}, { timestamps: true });
-
-const TvPresence = mongoose.models.TvPresence || mongoose.model('TvPresence', tvPresenceSchema);
+// Active TV Presence Memory Cache
 const globalTvScreens = new Map();
 
 // Route Handlers
@@ -51,7 +34,22 @@ const io = new Server(server, {
   transports: ['websocket', 'polling']
 });
 
+// Compression & Performance Middleware
+let compression;
+try {
+  compression = require('compression');
+} catch (e) {}
+
 // Middleware
+if (compression) {
+  app.use(compression({
+    threshold: 1024,
+    filter: (req, res) => {
+      if (req.headers['x-no-compression']) return false;
+      return compression.filter(req, res);
+    }
+  }));
+}
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -69,19 +67,21 @@ app.use((req, res, next) => {
 app.set('io', io);
 setupScoreSocket(io);
 
-// Static Asset Directories
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(path.join(__dirname)));
-
-// REST API & Action Bridge Database Connection Middleware
-app.use(async (req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
-    try {
-      await connectDB();
-    } catch (e) {
-      console.warn('Auto DB connect warning:', e.message);
+// Static Asset Directories with Browser Caching
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
+app.use(express.static(path.join(__dirname), {
+  maxAge: '1d',
+  setHeaders: (res, filePath) => {
+    if (/\.(png|jpg|jpeg|gif|ico|svg|webp)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    } else if (/\.(css|js)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=86400');
     }
   }
+}));
+
+// Database middleware (Neon PostgreSQL online connection pool)
+app.use(async (req, res, next) => {
   next();
 });
 
@@ -130,42 +130,7 @@ let globalSettingsState = dataStore.getSettings();
 let globalLiveMatchState = dataStore.getLiveMatch();
 
 async function getMergedSettings() {
-  const fileSettings = dataStore.getSettings();
-  let doc = null;
-  try {
-    if (mongoose.connection.readyState === 1) {
-      doc = await Settings.findOne().lean();
-    }
-  } catch (e) {}
-
-  const merged = { ...fileSettings };
-  if (doc) {
-    if (doc.rawSettings) Object.assign(merged, doc.rawSettings);
-    if (doc.tournamentName) merged.tournament_name = doc.tournamentName;
-    if (doc.subtitle) merged.tournament_subtitle = doc.subtitle;
-    if (doc.venue) merged.venue = doc.venue;
-    if (doc.dates) merged.dates = doc.dates;
-    if (doc.flashAnnouncement) merged.flash_message = doc.flashAnnouncement;
-    if (doc.flashActive !== undefined) {
-      merged.flash_active = (doc.flashActive === true || doc.flashActive === 'YES' || doc.flashActive === 'yes') ? 'YES' : 'NO';
-    } else if (doc.flash_active !== undefined) {
-      merged.flash_active = (doc.flash_active === 'YES' || doc.flash_active === true || doc.flash_active === 'yes') ? 'YES' : 'NO';
-    }
-    if (doc.registrationStatus) merged.registration_status = doc.registrationStatus;
-    if (doc.adminPin) merged.admin_pin = doc.adminPin;
-    if (doc.upiId) merged.upi_id = doc.upiId;
-    if (doc.upiPayeeName) merged.upi_name = doc.upiPayeeName;
-    if (doc.upiQrUrl) merged.upi_qr_url = doc.upiQrUrl;
-    if (doc.categories && doc.categories.length) {
-      merged.categories = doc.categories.map(c => ({
-        name: c.name,
-        status: (c.active !== false && c.status !== 'INACTIVE') ? 'ACTIVE' : 'INACTIVE',
-        fee: c.entryFee ? String(c.entryFee) : (c.fee || '500'),
-        maxPairs: c.maxSlots ? String(c.maxSlots) : (c.maxPairs || '32')
-      }));
-    }
-  }
-  return merged;
+  return dataStore.getSettings();
 }
 
 // Universal Compatibility Bridge for Action-based Query & POST Requests
@@ -854,6 +819,31 @@ async function handleActionBridge(req, res, next) {
           });
           globalLiveMatchState = updatedLive;
 
+          const mid = updatedLive.matchId || 'Court 1';
+          const p1 = updatedLive.p1Name || updatedLive.player1 || updatedLive.pair1 || 'Player 1';
+          const p2 = updatedLive.p2Name || updatedLive.player2 || updatedLive.pair2 || 'Player 2';
+          const winnerCalculated = updatedLive.winner || updatedLive.winnerName || (updatedLive.setsWon && updatedLive.setsWon[0] > updatedLive.setsWon[1] ? p1 : (updatedLive.setsWon && updatedLive.setsWon[1] > updatedLive.setsWon[0] ? p2 : ''));
+
+          // Synchronize to Neon PostgreSQL matches table
+          dataStore.addOrUpdateMatch({
+            matchId: mid,
+            p1Name: p1,
+            p2Name: p2,
+            team1_name: p1,
+            team2_name: p2,
+            category: updatedLive.category || 'Below 35',
+            court: updatedLive.court || 'Court 1',
+            status: updatedLive.status || (updatedLive.isLive ? 'LIVE' : 'UPCOMING'),
+            winner: winnerCalculated,
+            scores: updatedLive.games || [],
+            sets: updatedLive.setsWon || [0, 0],
+            isLive: !!updatedLive.isLive,
+            isComplete: !!updatedLive.isComplete,
+            durationFormatted: updatedLive.durationFormatted || '',
+            durationMinutes: updatedLive.durationMinutes || 0
+          });
+
+          // ⚡ Instant 0ms broadcast across all connected clients & hosts
           try {
             const io = req.app.get('io');
             if (io) {
@@ -861,130 +851,40 @@ async function handleActionBridge(req, res, next) {
               io.emit('tv_score_update', updatedLive);
               io.emit('match_state', updatedLive);
               io.emit('court:update', updatedLive);
+              io.emit('score_updated', { matchId: mid, match: updatedLive });
               io.to('tv_broadcast').emit('tv_score_update', updatedLive);
               io.to('court_1').emit('match_state', updatedLive);
             }
           } catch (e) {}
-
-          try {
-            if (mongoose.connection.readyState === 1 && Match) {
-              const mid = updatedLive.matchId || 'Court 1';
-              const p1 = updatedLive.p1Name || updatedLive.player1 || updatedLive.pair1 || '';
-              const p2 = updatedLive.p2Name || updatedLive.player2 || updatedLive.pair2 || '';
-
-              const existingMatch = await Match.findOne({ matchId: mid }).lean();
-              const existingTs = existingMatch && existingMatch.updatedAt ? new Date(existingMatch.updatedAt).getTime() : 0;
-
-              // Only write if incoming update is newer or matching (prevent out-of-order overwriting)
-              if (nowMs >= existingTs - 100) {
-                await Match.findOneAndUpdate(
-                  { matchId: mid },
-                  {
-                    matchId: mid,
-                    p1Name: p1,
-                    p2Name: p2,
-                    team1: { name: p1 || 'Team 1', score: (updatedLive.games && updatedLive.games[0] && updatedLive.games[0][0]) || 0, setsWon: (updatedLive.setsWon && updatedLive.setsWon[0]) || 0 },
-                    team2: { name: p2 || 'Team 2', score: (updatedLive.games && updatedLive.games[0] && updatedLive.games[0][1]) || 0, setsWon: (updatedLive.setsWon && updatedLive.setsWon[1]) || 0 },
-                    category: updatedLive.category || 'Below 35',
-                    targetPoints: Number(updatedLive.targetPoints) || 21,
-                    score: updatedLive.score || '0-0',
-                    games: updatedLive.games || [[0, 0], [0, 0], [0, 0]],
-                    setsWon: updatedLive.setsWon || [0, 0],
-                    currentGame: typeof updatedLive.currentGame === 'number' ? updatedLive.currentGame : 0,
-                    server: typeof updatedLive.server === 'number' ? updatedLive.server : 1,
-                    status: updatedLive.status || (updatedLive.isLive ? 'LIVE' : 'UPCOMING'),
-                    isLive: (updatedLive.status === 'LIVE' || updatedLive.status === 'Live' || updatedLive.status === 'IN PROGRESS'),
-                    isComplete: ((updatedLive.status === 'COMPLETED' || updatedLive.status === 'Completed') && updatedLive.status !== 'LIVE' && updatedLive.status !== 'UPCOMING'),
-                    interval: updatedLive.interval || null,
-                    customMessage: updatedLive.customMessage || '',
-                    durationMinutes: updatedLive.durationMinutes || 0,
-                    durationFormatted: updatedLive.durationFormatted || '',
-                    winner: updatedLive.winner || '',
-                    updatedAt: new Date(nowMs)
-                  },
-                  { upsert: true, new: true }
-                );
-              }
-
-              // Auto-record completed matches into MatchHistory for master tournament reports
-              if (updatedLive.status === 'COMPLETED' || updatedLive.status === 'Completed' || updatedLive.isComplete) {
-                try {
-                  const winnerCalculated = updatedLive.winner || updatedLive.winnerName || (updatedLive.setsWon && updatedLive.setsWon[0] > updatedLive.setsWon[1] ? p1 : p2);
-                  const recId = `REC_${nowMs}_${(mid || 'Court1').replace(/[^a-zA-Z0-9]/g, '')}`;
-                  await MatchHistory.findOneAndUpdate(
-                    {
-                      p1Name: p1,
-                      p2Name: p2,
-                      score: updatedLive.score || ''
-                    },
-                    {
-                      recordId: recId,
-                      matchId: mid,
-                      category: updatedLive.category || 'Below 35',
-                      round: updatedLive.round || 'Knockout',
-                      court: updatedLive.court || 'Court 1',
-                      p1Name: p1,
-                      p2Name: p2,
-                      winner: winnerCalculated,
-                      winnerName: winnerCalculated,
-                      score: updatedLive.score || '',
-                      games: updatedLive.games || [],
-                      setsWon: updatedLive.setsWon || [0, 0],
-                      durationMinutes: updatedLive.durationMinutes || 0,
-                      durationFormatted: updatedLive.durationFormatted || '',
-                      rallyLog: updatedLive.rallyLog || [],
-                      status: 'COMPLETED',
-                      completedAt: new Date(nowMs)
-                    },
-                    { upsert: true, new: true }
-                  );
-                } catch (recErr) {
-                  console.warn('MatchHistory auto-save notice:', recErr.message);
-                }
-              }
-            }
-          } catch (e) {
-            console.warn('DB live match update notice:', e.message);
-          }
         }
         return res.json({ success: true, liveMatch: globalLiveMatchState || dataStore.getLiveMatch() });
       }
 
       case 'getAllMatchesReport': {
-        let reports = [];
-        try {
-          if (mongoose.connection.readyState === 1) {
-            reports = await MatchHistory.find().sort({ completedAt: -1, createdAt: -1 }).lean();
-            if (!reports || reports.length === 0) {
-              const matchesDocs = await Match.find({
-                $or: [
-                  { status: 'COMPLETED' },
-                  { status: 'Completed' },
-                  { isComplete: true }
-                ]
-              }).sort({ updatedAt: -1 }).lean();
-              if (matchesDocs && matchesDocs.length > 0) {
-                reports = matchesDocs.map(m => ({
-                  recordId: m.matchId,
-                  matchId: m.matchId,
-                  category: m.category || 'Below 35',
-                  round: m.round || 'Knockout',
-                  p1Name: m.p1Name || (m.team1 && m.team1.name) || '',
-                  p2Name: m.p2Name || (m.team2 && m.team2.name) || '',
-                  winner: m.winner || m.winnerName || '',
-                  score: m.score || '',
-                  games: m.games || [[m.team1?.score || 0, m.team2?.score || 0]],
-                  setsWon: m.setsWon || [m.team1?.setsWon || 0, m.team2?.setsWon || 0],
-                  durationFormatted: m.durationFormatted || (m.durationMinutes ? `${m.durationMinutes} Mins` : ''),
-                  completedAt: m.updatedAt || new Date()
-                }));
-              }
-            }
-          }
-        } catch (e) {
-          console.warn('Get all matches report DB notice:', e.message);
-        }
-        return res.json({ success: true, reports: reports || [] });
+        const allMatches = dataStore.getMatches();
+        const completed = allMatches.filter(m =>
+          (m.status || '').toUpperCase() === 'COMPLETED' ||
+          m.isComplete === true ||
+          (m.winner && m.winner.trim() !== '')
+        );
+
+        const reports = completed.map(m => ({
+          recordId: m.matchId || m.id,
+          matchId: m.matchId || m.id,
+          category: m.category || 'Below 35',
+          round: m.round || 'Knockout',
+          court: m.court || 'Court 1',
+          p1Name: m.p1Name || m.team1_p1 || m.team1_name || 'Team 1',
+          p2Name: m.p2Name || m.team2_p1 || m.team2_name || 'Team 2',
+          winner: m.winner || '',
+          score: m.score || '',
+          games: m.scores || m.games || [],
+          setsWon: m.sets || m.setsWon || [0, 0],
+          durationFormatted: m.durationFormatted || (m.durationMinutes ? `${m.durationMinutes} Mins` : ''),
+          completedAt: m.updatedAt || new Date().toISOString()
+        }));
+
+        return res.json({ success: true, reports });
       }
 
       case 'deleteMatchReport': {
@@ -1107,61 +1007,7 @@ async function handleActionBridge(req, res, next) {
 
       case 'getLiveMatch': {
         const targetMatchId = req.query.matchId || (req.body && req.body.matchId) || 'Court 1';
-        let storeLive = dataStore.getLiveMatch() || globalLiveMatchState;
-        let finalLive = storeLive;
-
-        try {
-          if (mongoose.connection.readyState === 1) {
-            let liveDoc = await Match.findOne({ matchId: targetMatchId }).lean();
-            if (!liveDoc) {
-              liveDoc = await Match.findOne({
-                $or: [
-                  { isLive: true },
-                  { status: 'LIVE' },
-                  { status: 'IN PROGRESS' }
-                ]
-              }).sort({ updatedAt: -1 }).lean();
-            }
-
-            if (liveDoc) {
-              const docTs = liveDoc.updatedAt ? new Date(liveDoc.updatedAt).getTime() : 0;
-              const storeTs = storeLive ? (storeLive.updatedAt || storeLive.ts || 0) : 0;
-
-              if (docTs >= storeTs || (!storeLive || (!storeLive.p1Name && !storeLive.p2Name))) {
-                const p1 = liveDoc.p1Name || (liveDoc.team1 && liveDoc.team1.name) || liveDoc.pair1 || liveDoc.player1 || 'Singh / Patel';
-                const p2 = liveDoc.p2Name || (liveDoc.team2 && liveDoc.team2.name) || liveDoc.pair2 || liveDoc.player2 || 'Kumar / Reddy';
-                finalLive = {
-                  ...liveDoc,
-                  matchId: liveDoc.matchId || targetMatchId,
-                  p1Name: p1,
-                  p2Name: p2,
-                  pair1: p1,
-                  pair2: p2,
-                  category: liveDoc.category || 'Below 35',
-                  targetPoints: liveDoc.targetPoints || 21,
-                  status: liveDoc.status || (liveDoc.isLive ? 'LIVE' : 'UPCOMING'),
-                  isLive: (liveDoc.status === 'LIVE' || liveDoc.status === 'Live' || liveDoc.status === 'IN PROGRESS'),
-                  isComplete: ((liveDoc.status === 'COMPLETED' || liveDoc.status === 'Completed') && liveDoc.status !== 'LIVE' && liveDoc.status !== 'UPCOMING'),
-                  server: (typeof liveDoc.server === 'number') ? liveDoc.server : (liveDoc.server === 'team2' ? 2 : 1),
-                  currentGame: (typeof liveDoc.currentGame === 'number') ? liveDoc.currentGame : ((liveDoc.currentSet || 1) - 1),
-                  games: (liveDoc.games && Array.isArray(liveDoc.games)) ? liveDoc.games : [[(liveDoc.team1 && liveDoc.team1.score) || 0, (liveDoc.team2 && liveDoc.team2.score) || 0]],
-                  setsWon: (liveDoc.setsWon && Array.isArray(liveDoc.setsWon)) ? liveDoc.setsWon : [(liveDoc.team1 && liveDoc.team1.setsWon) || 0, (liveDoc.team2 && liveDoc.team2.setsWon) || 0],
-                  interval: liveDoc.interval || null,
-                  customMessage: liveDoc.customMessage || '',
-                  durationMinutes: liveDoc.durationMinutes || 0,
-                  durationFormatted: liveDoc.durationFormatted || '',
-                  winner: liveDoc.winner || '',
-                  updatedAt: docTs,
-                  ts: docTs
-                };
-              }
-            }
-          }
-        } catch (e) {
-          console.warn('DB getLiveMatch notice:', e.message);
-        }
-
-        if (!finalLive) finalLive = dataStore.getLiveMatch();
+        const finalLive = dataStore.getLiveMatch() || globalLiveMatchState;
         return res.json({
           success: true,
           liveMatch: finalLive
@@ -1246,20 +1092,8 @@ async function processLegacyRegistration(body, res) {
       timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
     };
 
-    // Save to file storage
+    // Save to PostgreSQL
     dataStore.addOrUpdateRegistration(regData);
-
-    try {
-      if (mongoose.connection.readyState === 1) {
-        await Registration.findOneAndUpdate(
-          { regId: regData.regId },
-          { $set: regData },
-          { upsert: true, new: true, setDefaultsOnInsert: true }
-        );
-      }
-    } catch (dbErr) {
-      console.warn('DB registration save fallback:', dbErr.message);
-    }
 
     // Trigger automated email notifications
     emailService.sendPlayerRegistrationReceipt(regData).catch(e => console.warn('Receipt email error:', e.message));
@@ -1302,6 +1136,89 @@ app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, 'index.ht
 app.get('/legacy', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/legacy-admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 app.get('/legacy-scorer', (req, res) => res.sendFile(path.join(__dirname, 'scorer.html')));
+app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'privacy.html')));
+app.get('/privacy.html', (req, res) => res.sendFile(path.join(__dirname, 'privacy.html')));
+app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
+app.get('/terms.html', (req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
+app.get('/404', (req, res) => res.status(404).sendFile(path.join(__dirname, '404.html')));
+app.get('/404.html', (req, res) => res.status(404).sendFile(path.join(__dirname, '404.html')));
+
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json');
+  res.sendFile(path.join(__dirname, 'manifest.json'));
+});
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(__dirname, 'sw.js'));
+});
+app.get('/cookie-consent.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'cookie-consent.js'));
+});
+app.get('/pwa-install.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'pwa-install.js'));
+});
+app.get('/analytics.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'analytics.js'));
+});
+app.get('/social-share.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'social-share.js'));
+});
+
+app.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.sendFile(path.join(__dirname, 'robots.txt'));
+});
+app.get('/sitemap.xml', (req, res) => {
+  res.setHeader('Content-Type', 'application/xml');
+  res.sendFile(path.join(__dirname, 'sitemap.xml'));
+});
+
+// Lightweight In-Memory & PostgreSQL Analytics Event Collector
+const sp3AnalyticsEvents = [];
+app.post('/api/analytics/event', (req, res) => {
+  try {
+    const ev = req.body;
+    if (ev && ev.event) {
+      ev.ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      ev.receivedAt = new Date().toISOString();
+      sp3AnalyticsEvents.push(ev);
+      if (sp3AnalyticsEvents.length > 500) sp3AnalyticsEvents.shift();
+
+      query(`
+        INSERT INTO analytics_events (event, path, hash, referrer, session_id, screen, theme, data, ip)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `, [
+        ev.event,
+        ev.path || '',
+        ev.hash || '',
+        ev.referrer || '',
+        ev.sessionId || '',
+        ev.screen || '',
+        ev.theme || '',
+        JSON.stringify(ev.data || {}),
+        ev.ip || ''
+      ]).catch(() => {});
+    }
+    return res.status(204).end();
+  } catch (e) {
+    return res.status(204).end();
+  }
+});
+app.get('/api/analytics/stats', (req, res) => {
+  return res.json({
+    totalTracked: sp3AnalyticsEvents.length,
+    recentEvents: sp3AnalyticsEvents.slice(-50)
+  });
+});
+
+app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'favicon.ico')));
+app.get('/favicon.png', (req, res) => res.sendFile(path.join(__dirname, 'favicon.png')));
+app.get('/apple-touch-icon.png', (req, res) => res.sendFile(path.join(__dirname, 'apple-touch-icon.png')));
 app.get('/qr_code.png', (req, res) => res.sendFile(path.join(__dirname, 'qr_code.png')));
 app.get('/logo.png', (req, res) => res.sendFile(path.join(__dirname, 'logo.png')));
 app.get('/config.js', (req, res) => res.sendFile(path.join(__dirname, 'config.js')));
@@ -1310,14 +1227,32 @@ app.get('/alert-modal.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'alert-modal.js'));
 });
 
-// Health Check
-app.get('/api/health', (req, res) => {
+// Health Check (Neon PostgreSQL)
+app.get('/api/health', async (req, res) => {
+  let dbStatus = 'Offline';
+  try {
+    const r = await query('SELECT 1 as alive');
+    if (r.rows && r.rows[0] && r.rows[0].alive === 1) {
+      dbStatus = 'Connected (Neon PostgreSQL · Online Database)';
+    }
+  } catch (e) {
+    dbStatus = 'PostgreSQL Error: ' + e.message;
+  }
   res.json({
     status: 'online',
     app: 'S.P. Badminton Tourney 3 Server',
     time: new Date().toISOString(),
-    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Offline / Standalone Fallback'
+    database: dbStatus
   });
+});
+
+// 404 Catch-All Handler (Badminton Themed Out-of-Bounds)
+app.use((req, res) => {
+  if (req.accepts('html')) {
+    res.status(404).sendFile(path.join(__dirname, '404.html'));
+  } else {
+    res.status(404).json({ success: false, error: 'Resource not found / Out of Bounds' });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
@@ -1337,9 +1272,10 @@ async function startServer() {
   });
 
   try {
-    connectDB().then(() => {
-      seedDatabase().catch(e => console.warn('Seed fallback:', e.message));
-    }).catch(e => console.warn('DB connect fallback:', e.message));
+    initPostgres().then(async () => {
+      console.log('✅ Neon PostgreSQL Engine ready!');
+      await dataStore.syncFromDb();
+    }).catch(e => console.warn('Postgres init warning:', e.message));
   } catch (err) {
     console.warn('DB init warning:', err.message);
   }

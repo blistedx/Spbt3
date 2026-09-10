@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy · S.P. Badminton Tourney 3</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#16a34a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Official Privacy & Data Protection Policy for S.P. Badminton Tourney Season 3 at Suryodaya Park. Data collection, ID verification, and player rights.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Privacy Policy · S.P. Badminton Tourney 3">
+  <meta property="og:description" content="Official Tournament Data Privacy Policy, photo/video rights, and cookies policy.">
+  <meta property="og:image" content="/logo.png">
+  <meta name="twitter:card" content="summary">
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('sp3_theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <style>
+    :root {
+      --ink: #14180F;
+      --paper: #F6F5EE;
+      --paper-dim: #EDECE2;
+      --court: #1E7A45;
+      --court-deep: #123F26;
+      --court-light: #e2ece4;
+      --cork: #D9722C;
+      --line: rgba(20, 24, 15, 0.12);
+      --card-bg: #ffffff;
+      --card-border: rgba(20, 24, 15, 0.08);
+      --text-muted: #64748b;
+    }
+    [data-theme="dark"] {
+      --ink: #f8fafc;
+      --paper: #090e0c;
+      --paper-dim: #111815;
+      --court: #22c55e;
+      --court-deep: #16a34a;
+      --court-light: #13271d;
+      --cork: #f97316;
+      --line: rgba(255, 255, 255, 0.12);
+      --card-bg: #0f1714;
+      --card-border: rgba(34, 197, 94, 0.22);
+      --text-muted: #94a3b8;
+      color-scheme: dark;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--paper);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.65;
+      padding-top: 80px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Outfit', 'Inter', sans-serif;
+    }
+    a {
+      color: var(--court);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Header */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: rgba(246, 245, 238, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1.5px solid var(--line);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+    [data-theme="dark"] .site-header {
+      background: rgba(9, 14, 12, 0.94);
+      border-bottom-color: rgba(34, 197, 94, 0.25);
+    }
+    .header-container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: inherit;
+      text-decoration: none;
+    }
+    .logo-img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: contain;
+    }
+    .logo-text-title {
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+    }
+    .logo-text-sub {
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--court);
+      font-weight: 700;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none !important;
+      transition: all 0.2s ease;
+      border: 1.5px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+    }
+    .btn:hover {
+      border-color: var(--court);
+      color: var(--court);
+      transform: translateY(-1px);
+    }
+    .btn-solid {
+      background: var(--court);
+      color: #fff !important;
+      border-color: var(--court);
+      box-shadow: 0 4px 14px rgba(30, 122, 69, 0.25);
+    }
+    .btn-solid:hover {
+      background: var(--court-deep);
+      border-color: var(--court-deep);
+      box-shadow: 0 6px 18px rgba(30, 122, 69, 0.35);
+    }
+    .theme-toggle-btn {
+      background: rgba(20, 24, 15, 0.05);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    [data-theme="dark"] .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Main Container */
+    .content-wrapper {
+      max-width: 900px;
+      width: 100%;
+      margin: 32px auto 60px;
+      padding: 0 24px;
+      flex: 1;
+    }
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .breadcrumb a {
+      color: var(--text-muted);
+    }
+    .breadcrumb a:hover {
+      color: var(--court);
+    }
+
+    .page-hero {
+      margin-bottom: 36px;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: rgba(30, 122, 69, 0.12);
+      color: var(--court);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(30, 122, 69, 0.25);
+    }
+    .page-title {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 680px;
+    }
+
+    /* Policy Cards */
+    .policy-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    [data-theme="dark"] .policy-card {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .policy-card:hover {
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+    }
+    .section-num {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--cork);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .policy-heading {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .policy-card p {
+      font-size: 14.5px;
+      color: inherit;
+      opacity: 0.9;
+      margin-bottom: 14px;
+    }
+    .policy-card p:last-child {
+      margin-bottom: 0;
+    }
+    .policy-card ul {
+      padding-left: 20px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .policy-card li {
+      margin-bottom: 8px;
+    }
+
+    /* Highlight Banner */
+    .highlight-box {
+      background: rgba(30, 122, 69, 0.08);
+      border-left: 4px solid var(--court);
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    /* Footer */
+    .site-footer {
+      background: var(--paper-dim);
+      border-top: 1.5px solid var(--line);
+      padding: 36px 0;
+      margin-top: auto;
+      font-size: 13.5px;
+    }
+    [data-theme="dark"] .site-footer {
+      background: #070c0a;
+      border-top-color: rgba(34, 197, 94, 0.2);
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      color: var(--court);
+    }
+
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 28px;
+      }
+      .policy-card {
+        padding: 20px;
+      }
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <a href="/" class="logo-link">
+        <img src="/logo.png" alt="S.P. Badminton Tourney" class="logo-img">
+        <div>
+          <div class="logo-text-title">SURYODAYA PARK</div>
+          <div class="logo-text-sub">BADMINTON 2026</div>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a href="/" class="btn">🏸 Back to Court</a>
+        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleDarkTheme()" title="Toggle Dark/Light Mode">
+          <span class="theme-icon">🌙</span> <span class="theme-text">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="content-wrapper">
+    <div class="breadcrumb">
+      <a href="/">Home</a>
+      <span>&rsaquo;</span>
+      <span>Privacy Policy</span>
+    </div>
+
+    <div class="page-hero">
+      <div class="badge-pill">🛡️ Data Protection &amp; Player Privacy</div>
+      <h1 class="page-title">Privacy Policy</h1>
+      <p class="page-subtitle">
+        Effective Date: January 1, 2026 · S.P. Badminton Tourney Season 3 Organising Committee (Suryodaya Park).
+      </p>
+    </div>
+
+    <!-- Section 1: Overview -->
+    <div class="policy-card">
+      <span class="section-num">Section 01</span>
+      <h2 class="policy-heading">🏸 1. Introduction &amp; Scope</h2>
+      <p>
+        At <strong>S.P. Badminton Tourney Season 3</strong>, we respect your privacy and are committed to protecting the personal data of players, team managers, officials, and spectators. This Privacy Policy details how we collect, process, store, and safeguard your information when you register for the tournament, participate in matches, or use our digital portal (web app and courtside TV scoring system).
+      </p>
+      <div class="highlight-box">
+        <strong>Key Commitment:</strong> We do NOT sell, rent, or commercialize your personal information to third-party marketers. Data is solely utilized for tournament administration, referee verification, match fixtures, and courtside broadcasting.
+      </div>
+    </div>
+
+    <!-- Section 2: Data Collected -->
+    <div class="policy-card">
+      <span class="section-num">Section 02</span>
+      <h2 class="policy-heading">📋 2. Information We Collect</h2>
+      <p>When you register a men's doubles pair or interact with our system, we collect:</p>
+      <ul>
+        <li><strong>Player Identity Details:</strong> Full legal name, Date of Birth (DOB) for age verification, and t-shirt sizes.</li>
+        <li><strong>Contact Information:</strong> Primary and partner mobile/WhatsApp numbers, and valid email addresses for fixture alerts.</li>
+        <li><strong>Age Verification Proof:</strong> Government-issued photo ID (Aadhaar Card, Driving License, Voter ID, or Passport) inspected at the courtside registration desk to confirm entry in <em>Below 35</em> or <em>35 &amp; Above</em> categories.</li>
+        <li><strong>Payment &amp; Financial Reference:</strong> UPI Transaction ID (UTR reference), payment screenshot, and timestamp to reconcile the ₹1000 entry fee. We do NOT store bank account numbers or PINs.</li>
+        <li><strong>Match Telemetry &amp; Statistics:</strong> Points won, games played, set history, and walkover records recorded by official court scorers.</li>
+      </ul>
+    </div>
+
+    <!-- Section 3: Use of Information -->
+    <div class="policy-card">
+      <span class="section-num">Section 03</span>
+      <h2 class="policy-heading">🎯 3. How We Use Your Information</h2>
+      <p>The collected information is used strictly for legitimate tournament operations:</p>
+      <ul>
+        <li>Assigning validated pairs to single-elimination tournament draws and bracket trees.</li>
+        <li>Generating digital Player Match Passes and QR codes for fast desk check-in.</li>
+        <li>Sending automated registration receipts and fixture call notifications via Email, WhatsApp, or SMS.</li>
+        <li>Broadcasting player names, team pairings, and real-time match points on the courtside TV screen and public website.</li>
+        <li>Awarding medals, certificates, and cash prizes to champions and runner-ups.</li>
+      </ul>
+    </div>
+
+    <!-- Section 4: Media & Photography -->
+    <div class="policy-card">
+      <span class="section-num">Section 04</span>
+      <h2 class="policy-heading">📸 4. Media, Photography &amp; Broadcast Rights</h2>
+      <p>
+        By participating in the S.P. Badminton Tourney 3 at Suryodaya Park, players and spectators acknowledge that high-definition photography, live score streaming, and video recordings take place on court.
+      </p>
+      <p>
+        The organizing committee reserves the right to capture match footage, highlight reels, and celebration photography for publication on the official tournament portal, social media channels, and community archives.
+      </p>
+    </div>
+
+    <!-- Section 5: Cookies & Local Storage -->
+    <div class="policy-card" id="cookies">
+      <span class="section-num">Section 05</span>
+      <h2 class="policy-heading">🍪 5. Cookies &amp; Local Storage</h2>
+      <p>
+        Our Progressive Web App (PWA) uses minimal, privacy-centric cookies and HTML5 Local Storage for essential application functionality:
+      </p>
+      <ul>
+        <li><strong>Theme Preferences:</strong> Remembering your Dark or Light mode choice across sessions.</li>
+        <li><strong>Offline Cache (Service Worker):</strong> Storing tournament draws, schedule, rules, and icons so you can access fixtures with poor network coverage at the court.</li>
+        <li><strong>Scoring Sessions:</strong> Authenticating referee tablet scoring sessions during active matches.</li>
+      </ul>
+      <p>
+        You can review or adjust your preferences at any time by clicking <a href="javascript:void(0)" onclick="openCookieSettings()">Cookie Settings</a> in the footer.
+      </p>
+    </div>
+
+    <!-- Section 6: Security & Contact -->
+    <div class="policy-card">
+      <span class="section-num">Section 06</span>
+      <h2 class="policy-heading">🔒 6. Data Security &amp; Contact Information</h2>
+      <p>
+        All communications between your browser and our server are secured with TLS encryption. Database access is restricted to authenticated tournament administrators.
+      </p>
+      <p>
+        If you have questions regarding your registration data, wish to correct your information, or have any privacy queries, please reach out to:
+      </p>
+      <div style="background:rgba(20,24,15,0.04); border-radius:12px; padding:16px; margin-top:12px;">
+        <div style="font-weight:700;">Abhishek Shukla · Tournament Director &amp; Superadmin</div>
+        <div style="font-size:13.5px; color:var(--text-muted); margin-top:3px;">S.P. Badminton Tourney 3 Organising Committee</div>
+        <div style="font-size:13.5px; margin-top:6px;">📍 Venue: Suryodaya Park Badminton Court</div>
+        <div style="font-size:13.5px; margin-top:3px;">📧 Email: support@spbadminton.in</div>
+      </div>
+    </div>
+
+    <!-- Clear Call To Action -->
+    <div style="text-align:center; margin:40px 0 20px;">
+      <a href="/terms.html" class="btn" style="margin-right:10px;">Read Tournament Terms &rarr;</a>
+      <a href="/" class="btn btn-solid">Return to Tournament Portal</a>
+    </div>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <div>&copy; 2026 <strong>S.P. Badminton Tourney 3</strong>. All rights reserved.</div>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Organized at Suryodaya Park · Superadmin: Abhishek Shukla</div>
+      </div>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/terms.html">Terms &amp; Conditions</a>
+        <a href="/privacy.html" style="font-weight:600; color:var(--court);">Privacy Policy</a>
+        <a href="javascript:void(0)" id="cookieSettingsLink">Cookie Settings</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/cookie-consent.js"></script>
+  <script src="/pwa-install.js"></script>
+  <script src="/analytics.js" defer></script>
+  <script src="/social-share.js" defer></script>
+  <script>
+    function toggleDarkTheme() {
+      try {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const nextTheme = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        localStorage.setItem('sp3_theme', nextTheme);
+        updateThemeButtons();
+      } catch (e) {}
+    }
+    function updateThemeButtons() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.querySelector('.theme-icon').innerText = isDark ? '☀️' : '🌙';
+        btn.querySelector('.theme-text').innerText = isDark ? 'Light' : 'Dark';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', updateThemeButtons);
+  </script>
+</body>
+</html>

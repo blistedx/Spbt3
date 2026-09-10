@@ -5,6 +5,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <title>Scorer Desk · S.P. Badminton Tourney 3</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#16a34a">
     <link
         href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
@@ -2310,6 +2316,58 @@
                 if (modalCategory) modalCategory.value = match.category || 'Below 35';
                 if (modalMatchId) modalMatchId.value = match.matchId + ' (' + (match.court || 'Court 1') + ')';
             };
+
+            // ─── INSTANT CROSS-DEVICE WEBSOCKET (SOCKET.IO 0MS DIRECT) ───
+            let scorerSocket = null;
+            try {
+                if (typeof io !== 'undefined') {
+                    scorerSocket = io({
+                        transports: ['websocket', 'polling'],
+                        reconnection: true,
+                        reconnectionDelay: 400,
+                        timeout: 5000
+                    });
+                    scorerSocket.on('connect', () => {
+                        scorerSocket.emit('join_court', 1);
+                        scorerSocket.emit('request_live_state');
+                    });
+                    scorerSocket.on('match_state', (data) => {
+                        if (data && !state.isLive && (!state.rallyLog || state.rallyLog.length === 0)) {
+                            applyScorerIncomingState(data);
+                        }
+                    });
+                    scorerSocket.on('score_update', (data) => {
+                        if (data && !state.isLive && (!state.rallyLog || state.rallyLog.length === 0)) {
+                            applyScorerIncomingState(data);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('[Scorer] Socket init notice:', e.message);
+            }
+
+            function applyScorerIncomingState(m) {
+                if (!m) return;
+                if (m.p1Name) state.p1Name = m.p1Name;
+                if (m.p2Name) state.p2Name = m.p2Name;
+                if (m.category) state.category = m.category;
+                if (m.matchId) state.matchId = m.matchId;
+                if (m.targetPoints) state.targetPoints = m.targetPoints;
+                if (m.games) state.games = m.games;
+                if (typeof m.currentGame === 'number') state.currentGame = m.currentGame;
+                if (m.setsWon) state.setsWon = m.setsWon;
+                if (typeof m.server === 'number') state.server = m.server;
+                state.isLive = (m.status === 'LIVE' || m.status === 'IN PROGRESS');
+                state.isComplete = (m.status === 'COMPLETED');
+                updateUI();
+            }
+
+            // ─── 1-SECOND CONTINUOUS LIVE SCORE SYNC POLLING (HOST & CLIENTS) ───
+            setInterval(() => {
+                if (!state.isLive && (!state.rallyLog || state.rallyLog.length === 0)) {
+                    loadLiveMatchFromSheet();
+                }
+            }, 1000);
 
             // ─── REAL-TIME MULTI-BROKER MQTT WEBSOCKET ENGINE (0MS CROSS-DEVICE) ─
             const MQTT_TOPIC = 'sp3_tournament_live_2026/scores';

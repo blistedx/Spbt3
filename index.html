@@ -5,11 +5,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>S.P. Badminton Tourney 3</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#16a34a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Official Tournament Portal for S.P. Badminton Tourney 3 at Suryodaya Park. Men's Doubles knockout matches, live TV broadcast, fixtures and instant digital passes.">
+  
+  <!-- Open Graph & Social Sharing Metadata -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="S.P. Badminton Tourney 3">
+  <meta property="og:title" content="S.P. Badminton Tourney Season 3 · Official Portal">
+  <meta property="og:description" content="Official Men's Doubles knockout tournament at Suryodaya Park. Live courtside TV scoring, bracket trees, instant player passes & pair registrations.">
+  <meta property="og:image" content="/logo.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="S.P. Badminton Tourney Season 3 · Suryodaya Park">
+  <meta name="twitter:description" content="Men's Doubles knockout tournament. Register your pair, view fixtures, and follow live scores!">
+  <meta name="twitter:image" content="/logo.png">
+
+  <!-- Performance Preconnect & DNS Prefetch -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+  <link rel="dns-prefetch" href="https://unpkg.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
     rel="stylesheet">
+  <script src="/socket.io/socket.io.js"></script>
   <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -3384,6 +3411,300 @@
       0% { transform: scale(0.94); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
+
+    /* ================= CLEAR CTA & PRE-FOOTER CTA STYLES ================= */
+    .hero-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 30px;
+      background: rgba(30, 122, 69, 0.12);
+      border: 1px solid rgba(30, 122, 69, 0.3);
+      color: var(--court);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(30, 122, 69, 0.1);
+    }
+    [data-theme="dark"] .hero-live-badge {
+      background: rgba(34, 197, 94, 0.16);
+      border-color: rgba(34, 197, 94, 0.4);
+      color: #4ade80;
+    }
+    .pulse-ring-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .pulse-ring-dot::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid #22c55e;
+      animation: pulsePing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    @keyframes pulsePing {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .cta-verify-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      opacity: 0.8;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .cta-verify-link:hover {
+      opacity: 1;
+      color: var(--court);
+      text-decoration: underline;
+      transform: translateX(2px);
+    }
+
+    .prefooter-cta-section {
+      padding: 70px 0 40px;
+      position: relative;
+    }
+    .cta-card-glass {
+      position: relative;
+      background: linear-gradient(135deg, rgba(30, 122, 69, 0.08), rgba(217, 114, 44, 0.08));
+      border: 1.5px solid rgba(30, 122, 69, 0.22);
+      border-radius: 28px;
+      padding: 48px 36px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06);
+    }
+    [data-theme="dark"] .cta-card-glass {
+      background: linear-gradient(135deg, rgba(22, 163, 74, 0.15), rgba(249, 115, 22, 0.1));
+      border-color: rgba(34, 197, 94, 0.35);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(34, 197, 94, 0.08);
+    }
+    .cta-content-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .cta-pill-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: rgba(30, 122, 69, 0.14);
+      color: var(--court);
+      padding: 5px 14px;
+      border-radius: 30px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(30, 122, 69, 0.25);
+    }
+    [data-theme="dark"] .cta-pill-tag {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+    .cta-title {
+      font-family: 'Anton', 'Outfit', sans-serif;
+      font-size: 38px;
+      letter-spacing: 1px;
+      line-height: 1.15;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+    }
+    .cta-subtitle {
+      font-size: 15.5px;
+      line-height: 1.6;
+      color: var(--ink);
+      opacity: 0.85;
+      margin-bottom: 28px;
+    }
+    .cta-features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .cta-feat-item {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12.5px;
+    }
+    [data-theme="dark"] .cta-feat-item {
+      background: rgba(15, 23, 20, 0.7);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .cta-feat-item .feat-icon {
+      font-size: 18px;
+    }
+    .cta-button-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .cta-main-btn {
+      position: relative;
+      overflow: hidden;
+      padding: 15px 34px !important;
+      font-size: 15px !important;
+      font-weight: 800 !important;
+      border-radius: 14px !important;
+      background: linear-gradient(135deg, #16a34a, #15803d) !important;
+      color: #fff !important;
+      box-shadow: 0 6px 25px rgba(22, 163, 74, 0.45) !important;
+      border: none !important;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .cta-main-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 10px 32px rgba(22, 163, 74, 0.6) !important;
+    }
+    .cta-verify-btn {
+      padding: 15px 28px !important;
+      font-size: 14.5px !important;
+      font-weight: 700 !important;
+      border-radius: 14px !important;
+      background: rgba(255, 255, 255, 0.8) !important;
+      border: 1.5px solid var(--line) !important;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    [data-theme="dark"] .cta-verify-btn {
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #f8fafc !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    .cta-verify-btn:hover {
+      border-color: var(--court) !important;
+      transform: translateY(-2px);
+    }
+    .cta-guarantee-note {
+      font-size: 13px;
+      color: var(--ink);
+      opacity: 0.75;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .cta-terms-link {
+      color: var(--court);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    /* ================= MOBILE BOTTOM STICKY ACTION BAR ================= */
+    .mobile-sticky-cta {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .mobile-sticky-cta {
+        display: flex;
+        position: fixed;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        background: rgba(246, 245, 238, 0.95);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1.5px solid rgba(20, 24, 15, 0.14);
+        border-radius: 18px;
+        padding: 8px 10px;
+        gap: 8px;
+        align-items: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+        z-index: 99990;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+      }
+      [data-theme="dark"] .mobile-sticky-cta {
+        background: rgba(14, 22, 18, 0.94);
+        border-color: rgba(34, 197, 94, 0.35);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+      }
+      .mobile-cta-reg-btn {
+        flex: 1;
+        background: #1E7A45;
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 13.5px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        text-align: center;
+        text-decoration: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        box-shadow: 0 4px 14px rgba(30, 122, 69, 0.3);
+      }
+      [data-theme="dark"] .mobile-cta-reg-btn {
+        background: #16a34a;
+        box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4);
+      }
+      .mobile-cta-draw-btn {
+        padding: 10px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        background: rgba(20, 24, 15, 0.06);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: inherit !important;
+        text-decoration: none !important;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      [data-theme="dark"] .mobile-cta-draw-btn {
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .mobile-cta-share-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: rgba(20, 24, 15, 0.06);
+        border: 1px solid var(--line);
+        color: inherit;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      [data-theme="dark"] .mobile-cta-share-btn {
+        background: rgba(255, 255, 255, 0.08);
+      }
+    }
   </style>
 
 <style>
@@ -3693,6 +4014,10 @@
   <div class="hero">
     <div class="main">
       <div class="copy">
+        <div class="hero-live-badge">
+          <span class="pulse-ring-dot"></span>
+          <span>🔥 Official Registration Open · ₹1000 / Pair</span>
+        </div>
         <div class="eyebrow"><span class="dot"></span> MEN'S DOUBLES &middot; KNOCKOUT &middot; SURYODAYA PARK</div>
         <h1><span class="l1">COURT IS</span><span class="l2">CALLING</span></h1>
         <p class="lede">
@@ -3701,8 +4026,17 @@
           court.
         </p>
         <div class="cta-row">
-          <a href="javascript:void(0)" class="btn solid" onclick="openRegister()">Register Your Pair</a>
-          <a href="#draws" class="btn">View Draws &amp; Fixtures</a>
+          <a href="javascript:void(0)" class="btn solid cta-main-btn" onclick="openRegister()" style="padding:14px 28px !important; font-size:15px !important;">
+            <span>⚡</span>
+            <span>Register Your Pair</span>
+          </a>
+          <a href="#draws" class="btn" style="padding:14px 22px; font-weight:700;">View Draws &amp; Fixtures</a>
+        </div>
+        <div>
+          <a href="javascript:void(0)" onclick="openStatusModal()" class="cta-verify-link">
+            <span>🔍</span>
+            <span>Already registered? Check Status &amp; Download Digital Pass &rarr;</span>
+          </a>
         </div>
 
         <div class="stats" id="heroStatsContainer" title="Click to replay animation">
@@ -4440,19 +4774,105 @@
     </div>
   </section>
 
+  <!-- ================= HIGH-CONVERTING CALL TO ACTION SECTION ================= -->
+  <section class="prefooter-cta-section" id="register-cta">
+    <div class="container">
+      <div class="cta-card-glass">
+        <div class="cta-content-inner">
+          <div class="cta-pill-tag">
+            <span class="pulse-ring-dot"></span>
+            <span>OFFICIAL REGISTRATION · LIMITED SLOTS</span>
+          </div>
+          <h2 class="cta-title">THE COURT IS WAITING FOR YOUR SMASH</h2>
+          <p class="cta-subtitle">
+            Join the premier Men's Doubles knockout showdown at Suryodaya Park. Below 35 and 35+ categories, live courtside TV broadcast, instant digital match passes, and prestigious championship trophies.
+          </p>
+
+          <div class="cta-features-grid">
+            <div class="cta-feat-item">
+              <span class="feat-icon">🏸</span>
+              <span class="feat-text"><strong>Yonex Mavis 350</strong> Official Nylon Shuttles</span>
+            </div>
+            <div class="cta-feat-item">
+              <span class="feat-icon">📺</span>
+              <span class="feat-text"><strong>Live TV Overlay</strong> Real-Time Scoring Broadcast</span>
+            </div>
+            <div class="cta-feat-item">
+              <span class="feat-icon">⚡</span>
+              <span class="feat-text"><strong>Instant Pass</strong> QR Check-in &amp; Schedule Alerts</span>
+            </div>
+            <div class="cta-feat-item">
+              <span class="feat-icon">🏆</span>
+              <span class="feat-text"><strong>Cash Prizes</strong> Medals &amp; Champion Trophies</span>
+            </div>
+          </div>
+
+          <div class="cta-button-row">
+            <button type="button" class="btn solid cta-main-btn" onclick="openRegister()">
+              <span>⚡</span>
+              <span>Register Your Pair Now (₹1000)</span>
+            </button>
+            <button type="button" class="btn cta-verify-btn" onclick="openStatusModal()">
+              <span>🔍</span>
+              <span>Check Verification Status</span>
+            </button>
+            <button type="button" class="btn btn-share-trigger" style="padding:15px 22px !important; font-size:14.5px !important; font-weight:700 !important; border-radius:14px !important;" title="Share with Badminton Players">
+              <span>📤</span>
+              <span>Share Tourney</span>
+            </button>
+          </div>
+
+          <div class="cta-guarantee-note">
+            <span>🛡️ Official BWF Rally Rules</span> &middot;
+            <span>Age Verified at Desk</span> &middot;
+            <a href="/terms.html" class="cta-terms-link">Read Tournament Terms &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= SITE FOOTER ================= -->
   <footer class="site-footer">
-    <div class="container footer-bottom-inner">
-      <div class="footer-copy-text">
-        <div>&copy; 2026 <strong>S.P. Badminton Tourney 3</strong>. All rights reserved.</div>
-        <div style="margin-top: 3px;"><strong>Abhishek Shukla (Superadmin)</strong></div>
+    <div class="container footer-bottom-inner" style="flex-direction:column; gap:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:14px;">
+        <div class="footer-copy-text">
+          <div>&copy; 2026 <strong>S.P. Badminton Tourney 3</strong>. All rights reserved.</div>
+          <div style="margin-top: 3px;">Organized at Suryodaya Park · <strong>Abhishek Shukla (Superadmin)</strong></div>
+        </div>
+        <div class="footer-superadmin-badge">
+          <span class="admin-pulse-dot"></span>
+          <span>Superadmin: Abhishek Shukla</span>
+        </div>
       </div>
-      <div class="footer-superadmin-badge">
-        <span class="admin-pulse-dot"></span>
-        <span>Superadmin: Abhishek Shukla</span>
+      <div class="footer-legal-links" style="display:flex; gap:18px; flex-wrap:wrap; font-size:13px; padding-top:14px; border-top:1px solid var(--line); width:100%; align-items:center;">
+        <a href="/terms.html" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">⚖️ Terms &amp; Conditions</a>
+        <a href="/privacy.html" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">🛡️ Privacy Policy</a>
+        <a href="javascript:void(0)" id="cookieSettingsLink" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">🍪 Cookie Settings</a>
+        <a href="javascript:void(0)" class="btn-share-trigger" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">📤 Share</a>
+        <a href="/404.html" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">🏸 Court 404</a>
+        <a href="javascript:void(0)" onclick="window.promptPwaInstall && window.promptPwaInstall()" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s; margin-left:auto;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">📱 Install App</a>
       </div>
     </div>
   </footer>
+
+  <!-- ================= MOBILE BOTTOM STICKY ACTION BAR ================= -->
+  <aside class="mobile-sticky-cta" id="mobileStickyCta" aria-label="Mobile Quick Action Bar">
+    <button type="button" class="mobile-cta-share-btn btn-share-trigger" title="Share Tournament" aria-label="Share Tournament">
+      <span style="font-size:16px;">📤</span>
+    </button>
+    <a href="javascript:void(0)" class="mobile-cta-reg-btn" onclick="openRegister()">
+      <span>⚡ Register Pair (₹1000)</span>
+    </a>
+    <a href="#draws" class="mobile-cta-draw-btn" title="View Knockout Draws">
+      <span>🏆 Draws</span>
+    </a>
+  </aside>
+
+  <!-- FLOATING SHARE BUTTON FOR DESKTOP -->
+  <button type="button" class="sp3-share-float-btn btn-share-trigger" title="Share Tournament" aria-label="Share Tournament" style="bottom: 80px;">
+    <span style="font-size:20px;">📤</span>
+  </button>
 
   <!-- FLOATING SCROLL TO TOP BUTTON -->
   <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()" aria-label="Scroll to top">
@@ -4504,13 +4924,18 @@
           <p style="margin:0; font-size:13px; color:#475569;">Players must wear proper sports attire and non-marking badminton shoes. Unsportsmanlike conduct, verbal abuse, or property damage will result in immediate disqualification. The decisions of the On-Court Referee, Umpires, and the Organizing Committee are final, conclusive, and binding.</p>
         </div>
 
-        <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
-          <button type="button" class="btn" style="border-color:#cbd5e1; color:#475569; padding:10px 18px;" onclick="closeTermsModal(false)">
-            Cancel / Close
-          </button>
-          <button type="button" class="btn solid" style="background:#1E7A45; border-color:#1E7A45; padding:10px 22px; font-weight:bold;" onclick="acceptTermsAndClose()">
-            ✓ I Agree &amp; Accept All Rules
-          </button>
+        <div style="margin-top:16px; padding-top:14px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <a href="/terms.html" target="_blank" style="color:var(--court); font-size:13px; font-weight:700; text-decoration:underline;">
+            📄 Open Full Dedicated Terms &amp; Rules Page &rarr;
+          </a>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn" style="border-color:#cbd5e1; color:#475569; padding:9px 16px;" onclick="closeTermsModal(false)">
+              Cancel / Close
+            </button>
+            <button type="button" class="btn solid" style="background:#1E7A45; border-color:#1E7A45; padding:9px 20px; font-weight:bold;" onclick="acceptTermsAndClose()">
+              ✓ I Agree &amp; Accept All Rules
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -6579,8 +7004,24 @@
         } catch (e) { }
       }
 
+      // Instant 0ms WebSocket Real-Time Listener
+      try {
+        if (typeof io !== 'undefined') {
+          const webSocket = io({ reconnection: true, reconnectionDelay: 500 });
+          webSocket.on('score_update', renderTickerData);
+          webSocket.on('tv_score_update', renderTickerData);
+          webSocket.on('match_state', renderTickerData);
+          webSocket.on('court:update', renderTickerData);
+          webSocket.on('score_updated', function (d) {
+            if (d && d.match) renderTickerData(d.match);
+            else if (d) renderTickerData(d);
+          });
+        }
+      } catch (e) { }
+
+      // 1-Second Continuous Live Score Sync Polling across every client and host machine
       fetchLiveMatchFromSheet();
-      setInterval(fetchLiveMatchFromSheet, 3000);
+      setInterval(fetchLiveMatchFromSheet, 1000);
     }
 
     /* ================= JUMBLED NUMBER SCRAMBLE ANIMATION ================= */
@@ -6844,5 +7285,9 @@
       } catch (e) { }
     }
   </script>
+  <script src="/cookie-consent.js"></script>
+  <script src="/pwa-install.js"></script>
+  <script src="/analytics.js" defer></script>
+  <script src="/social-share.js" defer></script>
 </body>
 </html>

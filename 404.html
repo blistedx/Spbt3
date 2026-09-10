@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 Out of Bounds · S.P. Badminton Tourney 3</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#16a34a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="404 Page Not Found · Shuttlecock landed wide! Return to court for S.P. Badminton Tourney 3 fixtures and live scores.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="404 Out of Bounds · S.P. Badminton Tourney 3">
+  <meta property="og:description" content="Shot landed outside the court lines! Return to court for live scoring, bracket fixtures, and tournament rules.">
+  <meta property="og:image" content="/logo.png">
+  <meta name="twitter:card" content="summary">
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('sp3_theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <style>
+    :root {
+      --ink: #14180F;
+      --paper: #F6F5EE;
+      --paper-dim: #EDECE2;
+      --court: #1E7A45;
+      --court-deep: #123F26;
+      --court-light: #e2ece4;
+      --cork: #D9722C;
+      --line: rgba(20, 24, 15, 0.12);
+      --card-bg: #ffffff;
+    }
+    [data-theme="dark"] {
+      --ink: #f8fafc;
+      --paper: #090e0c;
+      --paper-dim: #111815;
+      --court: #22c55e;
+      --court-deep: #16a34a;
+      --court-light: #13271d;
+      --cork: #f97316;
+      --line: rgba(255, 255, 255, 0.12);
+      --card-bg: #0f1714;
+      color-scheme: dark;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--paper);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      overflow-x: hidden;
+    }
+    header {
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: inherit;
+      text-decoration: none;
+    }
+    .logo-img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: contain;
+    }
+    .theme-toggle-btn {
+      background: rgba(20, 24, 15, 0.05);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    [data-theme="dark"] .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .error-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 20px auto;
+      padding: 20px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Badminton Court 404 Visual */
+    .court-graphic-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      height: 240px;
+      margin-bottom: 24px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--court-deep), #0c2b1a);
+      border: 4px solid var(--court);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .court-lines {
+      position: absolute;
+      inset: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      pointer-events: none;
+    }
+    .court-lines:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.6);
+    }
+    .court-tramline {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 25%;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.35);
+      border-left: 2px dashed rgba(255, 255, 255, 0.4);
+    }
+
+    /* 404 Big Display Inside Court */
+    .giant-404 {
+      font-family: 'Anton', 'Outfit', sans-serif;
+      font-size: 110px;
+      color: rgba(255, 255, 255, 0.12);
+      user-select: none;
+      letter-spacing: 6px;
+      z-index: 1;
+    }
+
+    /* Bouncing Shuttlecock that landed OUT */
+    .shuttle-actor {
+      position: absolute;
+      right: 14%;
+      bottom: 24%;
+      z-index: 5;
+      cursor: pointer;
+      animation: shuttleBounce 2.4s ease-in-out infinite;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .shuttle-actor:hover {
+      transform: scale(1.2) rotate(15deg);
+    }
+    @keyframes shuttleBounce {
+      0%, 100% {
+        transform: translateY(0) rotate(25deg);
+      }
+      50% {
+        transform: translateY(-18px) rotate(15deg);
+      }
+    }
+
+    .out-marker {
+      position: absolute;
+      right: 8%;
+      bottom: 15%;
+      background: #ef4444;
+      color: #ffffff;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5);
+      animation: pulseAlert 1.6s infinite;
+      z-index: 6;
+    }
+    @keyframes pulseAlert {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1.5px solid rgba(239, 68, 68, 0.3);
+      padding: 6px 16px;
+      border-radius: 30px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 44px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+    p.lead-text {
+      font-size: 16.5px;
+      color: var(--ink);
+      opacity: 0.8;
+      max-width: 580px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+    }
+
+    /* Action Buttons */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 12px;
+      text-decoration: none !important;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1.5px solid var(--line);
+      background: var(--card-bg);
+      color: var(--ink);
+    }
+    .btn:hover {
+      border-color: var(--court);
+      color: var(--court);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+    .btn-solid {
+      background: var(--court);
+      color: #ffffff !important;
+      border-color: var(--court);
+      box-shadow: 0 4px 16px rgba(30, 122, 69, 0.3);
+    }
+    .btn-solid:hover {
+      background: var(--court-deep);
+      border-color: var(--court-deep);
+      box-shadow: 0 8px 24px rgba(30, 122, 69, 0.4);
+    }
+
+    /* Shortcut Grid */
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      max-width: 640px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .quick-link-card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: left;
+      text-decoration: none !important;
+      color: inherit;
+      transition: all 0.2s ease;
+    }
+    .quick-link-card:hover {
+      border-color: var(--court);
+      transform: translateY(-2px);
+    }
+    .quick-link-icon {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+    .quick-link-title {
+      font-weight: 700;
+      font-size: 13.5px;
+      margin-bottom: 2px;
+    }
+    .quick-link-desc {
+      font-size: 11.5px;
+      color: #64748b;
+    }
+    [data-theme="dark"] .quick-link-desc {
+      color: #94a3b8;
+    }
+
+    footer {
+      padding: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #64748b;
+      border-top: 1px solid var(--line);
+      background: var(--paper-dim);
+    }
+    [data-theme="dark"] footer {
+      background: #070c0a;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 32px; }
+      .giant-404 { font-size: 80px; }
+      .court-graphic-wrap { height: 190px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <a href="/" class="logo-link">
+      <img src="/logo.png" alt="S.P. Badminton Tourney" class="logo-img">
+      <div style="font-family:'Outfit', sans-serif;">
+        <div style="font-weight:800; font-size:14px; letter-spacing:0.5px;">SURYODAYA PARK</div>
+        <div style="font-size:11px; color:var(--court); font-weight:700;">BADMINTON 2026</div>
+      </div>
+    </a>
+    <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleDarkTheme()" title="Toggle Dark/Light Mode">
+      <span class="theme-icon">🌙</span> <span class="theme-text">Dark</span>
+    </button>
+  </header>
+
+  <!-- Error Presentation -->
+  <div class="error-container">
+    
+    <!-- Badminton Court Visual -->
+    <div class="court-graphic-wrap" title="Click shuttlecock to smash back into play!">
+      <div class="court-lines"></div>
+      <div class="court-tramline"></div>
+      <div class="giant-404">404</div>
+
+      <!-- Out Marker Badge -->
+      <div class="out-marker">OUT OF BOUNDS!</div>
+
+      <!-- Animated Shuttlecock -->
+      <div class="shuttle-actor" id="shuttlecock" onclick="smashShuttle()">
+        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+          <!-- Feather Crown -->
+          <path d="M12 12 L38 38 M18 8 L44 34 M24 6 L48 30 M30 6 L52 28" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.95"/>
+          <path d="M14 16 C22 10 38 10 46 18" stroke="#ffffff" stroke-width="2.5" fill="none" opacity="0.8"/>
+          <!-- Cork Base -->
+          <circle cx="44" cy="44" r="10" fill="#D9722C" stroke="#fff" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="badge-status">⚠️ Umpire Call: Fault / Line Violation</div>
+    <h1>Shot Landed Wide!</h1>
+    <p class="lead-text">
+      The page or bracket link you are looking for is outside the tramlines. It may have been moved, renamed, or conceded.
+    </p>
+
+    <div class="button-group">
+      <a href="/" class="btn btn-solid">
+        <span>🏸</span> Return to Court (Home)
+      </a>
+      <a href="/#draws" class="btn">
+        <span>🏆</span> View Knockout Draws
+      </a>
+    </div>
+
+    <div class="links-grid">
+      <a href="/#schedule" class="quick-link-card">
+        <div class="quick-link-icon">📅</div>
+        <div class="quick-link-title">Match Schedule</div>
+        <div class="quick-link-desc">Fixtures &amp; timings</div>
+      </a>
+      <a href="/tv" class="quick-link-card">
+        <div class="quick-link-icon">📺</div>
+        <div class="quick-link-title">Courtside Live TV</div>
+        <div class="quick-link-desc">Real-time broadcast</div>
+      </a>
+      <a href="/terms.html" class="quick-link-card">
+        <div class="quick-link-icon">⚖️</div>
+        <div class="quick-link-title">Rules &amp; Terms</div>
+        <div class="quick-link-desc">Tournament bylaws</div>
+      </a>
+      <a href="/privacy.html" class="quick-link-card">
+        <div class="quick-link-icon">🛡️</div>
+        <div class="quick-link-title">Privacy Policy</div>
+        <div class="quick-link-desc">Data protection rules</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2026 S.P. Badminton Tourney Season 3 · Suryodaya Park Court · All rights reserved.
+  </footer>
+
+  <script src="/cookie-consent.js"></script>
+  <script src="/pwa-install.js"></script>
+  <script src="/analytics.js" defer></script>
+  <script src="/social-share.js" defer></script>
+  <script>
+    function toggleDarkTheme() {
+      try {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const nextTheme = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        localStorage.setItem('sp3_theme', nextTheme);
+        updateThemeButtons();
+      } catch (e) {}
+    }
+    function updateThemeButtons() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.querySelector('.theme-icon').innerText = isDark ? '☀️' : '🌙';
+        btn.querySelector('.theme-text').innerText = isDark ? 'Light' : 'Dark';
+      }
+    }
+    function smashShuttle() {
+      const s = document.getElementById('shuttlecock');
+      if (!s) return;
+      s.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      s.style.transform = 'translate(-120px, -50px) rotate(-180deg) scale(1.3)';
+      setTimeout(() => {
+        s.style.transform = '';
+      }, 700);
+    }
+    document.addEventListener('DOMContentLoaded', updateThemeButtons);
+  </script>
+</body>
+</html>
