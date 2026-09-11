@@ -1,30 +1,44 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const { Expense, Sponsor } = require('../models/Financials');
 const Registration = require('../models/Registration');
+const dataStore = require('../config/dataStore');
 const { requireAdmin } = require('../middleware/auth');
 
 // 1. Get Financial Summary & Ledger Analytics (Admin Protected)
 router.get('/summary', requireAdmin, async (req, res) => {
   try {
-    // Total Registrations Income (Approved registrations with payment)
-    const approvedRegs = await Registration.find({ status: 'Approved' });
-    const totalRegRevenue = approvedRegs.reduce((acc, r) => acc + (Number(r.paymentAmount) || 0), 0);
+    let approvedRegs = [];
+    let expenses = [];
+    let sponsors = [];
 
-    // Total Expenses
-    const expenses = await Expense.find().sort({ date: -1 });
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        approvedRegs = await Registration.find({ status: 'Approved' }).lean();
+        expenses = await Expense.find().sort({ date: -1 }).lean();
+        sponsors = await Sponsor.find().sort({ createdAt: -1 }).lean();
+      }
+    } catch (e) {}
+
+    if (!expenses.length && !sponsors.length) {
+      const fileFin = dataStore.getFinancials();
+      expenses = fileFin.expenses || [];
+      sponsors = fileFin.sponsors || [];
+    }
+    if (!approvedRegs.length) {
+      const allRegs = dataStore.getRegistrations();
+      approvedRegs = allRegs.filter(r => (r.status || '').toUpperCase() === 'APPROVED');
+    }
+
+    const totalRegRevenue = approvedRegs.reduce((acc, r) => acc + (Number(r.paymentAmount) || 1000), 0);
     const totalExpenses = expenses.reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
-
-    // Total Sponsorships Received
-    const sponsors = await Sponsor.find().sort({ createdAt: -1 });
     const totalSponsorship = sponsors.reduce((acc, s) => acc + (s.status === 'Received' ? (Number(s.amount) || 0) : 0), 0);
     const totalCommittedSponsorship = sponsors.reduce((acc, s) => acc + (Number(s.amount) || 0), 0);
 
-    // Net Balance
     const totalIncome = totalRegRevenue + totalSponsorship;
     const netBalance = totalIncome - totalExpenses;
 
-    // Expenses breakdown by Category
     const categoryBreakdown = {};
     expenses.forEach(e => {
       categoryBreakdown[e.category] = (categoryBreakdown[e.category] || 0) + Number(e.amount);
@@ -59,22 +73,32 @@ router.post('/expenses', requireAdmin, async (req, res) => {
     }
 
     const cleanId = expenseId || `EXP-${Date.now()}`;
-    const expense = await Expense.findOneAndUpdate(
-      { expenseId: cleanId },
-      {
-        expenseId: cleanId,
-        title,
-        category: category || 'Other',
-        amount: Number(amount) || 0,
-        paidTo: paidTo || '',
-        paidBy: paidBy || 'Hemant Kalra',
-        notes: notes || '',
-        date: date || new Date().toISOString().split('T')[0]
-      },
-      { upsert: true, new: true }
-    );
+    const expObj = {
+      id: cleanId,
+      expenseId: cleanId,
+      item: title,
+      title,
+      category: category || 'Other',
+      amount: Number(amount) || 0,
+      paidTo: paidTo || '',
+      paidBy: paidBy || 'Hemant Kalra',
+      notes: notes || '',
+      date: date || new Date().toISOString().split('T')[0]
+    };
 
-    return res.json({ success: true, message: 'Expense recorded successfully', expense });
+    dataStore.saveExpense(expObj);
+
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        await Expense.findOneAndUpdate(
+          { expenseId: cleanId },
+          expObj,
+          { upsert: true, new: true }
+        );
+      }
+    } catch (e) {}
+
+    return res.json({ success: true, message: 'Expense recorded successfully', expense: expObj });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
@@ -84,10 +108,14 @@ router.post('/expenses', requireAdmin, async (req, res) => {
 router.delete('/expenses/:expenseId', requireAdmin, async (req, res) => {
   try {
     const { expenseId } = req.params;
-    const deleted = await Expense.findOneAndDelete({ expenseId });
-    if (!deleted) {
-      return res.status(404).json({ success: false, error: 'Expense not found' });
-    }
+    dataStore.deleteExpense(expenseId);
+
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        await Expense.findOneAndDelete({ expenseId });
+      }
+    } catch (e) {}
+
     return res.json({ success: true, message: 'Expense deleted successfully' });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
@@ -97,7 +125,18 @@ router.delete('/expenses/:expenseId', requireAdmin, async (req, res) => {
 // 4. Get Public / All Sponsors
 router.get('/sponsors', async (req, res) => {
   try {
-    const sponsors = await Sponsor.find().sort({ createdAt: -1 });
+    let sponsors = [];
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        sponsors = await Sponsor.find().sort({ createdAt: -1 }).lean();
+      }
+    } catch (e) {}
+
+    if (!sponsors || sponsors.length === 0) {
+      const fileFin = dataStore.getFinancials();
+      sponsors = fileFin.sponsors || [];
+    }
+
     return res.json({ success: true, sponsors });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
@@ -113,23 +152,33 @@ router.post('/sponsors', requireAdmin, async (req, res) => {
     }
 
     const cleanId = sponsorId || `SPON-${Date.now()}`;
-    const sponsor = await Sponsor.findOneAndUpdate(
-      { sponsorId: cleanId },
-      {
-        sponsorId: cleanId,
-        name,
-        company: company || '',
-        tier: tier || 'Associate Sponsor',
-        amount: Number(amount) || 0,
-        logoUrl: logoUrl || '',
-        website: website || '',
-        contactPhone: contactPhone || '',
-        status: status || 'Received'
-      },
-      { upsert: true, new: true }
-    );
+    const sponObj = {
+      id: cleanId,
+      sponsorId: cleanId,
+      name,
+      company: company || '',
+      tier: tier || 'Associate Sponsor',
+      amount: Number(amount) || 0,
+      promisedAmount: Number(amount) || 0,
+      logoUrl: logoUrl || '',
+      website: website || '',
+      contactPhone: contactPhone || '',
+      status: status || 'Received'
+    };
 
-    return res.json({ success: true, message: 'Sponsor saved successfully', sponsor });
+    dataStore.saveSponsor(sponObj);
+
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        await Sponsor.findOneAndUpdate(
+          { sponsorId: cleanId },
+          sponObj,
+          { upsert: true, new: true }
+        );
+      }
+    } catch (e) {}
+
+    return res.json({ success: true, message: 'Sponsor saved successfully', sponsor: sponObj });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
@@ -139,10 +188,14 @@ router.post('/sponsors', requireAdmin, async (req, res) => {
 router.delete('/sponsors/:sponsorId', requireAdmin, async (req, res) => {
   try {
     const { sponsorId } = req.params;
-    const deleted = await Sponsor.findOneAndDelete({ sponsorId });
-    if (!deleted) {
-      return res.status(404).json({ success: false, error: 'Sponsor record not found' });
-    }
+    dataStore.deleteSponsor(sponsorId);
+
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        await Sponsor.findOneAndDelete({ sponsorId });
+      }
+    } catch (e) {}
+
     return res.json({ success: true, message: 'Sponsor deleted successfully' });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });

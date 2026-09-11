@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose');
 const Registration = require('../models/Registration');
 const Settings = require('../models/Settings');
 const dataStore = require('../config/dataStore');
@@ -73,7 +74,8 @@ async function generateUniqueRegId(p1Phone, p1Dob) {
   let candidate = baseId;
   let suffixCode = 65; // 'A'
 
-  while (await Registration.exists({ regId: candidate })) {
+  const existingRegs = dataStore.getRegistrations();
+  while (existingRegs.some(r => r.regId === candidate)) {
     candidate = `${baseId}${String.fromCharCode(suffixCode)}`;
     suffixCode++;
     if (suffixCode > 90) {
@@ -102,7 +104,23 @@ router.get('/check-duplicate', async (req, res) => {
       return res.json({ success: true, isDuplicate: false });
     }
 
-    const existing = await Registration.findOne(query);
+    let existing = null;
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        existing = await Registration.findOne(query).lean();
+      }
+    } catch (e) {}
+
+    if (!existing) {
+      const allRegs = dataStore.getRegistrations();
+      existing = allRegs.find(r => {
+        if (cleanP1Mobile && (r.p1Phone === cleanP1Mobile || r.player1Phone === cleanP1Mobile || r.p2Phone === cleanP1Mobile || r.player2Phone === cleanP1Mobile)) return true;
+        if (cleanP1Email && ((r.p1Email && r.p1Email.toLowerCase() === cleanP1Email) || (r.player1Email && r.player1Email.toLowerCase() === cleanP1Email))) return true;
+        if (cleanP2Mobile && (r.p1Phone === cleanP2Mobile || r.player1Phone === cleanP2Mobile || r.p2Phone === cleanP2Mobile || r.player2Phone === cleanP2Mobile)) return true;
+        return false;
+      });
+    }
+
     if (existing) {
       let field = 'Contact details';
       if (cleanP1Mobile && (existing.p1Phone === cleanP1Mobile || existing.p2Phone === cleanP1Mobile)) field = `Mobile: ${cleanP1Mobile}`;
@@ -128,9 +146,17 @@ router.post('/submit', upload.single('paymentScreenshot'), async (req, res) => {
   try {
     const body = req.body;
 
-    // Check registration status from settings
-    const settings = await Settings.findOne();
-    if (settings && settings.registrationStatus === 'Closed') {
+    let settings = null;
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        settings = await Settings.findOne().lean();
+      }
+    } catch (e) {}
+    if (!settings) {
+      settings = dataStore.getSettings();
+    }
+    const regStatus = (settings && (settings.registrationStatus || settings.registration_status)) || 'OPEN';
+    if (regStatus.toUpperCase() === 'CLOSED') {
       return res.status(400).json({ success: false, error: 'Registrations are currently closed for this tournament.' });
     }
 
@@ -156,92 +182,74 @@ router.post('/submit', upload.single('paymentScreenshot'), async (req, res) => {
     // Find category name
     let categoryName = body.category;
     if (settings && settings.categories) {
-      const matchCat = settings.categories.find(c => c.code === body.category || c.name === body.category);
+      const cats = Array.isArray(settings.categories) ? settings.categories : [];
+      const matchCat = cats.find(c => c.code === body.category || c.name === body.category);
       if (matchCat) categoryName = matchCat.name;
     }
 
-    const newReg = new Registration({
+    const regData = {
       regId,
       category: body.category,
       categoryName,
       p1Name: body.p1Name.trim(),
+      player1Name: body.p1Name.trim(),
       p1Phone: body.p1Phone.trim(),
+      player1Phone: body.p1Phone.trim(),
       p1Email: body.p1Email.trim().toLowerCase(),
+      player1Email: body.p1Email.trim().toLowerCase(),
       p1Dob: body.p1Dob,
+      player1Dob: body.p1Dob,
       p1Age: body.p1Age || '',
+      player1Age: body.p1Age || '',
       p1Tshirt: body.p1Tshirt || 'L',
+      player1Tshirt: body.p1Tshirt || 'L',
       p1BloodGroup: body.p1BloodGroup || '',
       p1City: body.p1City || 'Delhi NCR',
 
       p2Name: (body.p2Name || '').trim(),
+      player2Name: (body.p2Name || '').trim(),
       p2Phone: (body.p2Phone || '').trim(),
+      player2Phone: (body.p2Phone || '').trim(),
       p2Email: (body.p2Email || '').trim().toLowerCase(),
+      player2Email: (body.p2Email || '').trim().toLowerCase(),
       p2Dob: body.p2Dob || '',
+      player2Dob: body.p2Dob || '',
       p2Age: body.p2Age || '',
+      player2Age: body.p2Age || '',
       p2Tshirt: body.p2Tshirt || '',
+      player2Tshirt: body.p2Tshirt || '',
       p2BloodGroup: body.p2BloodGroup || '',
 
       paymentAmount: Number(body.paymentAmount) || 0,
       paymentUtr: (body.paymentUtr || '').trim(),
+      upiUtr: (body.paymentUtr || '').trim(),
       paymentScreenshotUrl,
-      status: 'Pending'
-    });
+      receiptUrl: paymentScreenshotUrl,
+      status: 'Pending',
+      createdAt: new Date().toISOString()
+    };
 
-    await newReg.save();
+    // Save to persistent database / cache
+    dataStore.addOrUpdateRegistration(regData);
 
-    // Sync with persistent local dataStore
     try {
-      dataStore.addOrUpdateRegistration({
-        regId: newReg.regId,
-        category: newReg.category,
-        categoryName: newReg.categoryName,
-        p1Name: newReg.p1Name,
-        player1Name: newReg.p1Name,
-        p1Phone: newReg.p1Phone,
-        player1Phone: newReg.p1Phone,
-        p1Email: newReg.p1Email,
-        player1Email: newReg.p1Email,
-        p1Dob: newReg.p1Dob,
-        player1Dob: newReg.p1Dob,
-        p1Age: newReg.p1Age,
-        player1Age: newReg.p1Age,
-        p1Tshirt: newReg.p1Tshirt,
-        player1Tshirt: newReg.p1Tshirt,
-        p1BloodGroup: newReg.p1BloodGroup,
-        p2Name: newReg.p2Name,
-        player2Name: newReg.p2Name,
-        p2Phone: newReg.p2Phone,
-        player2Phone: newReg.p2Phone,
-        p2Email: newReg.p2Email,
-        player2Email: newReg.p2Email,
-        p2Dob: newReg.p2Dob,
-        player2Dob: newReg.p2Dob,
-        p2Age: newReg.p2Age,
-        player2Age: newReg.p2Age,
-        p2Tshirt: newReg.p2Tshirt,
-        player2Tshirt: newReg.p2Tshirt,
-        p2BloodGroup: newReg.p2BloodGroup,
-        paymentAmount: newReg.paymentAmount,
-        paymentUtr: newReg.paymentUtr,
-        upiUtr: newReg.paymentUtr,
-        paymentScreenshotUrl: newReg.paymentScreenshotUrl,
-        receiptUrl: newReg.paymentScreenshotUrl,
-        status: newReg.status,
-        createdAt: newReg.createdAt ? newReg.createdAt.toISOString() : new Date().toISOString()
-      });
-    } catch (dsErr) {
-      console.warn('DataStore sync notice:', dsErr.message);
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        const newReg = new Registration(regData);
+        await newReg.save();
+      }
+    } catch (e) {
+      console.warn('Mongoose save registration notice:', e.message);
     }
 
     // Trigger automated email notifications
-    emailService.sendPlayerRegistrationReceipt(newReg).catch(e => console.warn('Receipt email error:', e.message));
-    emailService.sendAdminRegistrationAlert(newReg).catch(e => console.warn('Admin alert email error:', e.message));
+    emailService.sendPlayerRegistrationReceipt(regData).catch(e => console.warn('Receipt email error:', e.message));
+    emailService.sendAdminRegistrationAlert(regData).catch(e => console.warn('Admin alert email error:', e.message));
 
     return res.json({
       success: true,
       message: 'Registration submitted successfully! Your entry is currently pending admin verification.',
-      regId: newReg.regId,
-      registration: newReg
+      regId,
+      registration: regData
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
@@ -256,33 +264,55 @@ router.get('/status', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Please enter a Registration ID, Mobile number, or Email.' });
     }
 
-    const reg = await Registration.findOne({
-      $or: [
-        { regId: new RegExp(`^${query}$`, 'i') },
-        { p1Phone: query },
-        { p2Phone: query },
-        { p1Email: query.toLowerCase() },
-        { p2Email: query.toLowerCase() }
-      ]
-    });
+    let reg = null;
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        reg = await Registration.findOne({
+          $or: [
+            { regId: new RegExp(`^${query}$`, 'i') },
+            { p1Phone: query },
+            { p2Phone: query },
+            { p1Email: query.toLowerCase() },
+            { p2Email: query.toLowerCase() }
+          ]
+        }).lean();
+      }
+    } catch (e) {}
+
+    if (!reg) {
+      const allRegs = dataStore.getRegistrations();
+      const qLow = query.toLowerCase();
+      reg = allRegs.find(r =>
+        (r.regId && r.regId.toLowerCase() === qLow) ||
+        r.p1Phone === query ||
+        r.player1Phone === query ||
+        r.p2Phone === query ||
+        r.player2Phone === query ||
+        (r.p1Email && r.p1Email.toLowerCase() === qLow) ||
+        (r.player1Email && r.player1Email.toLowerCase() === qLow)
+      );
+    }
 
     if (!reg) {
       return res.json({ success: false, notFound: true, message: `No registration found matching "${query}". Please check and try again.` });
     }
+
+    const p1P = reg.p1Phone || reg.player1Phone || '';
+    const maskedP1 = p1P.length >= 4 ? p1P.slice(0, 2) + '******' + p1P.slice(-2) : p1P;
 
     return res.json({
       success: true,
       registration: {
         regId: reg.regId,
         category: reg.category,
-        categoryName: reg.categoryName,
-        p1Name: reg.p1Name,
-        p1Phone: reg.p1Phone.slice(0, 2) + '******' + reg.p1Phone.slice(-2),
-        p2Name: reg.p2Name,
+        categoryName: reg.categoryName || reg.category,
+        p1Name: reg.p1Name || reg.player1Name,
+        p1Phone: maskedP1,
+        p2Name: reg.p2Name || reg.player2Name,
         status: reg.status,
         paymentAmount: reg.paymentAmount,
         createdAt: reg.createdAt,
-        rejectionReason: reg.rejectionReason
+        rejectionReason: reg.rejectionReason || ''
       }
     });
   } catch (err) {
@@ -294,65 +324,81 @@ router.get('/status', async (req, res) => {
 router.get('/admin/list', requireAdmin, async (req, res) => {
   try {
     const { category, status, search } = req.query;
-    const filter = {};
+    let registrations = [];
 
-    if (category && category !== 'ALL') filter.category = category;
-    if (status && status !== 'ALL') filter.status = status;
-    if (search) {
-      filter.$or = [
-        { regId: new RegExp(search, 'i') },
-        { p1Name: new RegExp(search, 'i') },
-        { p2Name: new RegExp(search, 'i') },
-        { p1Phone: new RegExp(search, 'i') },
-        { p1Email: new RegExp(search, 'i') },
-        { paymentUtr: new RegExp(search, 'i') }
-      ];
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        const filter = {};
+        if (category && category !== 'ALL') filter.category = category;
+        if (status && status !== 'ALL') filter.status = status;
+        if (search) {
+          filter.$or = [
+            { regId: new RegExp(search, 'i') },
+            { p1Name: new RegExp(search, 'i') },
+            { p2Name: new RegExp(search, 'i') },
+            { p1Phone: new RegExp(search, 'i') },
+            { p1Email: new RegExp(search, 'i') },
+            { paymentUtr: new RegExp(search, 'i') }
+          ];
+        }
+        registrations = await Registration.find(filter).sort({ createdAt: -1 }).lean();
+      }
+    } catch (e) {}
+
+    if (!registrations || registrations.length === 0) {
+      registrations = dataStore.getRegistrations();
+      if (category && category !== 'ALL') registrations = registrations.filter(r => (r.category || '').toLowerCase() === category.toLowerCase());
+      if (status && status !== 'ALL') registrations = registrations.filter(r => (r.status || '').toUpperCase() === status.toUpperCase());
+      if (search) {
+        const s = search.toLowerCase();
+        registrations = registrations.filter(r =>
+          (r.regId && r.regId.toLowerCase().includes(s)) ||
+          (r.p1Name && r.p1Name.toLowerCase().includes(s)) ||
+          (r.player1Name && r.player1Name.toLowerCase().includes(s)) ||
+          (r.p2Name && r.p2Name.toLowerCase().includes(s)) ||
+          (r.player2Name && r.player2Name.toLowerCase().includes(s)) ||
+          (r.p1Phone && r.p1Phone.includes(s)) ||
+          (r.paymentUtr && r.paymentUtr.toLowerCase().includes(s))
+        );
+      }
     }
 
-    const registrations = await Registration.find(filter).sort({ createdAt: -1 });
-
     const normalizedList = registrations.map(r => ({
-      _id: r._id,
+      _id: r._id || r.regId,
       regId: r.regId,
       category: r.category,
       categoryName: r.categoryName || r.category,
-      
-      // Player 1
-      p1Name: r.p1Name,
-      player1Name: r.p1Name,
-      p1Phone: r.p1Phone,
-      player1Phone: r.p1Phone,
-      p1Email: r.p1Email,
-      player1Email: r.p1Email,
-      p1Dob: r.p1Dob,
-      player1Dob: r.p1Dob,
-      p1Age: r.p1Age,
-      player1Age: r.p1Age,
-      p1Tshirt: r.p1Tshirt,
-      player1Tshirt: r.p1Tshirt,
+      p1Name: r.p1Name || r.player1Name,
+      player1Name: r.p1Name || r.player1Name,
+      p1Phone: r.p1Phone || r.player1Phone,
+      player1Phone: r.p1Phone || r.player1Phone,
+      p1Email: r.p1Email || r.player1Email,
+      player1Email: r.p1Email || r.player1Email,
+      p1Dob: r.p1Dob || r.player1Dob,
+      player1Dob: r.p1Dob || r.player1Dob,
+      p1Age: r.p1Age !== undefined ? r.p1Age : r.player1Age,
+      player1Age: r.p1Age !== undefined ? r.p1Age : r.player1Age,
+      p1Tshirt: r.p1Tshirt || r.player1Tshirt,
+      player1Tshirt: r.p1Tshirt || r.player1Tshirt,
       p1BloodGroup: r.p1BloodGroup,
-
-      // Player 2
-      p2Name: r.p2Name,
-      player2Name: r.p2Name,
-      p2Phone: r.p2Phone,
-      player2Phone: r.p2Phone,
-      p2Email: r.p2Email,
-      player2Email: r.p2Email,
-      p2Dob: r.p2Dob,
-      player2Dob: r.p2Dob,
-      p2Age: r.p2Age,
-      player2Age: r.p2Age,
-      p2Tshirt: r.p2Tshirt,
-      player2Tshirt: r.p2Tshirt,
+      p2Name: r.p2Name || r.player2Name,
+      player2Name: r.p2Name || r.player2Name,
+      p2Phone: r.p2Phone || r.player2Phone,
+      player2Phone: r.p2Phone || r.player2Phone,
+      p2Email: r.p2Email || r.player2Email,
+      player2Email: r.p2Email || r.player2Email,
+      p2Dob: r.p2Dob || r.player2Dob,
+      player2Dob: r.p2Dob || r.player2Dob,
+      p2Age: r.p2Age !== undefined ? r.p2Age : r.player2Age,
+      player2Age: r.p2Age !== undefined ? r.p2Age : r.player2Age,
+      p2Tshirt: r.p2Tshirt || r.player2Tshirt,
+      player2Tshirt: r.p2Tshirt || r.player2Tshirt,
       p2BloodGroup: r.p2BloodGroup,
-
-      // Payment & Status
       paymentAmount: r.paymentAmount,
-      paymentUtr: r.paymentUtr,
-      upiUtr: r.paymentUtr,
-      paymentScreenshotUrl: r.paymentScreenshotUrl,
-      receiptUrl: r.paymentScreenshotUrl,
+      paymentUtr: r.paymentUtr || r.upiUtr,
+      upiUtr: r.paymentUtr || r.upiUtr,
+      paymentScreenshotUrl: r.paymentScreenshotUrl || r.receiptUrl,
+      receiptUrl: r.paymentScreenshotUrl || r.receiptUrl,
       paymentStatus: r.paymentStatus,
       status: r.status,
       rejectionReason: r.rejectionReason,
@@ -362,11 +408,12 @@ router.get('/admin/list', requireAdmin, async (req, res) => {
       updatedAt: r.updatedAt
     }));
 
+    const allCurrent = dataStore.getRegistrations();
     const stats = {
-      total: await Registration.countDocuments(),
-      approved: await Registration.countDocuments({ status: 'Approved' }),
-      pending: await Registration.countDocuments({ status: 'Pending' }),
-      rejected: await Registration.countDocuments({ status: 'Rejected' })
+      total: allCurrent.length,
+      approved: allCurrent.filter(r => (r.status || '').toUpperCase() === 'APPROVED').length,
+      pending: allCurrent.filter(r => (r.status || '').toUpperCase() === 'PENDING').length,
+      rejected: allCurrent.filter(r => (r.status || '').toUpperCase() === 'REJECTED').length
     };
 
     return res.json({ success: true, registrations: normalizedList, stats });
@@ -383,118 +430,80 @@ router.post('/admin/update-status', requireAdmin, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Registration ID and new status are required.' });
     }
 
-    const reg = await Registration.findOne({ regId });
-    if (!reg) {
-      return res.status(404).json({ success: false, error: `Registration ${regId} not found.` });
+    const updatedReg = dataStore.updateRegistrationStatus(regId, newStatus, adminNotes);
+
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        const reg = await Registration.findOne({ regId });
+        if (reg) {
+          reg.status = newStatus;
+          if (rejectionReason !== undefined) reg.rejectionReason = rejectionReason;
+          if (adminNotes !== undefined) reg.adminNotes = adminNotes;
+          reg.updatedAt = new Date();
+          await reg.save();
+        }
+      }
+    } catch (e) {}
+
+    if ((newStatus || '').toUpperCase() === 'APPROVED' && updatedReg) {
+      emailService.sendPlayerApprovalEmail(updatedReg).catch(e => console.warn('Approval email error:', e.message));
     }
 
-    reg.status = newStatus;
-    if (rejectionReason !== undefined) reg.rejectionReason = rejectionReason;
-    if (adminNotes !== undefined) reg.adminNotes = adminNotes;
-    reg.updatedAt = new Date();
-
-    await reg.save();
-
-    if ((newStatus || '').toUpperCase() === 'APPROVED') {
-      emailService.sendPlayerApprovalEmail(reg).catch(e => console.warn('Approval email error:', e.message));
-    }
-
-    return res.json({ success: true, message: `Registration ${regId} updated to ${newStatus}`, registration: reg });
+    return res.json({ success: true, message: `Registration ${regId} updated to ${newStatus}`, registration: updatedReg });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// 6. Admin: Delete Registration (Protected)
-// 7. Admin: Full Edit Registration Details (Protected)
+// 6. Admin: Full Edit Registration Details (Protected)
 router.put('/admin/:regId', requireAdmin, async (req, res) => {
   try {
     const { regId } = req.params;
     const body = req.body;
 
-    const reg = await Registration.findOne({ regId });
-    if (!reg) {
-      return res.status(404).json({ success: false, error: `Registration ${regId} not found.` });
-    }
+    const allRegs = dataStore.getRegistrations();
+    const existing = allRegs.find(r => r.regId === regId) || { regId };
+    const merged = { ...existing, ...body, regId, updatedAt: new Date().toISOString() };
+    dataStore.addOrUpdateRegistration(merged);
 
-    if (body.category) reg.category = body.category;
-    if (body.categoryName) reg.categoryName = body.categoryName;
-    if (body.p1Name || body.player1Name) reg.p1Name = (body.p1Name || body.player1Name).trim();
-    if (body.p1Phone || body.player1Phone) reg.p1Phone = (body.p1Phone || body.player1Phone).trim();
-    if (body.p1Email || body.player1Email) reg.p1Email = (body.p1Email || body.player1Email).trim().toLowerCase();
-    if (body.p1Dob || body.player1Dob) reg.p1Dob = body.p1Dob || body.player1Dob;
-    if (body.p1Age !== undefined || body.player1Age !== undefined) reg.p1Age = body.p1Age !== undefined ? body.p1Age : body.player1Age;
-    if (body.p1Tshirt || body.player1Tshirt) reg.p1Tshirt = body.p1Tshirt || body.player1Tshirt;
-    if (body.p1BloodGroup !== undefined) reg.p1BloodGroup = body.p1BloodGroup;
-
-    if (body.p2Name !== undefined || body.player2Name !== undefined) reg.p2Name = (body.p2Name !== undefined ? body.p2Name : body.player2Name || '').trim();
-    if (body.p2Phone !== undefined || body.player2Phone !== undefined) reg.p2Phone = (body.p2Phone !== undefined ? body.p2Phone : body.player2Phone || '').trim();
-    if (body.p2Email !== undefined || body.player2Email !== undefined) reg.p2Email = (body.p2Email !== undefined ? body.p2Email : body.player2Email || '').trim().toLowerCase();
-    if (body.p2Dob !== undefined || body.player2Dob !== undefined) reg.p2Dob = body.p2Dob !== undefined ? body.p2Dob : body.player2Dob;
-    if (body.p2Age !== undefined || body.player2Age !== undefined) reg.p2Age = body.p2Age !== undefined ? body.p2Age : body.player2Age;
-    if (body.p2Tshirt !== undefined || body.player2Tshirt !== undefined) reg.p2Tshirt = body.p2Tshirt !== undefined ? body.p2Tshirt : body.player2Tshirt;
-    if (body.p2BloodGroup !== undefined) reg.p2BloodGroup = body.p2BloodGroup;
-
-    if (body.paymentAmount !== undefined) reg.paymentAmount = Number(body.paymentAmount);
-    if (body.paymentUtr !== undefined || body.upiUtr !== undefined) reg.paymentUtr = (body.paymentUtr !== undefined ? body.paymentUtr : body.upiUtr || '').trim();
-    if (body.status) reg.status = body.status;
-    if (body.adminNotes !== undefined) reg.adminNotes = body.adminNotes;
-    if (body.rejectionReason !== undefined) reg.rejectionReason = body.rejectionReason;
-
-    reg.updatedAt = new Date();
-    await reg.save();
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        await Registration.findOneAndUpdate({ regId }, merged, { upsert: true });
+      }
+    } catch (e) {}
 
     return res.json({
       success: true,
       message: `Registration ${regId} updated successfully.`,
-      registration: reg
+      registration: merged
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// 8. Admin: Full Edit Registration (POST alias for maximum compatibility)
+// 7. Admin: Full Edit Registration (POST alias for maximum compatibility)
 router.post('/admin/edit', requireAdmin, async (req, res) => {
   try {
     const regId = req.body.regId || req.query.regId;
     if (!regId) return res.status(400).json({ success: false, error: 'Registration ID is required.' });
 
     const body = req.body;
-    const reg = await Registration.findOne({ regId });
-    if (!reg) return res.status(404).json({ success: false, error: `Registration ${regId} not found.` });
+    const allRegs = dataStore.getRegistrations();
+    const existing = allRegs.find(r => r.regId === regId) || { regId };
+    const merged = { ...existing, ...body, regId, updatedAt: new Date().toISOString() };
+    dataStore.addOrUpdateRegistration(merged);
 
-    if (body.category) reg.category = body.category;
-    if (body.categoryName) reg.categoryName = body.categoryName;
-    if (body.p1Name || body.player1Name) reg.p1Name = (body.p1Name || body.player1Name).trim();
-    if (body.p1Phone || body.player1Phone) reg.p1Phone = (body.p1Phone || body.player1Phone).trim();
-    if (body.p1Email || body.player1Email) reg.p1Email = (body.p1Email || body.player1Email).trim().toLowerCase();
-    if (body.p1Dob || body.player1Dob) reg.p1Dob = body.p1Dob || body.player1Dob;
-    if (body.p1Age !== undefined || body.player1Age !== undefined) reg.p1Age = body.p1Age !== undefined ? body.p1Age : body.player1Age;
-    if (body.p1Tshirt || body.player1Tshirt) reg.p1Tshirt = body.p1Tshirt || body.player1Tshirt;
-    if (body.p1BloodGroup !== undefined) reg.p1BloodGroup = body.p1BloodGroup;
-
-    if (body.p2Name !== undefined || body.player2Name !== undefined) reg.p2Name = (body.p2Name !== undefined ? body.p2Name : body.player2Name || '').trim();
-    if (body.p2Phone !== undefined || body.player2Phone !== undefined) reg.p2Phone = (body.p2Phone !== undefined ? body.p2Phone : body.player2Phone || '').trim();
-    if (body.p2Email !== undefined || body.player2Email !== undefined) reg.p2Email = (body.p2Email !== undefined ? body.p2Email : body.player2Email || '').trim().toLowerCase();
-    if (body.p2Dob !== undefined || body.player2Dob !== undefined) reg.p2Dob = body.p2Dob !== undefined ? body.p2Dob : body.player2Dob;
-    if (body.p2Age !== undefined || body.player2Age !== undefined) reg.p2Age = body.p2Age !== undefined ? body.p2Age : body.player2Age;
-    if (body.p2Tshirt !== undefined || body.player2Tshirt !== undefined) reg.p2Tshirt = body.p2Tshirt !== undefined ? body.p2Tshirt : body.player2Tshirt;
-    if (body.p2BloodGroup !== undefined) reg.p2BloodGroup = body.p2BloodGroup;
-
-    if (body.paymentAmount !== undefined) reg.paymentAmount = Number(body.paymentAmount);
-    if (body.paymentUtr !== undefined || body.upiUtr !== undefined) reg.paymentUtr = (body.paymentUtr !== undefined ? body.paymentUtr : body.upiUtr || '').trim();
-    if (body.status) reg.status = body.status;
-    if (body.adminNotes !== undefined) reg.adminNotes = body.adminNotes;
-    if (body.rejectionReason !== undefined) reg.rejectionReason = body.rejectionReason;
-
-    reg.updatedAt = new Date();
-    await reg.save();
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        await Registration.findOneAndUpdate({ regId }, merged, { upsert: true });
+      }
+    } catch (e) {}
 
     return res.json({
       success: true,
       message: `Registration ${regId} updated successfully.`,
-      registration: reg
+      registration: merged
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
