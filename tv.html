@@ -2352,7 +2352,9 @@
                 const isTrulyLive = (!isTrulyComplete && (liveState.isLive || liveState.status === 'LIVE' || liveState.status === 'Live' || liveState.status === 'IN PROGRESS' || liveState.status === 'PAUSED'));
                 const isTrulyUpcoming = (!isTrulyComplete && !isTrulyLive);
 
-                const showNotice = (cleanNoticeText !== '');
+                // When match is setup (upcoming) or live, prioritize player showdown/scoreboard over notice
+                const hasMatchConfig = Boolean((liveState.p1Name && liveState.p1Name.trim()) || (liveState.p2Name && liveState.p2Name.trim()));
+                const showNotice = (cleanNoticeText !== '' && (!hasMatchConfig || (!isTrulyLive && !isTrulyUpcoming)));
                 const showSummary = (!showNotice && isTrulyComplete);
                 const showUpcoming = (!showNotice && !showSummary && isTrulyUpcoming);
                 const showScoreboard = (!showNotice && !showSummary && !showUpcoming);
@@ -2745,21 +2747,22 @@
                 const matchSig = (d.matchId || 'Court 1') + '_' + (nameP1 || liveState.p1Name || '') + '_' + (nameP2 || liveState.p2Name || '');
                 const isNewMatch = matchSig && matchSig !== bwfTracking.matchSignature;
 
-                // Anti-stale packet check: strictly reject any packet older than our latest received data
-                if (!isNewMatch && incomingTs > 0 && liveState.lastDataTimestamp && incomingTs < liveState.lastDataTimestamp) {
+                // Anti-stale packet check: reject packet only if it is genuinely older (> 3000ms) than our last data
+                const isExplicitAction = (d.status === 'UPCOMING' || (d.status === 'LIVE' && incomingGames[incomingGame] && incomingGames[incomingGame][0] === 0 && incomingGames[incomingGame][1] === 0));
+                if (!isNewMatch && !isExplicitAction && incomingTs > 0 && liveState.lastDataTimestamp && incomingTs < (liveState.lastDataTimestamp - 3000)) {
                     return;
                 }
 
-                // Monotonic score check: in the same game of the same match, reject packets that revert to fewer points
-                // unless incomingTs is strictly newer than our current timestamp (indicating an intentional scorer Undo)
-                if (!isNewMatch && !isFirstPacket && liveState.games && incomingGame === (liveState.currentGame || 0)) {
+                // Monotonic score check: in the same game of the same match, reject stale packets with lower score
+                // BUT NEVER reject when match is UPCOMING or when score is reset to 0-0!
+                if (!isNewMatch && !isFirstPacket && !isExplicitAction && liveState.games && incomingGame === (liveState.currentGame || 0)) {
                     const checkG = liveState.currentGame || 0;
                     const curGScore = liveState.games[checkG] || [0, 0];
                     const incGScore = incomingGames[checkG] || [0, 0];
                     const curPts = (curGScore[0] || 0) + (curGScore[1] || 0);
                     const incPts = (incGScore[0] || 0) + (incGScore[1] || 0);
                     if (incPts < curPts) {
-                        if (!incomingTs || incomingTs <= (liveState.lastDataTimestamp || 0)) {
+                        if (incomingTs > 0 && incomingTs < (liveState.lastDataTimestamp - 3000)) {
                             return; // Reject stale out-of-order packet with lower score
                         }
                     }
@@ -2813,7 +2816,11 @@
                 if (d.durationMinutes !== undefined) liveState.durationMinutes = d.durationMinutes;
                 if (d.durationFormatted !== undefined) liveState.durationFormatted = d.durationFormatted;
                 if (d.winner) liveState.winner = d.winner;
-                if (d.customMessage !== undefined) liveState.customMessage = d.customMessage;
+                if (d.customMessage !== undefined) {
+                    liveState.customMessage = d.customMessage;
+                } else if (d.status === 'UPCOMING' || d.status === 'LIVE') {
+                    liveState.customMessage = '';
+                }
 
                 liveState.games = incomingGames;
                 liveState.currentGame = incomingGame;
@@ -3023,6 +3030,7 @@
             // 4. Ultra-low Latency Real-Time MQTT WebSocket Listener (0ms Cross-Device Fallback)
             const MQTT_TOPIC = 'sp3_tournament_live_2026/scores';
             const tvBrokerUrls = [
+                'wss://broker.emqx.io:8084/mqtt',
                 'wss://broker.hivemq.com:8884/mqtt'
             ];
             let tvMqttClients = [];
@@ -3043,6 +3051,7 @@
 
                             client.on('connect', function () {
                                 client.subscribe(MQTT_TOPIC, { qos: 0 });
+                                client.subscribe('sp3_tournament_live_2026/match_state', { qos: 0 });
                             });
 
                             client.on('message', function (topic, msgBuffer) {

@@ -202,6 +202,7 @@ async function initPostgres() {
   `;
 
   await query(schemaSql);
+  await query("ALTER TABLE live_match ADD COLUMN IF NOT EXISTS custom_message TEXT DEFAULT ''").catch(() => {});
   console.log('✅ PostgreSQL Schema initialized (All 8 tables verified)!');
 
   // Seed default settings row if missing

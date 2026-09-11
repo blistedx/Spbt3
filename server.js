@@ -824,7 +824,7 @@ async function handleActionBridge(req, res, next) {
           const nowMs = Date.now();
           const clientTs = typeof payload.updatedAt === 'string' ? new Date(payload.updatedAt).getTime() : (Number(payload.updatedAt) || Number(payload.ts) || 0);
           const finalTs = clientTs > 0 ? clientTs : nowMs;
-          const updatedLive = dataStore.saveLiveMatch({
+          const updatedLive = await dataStore.saveLiveMatch({
             ...payload,
             updatedAt: finalTs,
             ts: finalTs
@@ -1016,8 +1016,7 @@ async function handleActionBridge(req, res, next) {
       }
 
       case 'getLiveMatch': {
-        const targetMatchId = req.query.matchId || (req.body && req.body.matchId) || 'Court 1';
-        const finalLive = dataStore.getLiveMatch() || globalLiveMatchState;
+        const finalLive = await dataStore.getLiveMatchAsync();
         return res.json({
           success: true,
           liveMatch: finalLive

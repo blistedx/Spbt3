@@ -163,6 +163,7 @@ async function syncFromDb() {
         setsWon: typeof l.sets_won === 'string' ? JSON.parse(l.sets_won) : (l.sets_won || [0, 0]),
         interval: typeof l.interval === 'string' ? JSON.parse(l.interval) : (l.interval || { active: false, secondsLeft: 0, intervalTakenForGame: [false, false, false] }),
         rallyLog: typeof l.rally_log === 'string' ? JSON.parse(l.rally_log) : (l.rally_log || []),
+        customMessage: l.custom_message || '',
         updatedAt: l.updated_at ? new Date(l.updated_at).getTime() : Date.now()
       };
     }
@@ -454,59 +455,107 @@ const dataStore = {
   getLiveMatch() {
     return { ...liveMatchCache };
   },
-  saveLiveMatch(payload) {
+  setLiveMatchCache(updated) {
+    if (updated) {
+      liveMatchCache = { ...liveMatchCache, ...updated };
+    }
+    return { ...liveMatchCache };
+  },
+  async getLiveMatchAsync() {
+    try {
+      const res = await query("SELECT * FROM live_match WHERE court_id = 'Court 1' LIMIT 1");
+      if (res.rows && res.rows.length > 0) {
+        const l = res.rows[0];
+        const dbTs = l.updated_at ? new Date(l.updated_at).getTime() : 0;
+        if (dbTs >= (liveMatchCache.updatedAt || 0) || !liveMatchCache.p1Name) {
+          liveMatchCache = {
+            court_id: l.court_id,
+            matchId: l.match_id,
+            category: l.category,
+            p1Name: l.p1_name,
+            p2Name: l.p2_name,
+            targetPoints: l.target_points,
+            score: l.score,
+            status: l.status,
+            isLive: l.is_live,
+            isComplete: l.is_complete,
+            server: l.server,
+            currentGame: l.current_game,
+            games: typeof l.games === 'string' ? JSON.parse(l.games) : (l.games || [[0, 0], [0, 0], [0, 0]]),
+            setsWon: typeof l.sets_won === 'string' ? JSON.parse(l.sets_won) : (l.sets_won || [0, 0]),
+            interval: typeof l.interval === 'string' ? JSON.parse(l.interval) : (l.interval || { active: false, secondsLeft: 0, intervalTakenForGame: [false, false, false] }),
+            rallyLog: typeof l.rally_log === 'string' ? JSON.parse(l.rally_log) : (l.rally_log || []),
+            customMessage: l.custom_message || '',
+            updatedAt: dbTs || Date.now()
+          };
+        }
+      }
+    } catch (e) {}
+    return { ...liveMatchCache };
+  },
+  async saveLiveMatch(payload) {
     const isLive = payload.status === 'LIVE' || payload.status === 'IN PROGRESS' || (payload.isLive === true);
     const isComplete = payload.status === 'COMPLETED' || (payload.status !== 'UPCOMING' && payload.status !== 'NO_LIVE_MATCH' && !isLive && payload.isComplete === true);
+    const nowMs = Date.now();
+    const clientTs = typeof payload.updatedAt === 'string' ? new Date(payload.updatedAt).getTime() : (Number(payload.updatedAt) || Number(payload.ts) || 0);
+    const finalTs = clientTs > 0 ? clientTs : nowMs;
+
     liveMatchCache = {
       ...liveMatchCache,
       ...payload,
       isLive,
       isComplete,
-      updatedAt: Date.now()
+      updatedAt: finalTs
     };
 
-    query(`
-      INSERT INTO live_match (
-        court_id, match_id, category, p1_name, p2_name, target_points, score, status,
-        is_live, is_complete, server, current_game, games, sets_won, interval, rally_log, updated_at
-      ) VALUES (
-        'Court 1', $1, $2, $3, $4, $5, $6, $7,
-        $8, $9, $10, $11, $12, $13, $14, $15, NOW()
-      )
-      ON CONFLICT (court_id) DO UPDATE SET
-        match_id = EXCLUDED.match_id,
-        category = EXCLUDED.category,
-        p1_name = EXCLUDED.p1_name,
-        p2_name = EXCLUDED.p2_name,
-        target_points = EXCLUDED.target_points,
-        score = EXCLUDED.score,
-        status = EXCLUDED.status,
-        is_live = EXCLUDED.is_live,
-        is_complete = EXCLUDED.is_complete,
-        server = EXCLUDED.server,
-        current_game = EXCLUDED.current_game,
-        games = EXCLUDED.games,
-        sets_won = EXCLUDED.sets_won,
-        interval = EXCLUDED.interval,
-        rally_log = EXCLUDED.rally_log,
-        updated_at = NOW()
-    `, [
-      liveMatchCache.matchId || '',
-      liveMatchCache.category || 'Below 35',
-      liveMatchCache.p1Name || '',
-      liveMatchCache.p2Name || '',
-      liveMatchCache.targetPoints || 21,
-      liveMatchCache.score || '0-0',
-      liveMatchCache.status || 'NO_LIVE_MATCH',
-      !!liveMatchCache.isLive,
-      !!liveMatchCache.isComplete,
-      liveMatchCache.server || 1,
-      liveMatchCache.currentGame || 0,
-      JSON.stringify(liveMatchCache.games || [[0, 0], [0, 0], [0, 0]]),
-      JSON.stringify(liveMatchCache.setsWon || [0, 0]),
-      JSON.stringify(liveMatchCache.interval || {}),
-      JSON.stringify(liveMatchCache.rallyLog || [])
-    ]).catch(e => console.error('[PostgreSQL] saveLiveMatch error:', e.message));
+    try {
+      await query(`
+        INSERT INTO live_match (
+          court_id, match_id, category, p1_name, p2_name, target_points, score, status,
+          is_live, is_complete, server, current_game, games, sets_won, interval, rally_log, custom_message, updated_at
+        ) VALUES (
+          'Court 1', $1, $2, $3, $4, $5, $6, $7,
+          $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW()
+        )
+        ON CONFLICT (court_id) DO UPDATE SET
+          match_id = EXCLUDED.match_id,
+          category = EXCLUDED.category,
+          p1_name = EXCLUDED.p1_name,
+          p2_name = EXCLUDED.p2_name,
+          target_points = EXCLUDED.target_points,
+          score = EXCLUDED.score,
+          status = EXCLUDED.status,
+          is_live = EXCLUDED.is_live,
+          is_complete = EXCLUDED.is_complete,
+          server = EXCLUDED.server,
+          current_game = EXCLUDED.current_game,
+          games = EXCLUDED.games,
+          sets_won = EXCLUDED.sets_won,
+          interval = EXCLUDED.interval,
+          rally_log = EXCLUDED.rally_log,
+          custom_message = EXCLUDED.custom_message,
+          updated_at = NOW()
+      `, [
+        liveMatchCache.matchId || '',
+        liveMatchCache.category || 'Below 35',
+        liveMatchCache.p1Name || '',
+        liveMatchCache.p2Name || '',
+        liveMatchCache.targetPoints || 21,
+        liveMatchCache.score || '0-0',
+        liveMatchCache.status || 'NO_LIVE_MATCH',
+        !!liveMatchCache.isLive,
+        !!liveMatchCache.isComplete,
+        liveMatchCache.server || 1,
+        liveMatchCache.currentGame || 0,
+        JSON.stringify(liveMatchCache.games || [[0, 0], [0, 0], [0, 0]]),
+        JSON.stringify(liveMatchCache.setsWon || [0, 0]),
+        JSON.stringify(liveMatchCache.interval || {}),
+        JSON.stringify(liveMatchCache.rallyLog || []),
+        liveMatchCache.customMessage || ''
+      ]);
+    } catch (e) {
+      console.error('[PostgreSQL] saveLiveMatch error:', e.message);
+    }
 
     return { ...liveMatchCache };
   },

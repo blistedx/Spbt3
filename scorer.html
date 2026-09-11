@@ -2459,6 +2459,7 @@
             // ─── REAL-TIME MULTI-BROKER MQTT WEBSOCKET ENGINE (0MS CROSS-DEVICE) ─
             const MQTT_TOPIC = 'sp3_tournament_live_2026/scores';
             const brokerUrls = [
+                'wss://broker.emqx.io:8084/mqtt',
                 'wss://broker.hivemq.com:8884/mqtt'
             ];
             let scorerClients = [];
@@ -2579,12 +2580,13 @@
 
             function broadcastMqttPayload(customPayload) {
                 try {
-                    const p = customPayload || getMatchPayload('LIVE');
+                    const p = customPayload || getMatchPayload(state.isComplete ? 'COMPLETED' : (state.interval && state.interval.active ? 'INTERVAL' : (state.isLive ? 'LIVE' : 'UPCOMING')));
                     const str = JSON.stringify(p);
                     scorerClients.forEach(c => {
                         if (c && c.connected) {
                             try {
                                 c.publish(MQTT_TOPIC, str, { qos: 0, retain: true });
+                                c.publish('sp3_tournament_live_2026/match_state', str, { qos: 0, retain: true });
                             } catch(e) {}
                         }
                     });
@@ -3365,6 +3367,16 @@
             function resetMatch() {
                 if (state.isLive && !confirm('Reset match? All current score progress will be cleared.')) return;
                 state.lastLocalTap = Date.now();
+                state.customMessage = '';
+                const customMsgInput = document.getElementById('customBroadcastMsgInput');
+                if (customMsgInput) customMsgInput.value = '';
+                const broadcastBadge = document.getElementById('broadcastMsgStatusBadge');
+                if (broadcastBadge) {
+                    broadcastBadge.className = 'broadcast-status-pill none';
+                    broadcastBadge.innerHTML = 'No Active Notice';
+                }
+                const broadcastCard = document.getElementById('broadcastMsgCard');
+                if (broadcastCard) broadcastCard.classList.remove('is-active');
 
                 state.selectedMatchId = null;
                 state.matchId = 'Court 1';
@@ -3396,10 +3408,23 @@
                 logEmpty.style.display = 'block';
                 logEntries.innerHTML = '';
                 syncMatchScoreToSheet('UPCOMING');
+                if (typeof flushHttpSync === 'function') flushHttpSync();
+                broadcastLiveState();
             }
 
             function toggleMatch() {
                 state.lastLocalTap = Date.now();
+                state.customMessage = '';
+                const customMsgInput = document.getElementById('customBroadcastMsgInput');
+                if (customMsgInput) customMsgInput.value = '';
+                const broadcastBadge = document.getElementById('broadcastMsgStatusBadge');
+                if (broadcastBadge) {
+                    broadcastBadge.className = 'broadcast-status-pill none';
+                    broadcastBadge.innerHTML = 'No Active Notice';
+                }
+                const broadcastCard = document.getElementById('broadcastMsgCard');
+                if (broadcastCard) broadcastCard.classList.remove('is-active');
+
                 if (state.isComplete) {
                     state.isComplete = false;
                     state.isLive = true;
@@ -3407,6 +3432,8 @@
                     state.status = 'LIVE';
                     updateUI();
                     syncMatchScoreToSheet('LIVE');
+                    if (typeof flushHttpSync === 'function') flushHttpSync();
+                    broadcastLiveState();
                     return;
                 }
                 state.isLive = !state.isLive;
@@ -3416,6 +3443,8 @@
                 state.status = state.isLive ? 'LIVE' : 'PAUSED';
                 updateUI();
                 syncMatchScoreToSheet(state.isLive ? 'LIVE' : 'PAUSED');
+                if (typeof flushHttpSync === 'function') flushHttpSync();
+                broadcastLiveState();
             }
 
             function swapSides() {
@@ -3492,6 +3521,18 @@
                 state.rallyLog = [];
                 state.matchStartTime = null;
                 state.matchEndTime = null;
+
+                // Clear Active Notice so upcoming player showdown is shown immediately
+                state.customMessage = '';
+                const customMsgInput = document.getElementById('customBroadcastMsgInput');
+                if (customMsgInput) customMsgInput.value = '';
+                const broadcastBadge = document.getElementById('broadcastMsgStatusBadge');
+                if (broadcastBadge) {
+                    broadcastBadge.className = 'broadcast-status-pill none';
+                    broadcastBadge.innerHTML = 'No Active Notice';
+                }
+                const broadcastCard = document.getElementById('broadcastMsgCard');
+                if (broadcastCard) broadcastCard.classList.remove('is-active');
 
                 state.lastLocalTap = Date.now();
                 setupModal.classList.remove('open');

@@ -6883,10 +6883,10 @@
         }
 
         const incomingTs = typeof data.updatedAt === 'string' ? new Date(data.updatedAt).getTime() : (Number(data.updatedAt) || Number(data.ts) || 0);
-        if (incomingTs > 0 && window._lastTickerTs && incomingTs < window._lastTickerTs) {
+        if (incomingTs > 0 && window._lastTickerTs && incomingTs < (window._lastTickerTs - 3000)) {
           return;
         }
-        if (incomingTs > 0) window._lastTickerTs = incomingTs;
+        if (incomingTs > 0) window._lastTickerTs = Math.max(window._lastTickerTs || 0, incomingTs);
 
         const p1Name = (data.p1Name || data.pair1 || data.team1_name || data.player1 || '').trim();
         const p2Name = (data.p2Name || data.pair2 || data.team2_name || data.player2 || '').trim();
@@ -6898,14 +6898,15 @@
         }
 
         const pill = ticker.querySelector('.ticker-live-pill');
+        const isUpcoming = (data.status === 'UPCOMING' || data.status === 'Scheduled');
+        const isCompleted = (data.status === 'COMPLETED' || data.status === 'Completed' || (data.isComplete && !data.isLive));
+        const isLive = (data.isLive === true || data.status === 'LIVE' || data.status === 'Live' || data.status === 'IN PROGRESS') && !isCompleted;
 
-        // 1. Custom Broadcast Announcement (shows prominently on website)
-        if (data.customMessage && data.customMessage.trim() !== '') {
+        // 1. Custom Broadcast Announcement (only if no active upcoming or live match)
+        if (data.customMessage && data.customMessage.trim() !== '' && !isLive && !isUpcoming) {
           const customMsg = data.customMessage.trim();
           if (titleEl) titleEl.textContent = customMsg;
-          if (scoreEl) {
-            scoreEl.textContent = (data.isLive && !data.isComplete) ? ("LIVE · " + (data.score || 'In Progress')) : "NOTICE";
-          }
+          if (scoreEl) scoreEl.textContent = "NOTICE";
           if (metaEl) metaEl.textContent = (data.matchId || 'Court 1') + " · Desk Broadcast";
           if (pill) {
             pill.innerHTML = '<span class="dot" style="background:#f59e0b;"></span> ANNOUNCEMENT';
@@ -6917,9 +6918,6 @@
           return;
         }
 
-        const isCompleted = (data.status === 'COMPLETED' || data.status === 'Completed' || (data.isComplete && !data.isLive));
-        const isLive = (data.isLive === true || data.status === 'LIVE' || data.status === 'Live' || data.status === 'IN PROGRESS') && !isCompleted;
-
         const g = (typeof data.currentGame === 'number') ? data.currentGame : 0;
         const currentScores = (data.games && data.games[g]) ? data.games[g] : [0, 0];
         const p1Pts = currentScores[0] || 0;
@@ -6928,6 +6926,18 @@
 
         if (titleEl) titleEl.textContent = p1Name + " vs " + p2Name;
         if (metaEl) metaEl.textContent = (data.matchId || 'Court 1') + " · " + (data.category || 'Below 35');
+
+        if (isUpcoming) {
+          if (pill) {
+            pill.innerHTML = '<span class="dot" style="background:#38bdf8;"></span> UPCOMING';
+            pill.style.background = 'rgba(56, 189, 248, 0.15)';
+            pill.style.color = '#0284c7';
+            pill.style.borderColor = '#38bdf8';
+          }
+          if (scoreEl) scoreEl.textContent = "Next On Court · Warm-up";
+          ticker.style.display = 'block';
+          return;
+        }
 
         if (isLive) {
           if (pill) {
@@ -6938,6 +6948,7 @@
           }
           if (scoreEl) scoreEl.textContent = "G" + (g + 1) + " · " + p1Pts + " - " + p2Pts + " (" + sWon[0] + "-" + sWon[1] + ")";
           ticker.style.display = 'block';
+          return;
         } else if (isCompleted) {
           if (pill) {
             pill.innerHTML = '🏆 FINAL RESULT';
@@ -7004,9 +7015,8 @@
         try {
           const clientId = 'sp3_web_' + Math.random().toString(16).substring(2, 9);
           const brokerUrls = [
-            'wss://broker.hivemq.com:8884/mqtt',
             'wss://broker.emqx.io:8084/mqtt',
-            'wss://test.mosquitto.org:8081/mqtt'
+            'wss://broker.hivemq.com:8884/mqtt'
           ];
           let curIdx = 0;
           let webMqttClient = null;
@@ -7022,9 +7032,12 @@
               reconnectPeriod: 1500,
               keepalive: 20
             });
-            webMqttClient.on('connect', () => webMqttClient.subscribe(MQTT_TOPIC, { qos: 1 }));
+            webMqttClient.on('connect', () => {
+              webMqttClient.subscribe(MQTT_TOPIC, { qos: 0 });
+              webMqttClient.subscribe('sp3_tournament_live_2026/match_state', { qos: 0 });
+            });
             webMqttClient.on('message', (topic, msgBuffer) => {
-              if (topic === MQTT_TOPIC) {
+              if (topic === MQTT_TOPIC || topic.includes('scores') || topic.includes('match_state')) {
                 try {
                   const parsed = JSON.parse(msgBuffer.toString());
                   const matchData = parsed.payload || parsed.data || parsed;
