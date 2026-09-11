@@ -2076,6 +2076,17 @@
                                 if (card) card.classList.add('is-active');
                             }
 
+                            if (m.interval && m.interval.active) {
+                                const now = Date.now();
+                                const rem = m.interval.endTime ? Math.max(0, Math.ceil((m.interval.endTime - now) / 1000)) : (m.interval.secondsLeft || 0);
+                                if (rem > 0) {
+                                    state.interval = { ...state.interval, ...m.interval, secondsLeft: rem };
+                                    if (typeof window.startInterval === 'function') {
+                                        window.startInterval(m.interval.type, m.interval.title, m.interval.totalSeconds, m.interval.endTime);
+                                    }
+                                }
+                            }
+
                             if (state.games) {
                                 for (let i = 0; i < 3; i++) {
                                     const gm = state.games[i] || [0, 0];
@@ -2093,6 +2104,13 @@
             // ─── SAFE INCOMING MATCH STATE APPLICATION ───
             function applyScorerIncomingState(m) {
                 if (!m) return;
+
+                // Protect local active scorer edits from delayed background echoes/polls
+                const now = Date.now();
+                if (state.lastLocalTap && (now - state.lastLocalTap < 4000)) {
+                    return;
+                }
+
                 const serverTs = typeof m.updatedAt === 'string' ? new Date(m.updatedAt).getTime() : (Number(m.updatedAt) || Number(m.ts) || 0);
                 const localRaw = localStorage.getItem('sp3_tourney_live_data');
                 let localTs = 0;
@@ -2106,6 +2124,10 @@
                 if (localHasLiveProgress && serverTs > 0 && serverTs < localTs) {
                     return;
                 }
+                if (serverTs > 0 && state.lastSyncedUpdatedAt && serverTs < state.lastSyncedUpdatedAt) {
+                    return;
+                }
+                state.lastSyncedUpdatedAt = serverTs || now;
 
                 if (m.p1Name) state.p1Name = m.p1Name;
                 if (m.p2Name) state.p2Name = m.p2Name;
@@ -2126,7 +2148,12 @@
                 if (m.matchEndTime) state.matchEndTime = m.matchEndTime;
                 if (m.durationMinutes) state.durationMinutes = m.durationMinutes;
                 if (m.durationFormatted) state.durationFormatted = m.durationFormatted;
-                if (m.interval && typeof m.interval === 'object') state.interval = { ...state.interval, ...m.interval };
+                if (m.interval && typeof m.interval === 'object') {
+                    if (!state.interval.active || m.interval.active === false || m.interval.key !== state.interval.key) {
+                        state.interval = { ...state.interval, ...m.interval };
+                        renderIntervalUI();
+                    }
+                }
                 if (m.customMessage !== undefined) {
                     state.customMessage = m.customMessage;
                     const input = document.getElementById('customBroadcastMsgInput');
@@ -2250,25 +2277,28 @@
             // ─── INTERVAL TIMER ENGINE ───
             let intervalTimerId = null;
 
-            window.startInterval = function (type, customTitle) {
+            window.startInterval = function (type, customTitle, customTotal, explicitEndTime) {
                 if (intervalTimerId) clearInterval(intervalTimerId);
 
-                const total = type === '120s' ? 120 : 60;
+                const total = customTotal || (type === '120s' ? 120 : 60);
                 const title = customTitle || (type === '120s' ? 'Between Games Break (2 Min)' : 'Mid-Game Interval (11 Pts)');
                 const now = Date.now();
+                const canonicalEndTime = (explicitEndTime && explicitEndTime > now) ? explicitEndTime : (now + total * 1000);
+                const sec = Math.max(0, Math.ceil((canonicalEndTime - now) / 1000));
 
+                state.lastLocalTap = now;
                 state.interval.active = true;
                 state.interval.type = type;
                 state.interval.title = title;
                 state.interval.totalSeconds = total;
-                state.interval.secondsLeft = total;
+                state.interval.secondsLeft = sec;
                 state.interval.startTime = now;
+                state.interval.endTime = canonicalEndTime;
                 state.interval.key = (type + '_' + state.currentGame + '_' + now);
                 state.interval.paused = false;
 
                 playIntervalBeep('start');
                 renderIntervalUI();
-                broadcastLiveState();
                 syncMatchScoreToSheet('INTERVAL');
 
                 intervalTimerId = setInterval(() => {
@@ -2278,8 +2308,8 @@
                     }
                     if (state.interval.paused) return;
 
-                    const elapsed = Math.floor((Date.now() - state.interval.startTime) / 1000);
-                    state.interval.secondsLeft = Math.max(0, state.interval.totalSeconds - elapsed);
+                    const curNow = Date.now();
+                    state.interval.secondsLeft = Math.max(0, Math.ceil((state.interval.endTime - curNow) / 1000));
 
                     if (state.interval.secondsLeft === 20 || state.interval.secondsLeft === 10) {
                         playIntervalBeep('warn');
@@ -2291,33 +2321,60 @@
                         clearInterval(intervalTimerId);
                         playIntervalBeep('end');
                         syncMatchScoreToSheet('LIVE');
+                        renderIntervalUI();
+                        return;
                     }
 
                     renderIntervalUI();
-                    broadcastLiveState();
+                    // Keep local channel & storage in sync without hammering server with heavy sync
+                    try {
+                        const payload = getMatchPayload('INTERVAL');
+                        localStorage.setItem('sp3_tourney_live_data', JSON.stringify({ payload: payload, ts: Date.now() }));
+                        if (window.BroadcastChannel) {
+                            const bc = new BroadcastChannel('sp3_tourney_live');
+                            bc.postMessage({ type: 'SCORE_UPDATE', data: payload });
+                        }
+                    } catch (e) { }
                 }, 1000);
             };
 
             window.pauseResumeInterval = function () {
                 if (!state.interval.active) return;
+                state.lastLocalTap = Date.now();
                 state.interval.paused = !state.interval.paused;
+                const now = Date.now();
+                if (state.interval.paused) {
+                    state.interval.pausedSecondsLeft = Math.max(0, Math.ceil((state.interval.endTime - now) / 1000));
+                } else {
+                    const rem = state.interval.pausedSecondsLeft || state.interval.secondsLeft || 60;
+                    state.interval.endTime = now + rem * 1000;
+                    state.interval.secondsLeft = rem;
+                }
                 renderIntervalUI();
-                broadcastLiveState();
+                syncMatchScoreToSheet('INTERVAL');
             };
 
             window.addIntervalTime = function (sec) {
                 if (!state.interval.active) return;
-                state.interval.secondsLeft = Math.min(300, state.interval.secondsLeft + sec);
+                state.lastLocalTap = Date.now();
+                const now = Date.now();
+                if (!state.interval.endTime || state.interval.endTime < now) {
+                    state.interval.endTime = now + (state.interval.secondsLeft || 0) * 1000;
+                }
+                state.interval.endTime += sec * 1000;
+                state.interval.totalSeconds = (state.interval.totalSeconds || 60) + sec;
+                state.interval.secondsLeft = Math.max(0, Math.ceil((state.interval.endTime - now) / 1000));
                 renderIntervalUI();
-                broadcastLiveState();
+                syncMatchScoreToSheet('INTERVAL');
             };
 
             window.stopInterval = function () {
+                state.lastLocalTap = Date.now();
                 state.interval.active = false;
                 state.interval.secondsLeft = 0;
+                state.interval.endTime = 0;
                 if (intervalTimerId) clearInterval(intervalTimerId);
                 renderIntervalUI();
-                broadcastLiveState();
                 syncMatchScoreToSheet('LIVE');
             };
 
@@ -2635,7 +2692,7 @@
                     }
                 }
                 const scoreStr = setsArr.length > 0 ? setsArr.join(', ') : (state.games[state.currentGame][0]) + "-" + (state.games[state.currentGame][1]);
-                const matchStatus = status || (state.isComplete ? 'COMPLETED' : (state.isLive ? 'LIVE' : 'UPCOMING'));
+                const matchStatus = status || (state.isComplete ? 'COMPLETED' : (state.interval && state.interval.active ? 'INTERVAL' : (state.isLive ? 'LIVE' : 'UPCOMING')));
                 const nowTs = Date.now();
 
                 const startTs = state.matchStartTime || (state.isLive ? Date.now() : 0);
@@ -2717,9 +2774,7 @@
                 // 3. Ultra-fast Cross-Device Real-Time Socket.io
                 if (scorerSocket && scorerSocket.connected) {
                     try {
-                        scorerSocket.emit('score_point', payload);
                         scorerSocket.emit('update_score', payload);
-                        scorerSocket.emit('sync_match', payload);
                     } catch (e) {}
                 }
 
@@ -2733,7 +2788,7 @@
 
             // ─── BROADCAST STATE TO TV & MAIN SITE ───
             function broadcastLiveState() {
-                syncMatchScoreToSheet(state.isComplete ? 'COMPLETED' : (state.isLive ? 'LIVE' : 'UPCOMING'));
+                syncMatchScoreToSheet(state.isComplete ? 'COMPLETED' : (state.interval && state.interval.active ? 'INTERVAL' : (state.isLive ? 'LIVE' : 'UPCOMING')));
             }
 
             if (window.BroadcastChannel) {
@@ -2963,6 +3018,7 @@
                 const name = winner === 1 ? state.p1Name : state.p2Name;
                 if (!confirm("Award current set to " + (name) + "?")) return;
 
+                state.lastLocalTap = Date.now();
                 const g = state.currentGame;
                 state.setsWon[winner - 1]++;
 
@@ -3226,6 +3282,7 @@
 
             function addPoint(player) {
                 if (state.isComplete) return;
+                state.lastLocalTap = Date.now();
 
                 if (!state.isLive) {
                     state.isLive = true;
@@ -3273,6 +3330,7 @@
 
             function undoPoint() {
                 if (!state.isLive || state.isComplete || state.rallyLog.length === 0) return;
+                state.lastLocalTap = Date.now();
 
                 let idx = state.rallyLog.length - 1;
                 while (idx >= 0 && state.rallyLog[idx].isGameWin) {
@@ -3306,6 +3364,7 @@
 
             function resetMatch() {
                 if (state.isLive && !confirm('Reset match? All current score progress will be cleared.')) return;
+                state.lastLocalTap = Date.now();
 
                 state.selectedMatchId = null;
                 state.matchId = 'Court 1';
@@ -3340,6 +3399,7 @@
             }
 
             function toggleMatch() {
+                state.lastLocalTap = Date.now();
                 if (state.isComplete) {
                     state.isComplete = false;
                     state.isLive = true;
@@ -3359,6 +3419,7 @@
             }
 
             function swapSides() {
+                state.lastLocalTap = Date.now();
                 const tempName = state.p1Name;
                 state.p1Name = state.p2Name;
                 state.p2Name = tempName;
@@ -3389,6 +3450,7 @@
             }
 
             function switchServe() {
+                state.lastLocalTap = Date.now();
                 state.server = state.server === 1 ? 2 : 1;
                 updateUI();
                 syncMatchScoreToSheet(state.isLive ? 'LIVE' : (state.status || 'UPCOMING'));
@@ -3533,7 +3595,7 @@
             // Continuous High-Speed Real-Time Sync Polling across all scorer mobile devices
             setInterval(() => {
                 const now = Date.now();
-                if (!state.lastLocalTap || (now - state.lastLocalTap > 2000)) {
+                if (!state.lastLocalTap || (now - state.lastLocalTap > 4000)) {
                     loadLiveMatchFromSheet();
                 }
             }, 1200);

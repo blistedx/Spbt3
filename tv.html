@@ -2291,27 +2291,27 @@
             document.addEventListener('keydown', unlockAudio, { once: true });
 
             // ─── INTERVAL CONTROLLER (ZERO SKEW - MONOTONIC CLOCK) ─────
-            window.startTVInterval = function (type, title, totalSec, key) {
+            window.startTVInterval = function (type, title, totalSec, key, explicitEndTime) {
                 const intervalKey = key || (type + '_' + Date.now());
 
-                // If already active with the same key or type, DO NOT reset the clock!
-                if (liveState.interval && liveState.interval.active) {
-                    if (liveState.interval.key === intervalKey || liveState.interval.type === type) {
-                        return;
-                    }
+                // If already active with the same key, DO NOT reset the clock!
+                if (liveState.interval && liveState.interval.active && liveState.interval.key === intervalKey) {
+                    return;
                 }
 
                 const total = totalSec || (type === '120s' ? 120 : 60);
                 const intervalTitle = title || (type === '120s' ? 'Between Games Break (2 Min)' : 'Mid-Game Interval (11 Points)');
                 const nowTs = Date.now();
+                const canonicalEndTime = (explicitEndTime && explicitEndTime > nowTs) ? explicitEndTime : (nowTs + total * 1000);
+                const sec = Math.max(0, Math.ceil((canonicalEndTime - nowTs) / 1000));
 
                 liveState.interval = {
                     active: true,
                     type: type,
                     title: intervalTitle,
                     totalSeconds: total,
-                    secondsLeft: total,
-                    endTime: nowTs + total * 1000,
+                    secondsLeft: sec,
+                    endTime: canonicalEndTime,
                     localTickTime: nowTs,
                     paused: false,
                     key: intervalKey,
@@ -2326,6 +2326,7 @@
                 if (liveState.interval) {
                     liveState.interval.active = false;
                     liveState.interval.secondsLeft = 0;
+                    liveState.interval.endTime = 0;
                 }
                 tvIntervalModal.classList.remove('active', 'critical-10s');
                 tvIntervalCard.classList.remove('critical-10s');
@@ -2744,9 +2745,24 @@
                 const matchSig = (d.matchId || 'Court 1') + '_' + (nameP1 || liveState.p1Name || '') + '_' + (nameP2 || liveState.p2Name || '');
                 const isNewMatch = matchSig && matchSig !== bwfTracking.matchSignature;
 
-                // Anti-stale packet check (only if same match and incomingTs is significantly older)
-                if (!isNewMatch && incomingTs > 0 && liveState.lastDataTimestamp && incomingTs < (liveState.lastDataTimestamp - 5000)) {
+                // Anti-stale packet check: strictly reject any packet older than our latest received data
+                if (!isNewMatch && incomingTs > 0 && liveState.lastDataTimestamp && incomingTs < liveState.lastDataTimestamp) {
                     return;
+                }
+
+                // Monotonic score check: in the same game of the same match, reject packets that revert to fewer points
+                // unless incomingTs is strictly newer than our current timestamp (indicating an intentional scorer Undo)
+                if (!isNewMatch && !isFirstPacket && liveState.games && incomingGame === (liveState.currentGame || 0)) {
+                    const checkG = liveState.currentGame || 0;
+                    const curGScore = liveState.games[checkG] || [0, 0];
+                    const incGScore = incomingGames[checkG] || [0, 0];
+                    const curPts = (curGScore[0] || 0) + (curGScore[1] || 0);
+                    const incPts = (incGScore[0] || 0) + (incGScore[1] || 0);
+                    if (incPts < curPts) {
+                        if (!incomingTs || incomingTs <= (liveState.lastDataTimestamp || 0)) {
+                            return; // Reject stale out-of-order packet with lower score
+                        }
+                    }
                 }
 
                 if (nameP1 && nameP1.trim().length > 0) liveState.p1Name = nameP1.trim();
@@ -2864,30 +2880,44 @@
                     if (srvInt && srvInt.active) {
                         isScorerIntervalHandled = true;
                         const total = srvInt.totalSeconds || (srvInt.type === '120s' ? 120 : 60);
-                        let sec = (typeof srvInt.secondsLeft === 'number') ? srvInt.secondsLeft : total;
-                        sec = Math.min(total, Math.max(0, sec));
                         const srvKey = srvInt.key || (srvInt.type + '_' + (srvInt.startTime || ''));
+                        const nowTs = Date.now();
 
-                        if (sec > 0) {
+                        // Establish canonical endTime
+                        let targetEndTime = srvInt.endTime;
+                        if (!targetEndTime) {
+                            let sec = (typeof srvInt.secondsLeft === 'number') ? srvInt.secondsLeft : total;
+                            sec = Math.min(total, Math.max(0, sec));
+                            targetEndTime = nowTs + sec * 1000;
+                        }
+
+                        const currentSecsRemaining = srvInt.paused
+                            ? (srvInt.pausedSecondsLeft || srvInt.secondsLeft || 0)
+                            : Math.max(0, Math.ceil((targetEndTime - nowTs) / 1000));
+
+                        if (currentSecsRemaining > 0) {
                             if (!liveState.interval || !liveState.interval.active || liveState.interval.key !== srvKey) {
-                                window.startTVInterval(srvInt.type, srvInt.title, total, srvKey);
-                                if (liveState.interval) {
-                                    liveState.interval.endTime = Date.now() + sec * 1000;
-                                    liveState.interval.secondsLeft = sec;
-                                }
-                            } else if (liveState.interval && liveState.interval.active) {
-                                if (Math.abs((liveState.interval.secondsLeft || 0) - sec) > 3) {
-                                    liveState.interval.endTime = Date.now() + sec * 1000;
-                                    liveState.interval.secondsLeft = sec;
-                                }
+                                window.startTVInterval(srvInt.type, srvInt.title, total, srvKey, targetEndTime);
+                            } else {
+                                // Already active: preserve monotonic ticking and only sync pause or explicit extensions
                                 liveState.interval.paused = !!srvInt.paused;
+                                if (srvInt.title) liveState.interval.title = srvInt.title;
+                                liveState.interval.totalSeconds = total;
+
+                                // If scorer explicitly added time (+15s), update canonical endTime
+                                if (srvInt.endTime && Math.abs(liveState.interval.endTime - srvInt.endTime) > 1500) {
+                                    liveState.interval.endTime = srvInt.endTime;
+                                }
+                                if (srvInt.paused) {
+                                    liveState.interval.secondsLeft = currentSecsRemaining;
+                                }
                             }
                             renderIntervalOverlay();
                         } else {
                             window.dismissInterval();
                         }
                     } else if (srvInt && srvInt.active === false) {
-                        // Scorer explicitly says interval is over -> dismiss TV interval immediately
+                        // Scorer explicitly ended interval -> dismiss immediately
                         if (liveState.interval && liveState.interval.active) {
                             window.dismissInterval();
                         }
@@ -2909,7 +2939,7 @@
                         bwfTracking.lastProcessedGame = incomingGame;
                         if (!bwfTracking.setBreakTaken[endedGameIdx] && endedGameIdx < 2 && (liveState.setsWon[0] < 2 && liveState.setsWon[1] < 2)) {
                             bwfTracking.setBreakTaken[endedGameIdx] = true;
-                            const title = `Set ${endedGameIdx + 1} Complete · Resuming in 5s`;
+                            const title = `Set ${endedGameIdx + 1} Complete · Between Games Break (2 Min)`;
                             window.startTVInterval('120s', title, CONFIG.INTERVAL_SETBREAK_SECONDS, `setbreak_${endedGameIdx}_${matchSig}`);
                         }
                     }

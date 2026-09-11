@@ -822,10 +822,12 @@ async function handleActionBridge(req, res, next) {
         const payload = req.body.match || req.body.payload || req.body;
         if (payload) {
           const nowMs = Date.now();
+          const clientTs = typeof payload.updatedAt === 'string' ? new Date(payload.updatedAt).getTime() : (Number(payload.updatedAt) || Number(payload.ts) || 0);
+          const finalTs = clientTs > 0 ? clientTs : nowMs;
           const updatedLive = dataStore.saveLiveMatch({
             ...payload,
-            updatedAt: nowMs,
-            ts: nowMs
+            updatedAt: finalTs,
+            ts: finalTs
           });
           globalLiveMatchState = updatedLive;
 
@@ -862,8 +864,6 @@ async function handleActionBridge(req, res, next) {
               io.emit('match_state', updatedLive);
               io.emit('court:update', updatedLive);
               io.emit('score_updated', { matchId: mid, match: updatedLive });
-              io.to('tv_broadcast').emit('tv_score_update', updatedLive);
-              io.to('court_1').emit('match_state', updatedLive);
             }
           } catch (e) {}
         }

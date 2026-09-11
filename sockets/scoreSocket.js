@@ -73,7 +73,10 @@ function setupScoreSocket(io) {
 
         // 1. Full match object from scorer desk -> Update Neon live_match & matches tables
         if (data.p1Name || data.p2Name || data.games || data.score || data.status || data.setsWon) {
-          const updatedLive = dataStore.saveLiveMatch(data);
+          const updatedLive = dataStore.saveLiveMatch({
+            ...data,
+            updatedAt: data.updatedAt || Date.now()
+          });
 
           // Sync to Neon matches table as well
           const p1 = updatedLive.p1Name || 'Player 1';
@@ -98,8 +101,6 @@ function setupScoreSocket(io) {
           io.emit('match_state', updatedLive);
           io.emit('court:update', updatedLive);
           io.emit('score_updated', { matchId, match: updatedLive });
-          io.to('tv_broadcast').emit('tv_score_update', updatedLive);
-          io.to('court_1').emit('match_state', updatedLive);
           return;
         }
 
@@ -229,6 +230,7 @@ function setupScoreSocket(io) {
         const currentMatch = dataStore.getLiveMatch();
         if (data && data.interval) {
           currentMatch.interval = data.interval;
+          currentMatch.updatedAt = data.updatedAt || Date.now();
           const updated = dataStore.saveLiveMatch(currentMatch);
           io.emit('score_update', updated);
           io.emit('tv_score_update', updated);

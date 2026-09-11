@@ -6882,6 +6882,12 @@
           return;
         }
 
+        const incomingTs = typeof data.updatedAt === 'string' ? new Date(data.updatedAt).getTime() : (Number(data.updatedAt) || Number(data.ts) || 0);
+        if (incomingTs > 0 && window._lastTickerTs && incomingTs < window._lastTickerTs) {
+          return;
+        }
+        if (incomingTs > 0) window._lastTickerTs = incomingTs;
+
         const p1Name = (data.p1Name || data.pair1 || data.team1_name || data.player1 || '').trim();
         const p2Name = (data.p2Name || data.pair2 || data.team2_name || data.player2 || '').trim();
         const hasPlayers = (p1Name.length > 0 && p2Name.length > 0);
