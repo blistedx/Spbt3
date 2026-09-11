@@ -16,10 +16,9 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Chakra+Petch:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@600;700;800;900&family=Space+Mono:wght@400;700&display=swap"
         rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/alert-modal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js" defer></script>
+    <script src="/alert-modal.js" defer></script>
     <style>
         *,
         *::before,
@@ -3041,7 +3040,12 @@
                 } catch (e) { }
             }
 
-            initTvMqtt();
+            if (typeof mqtt !== 'undefined') {
+                initTvMqtt();
+            } else {
+                window.addEventListener('DOMContentLoaded', initTvMqtt);
+                window.addEventListener('load', initTvMqtt);
+            }
 
             // ─── TV PRESENCE & HEARTBEAT ENGINE (REAL-TIME ACTIVE DEVICE TRACKING) ───
             const TV_PRESENCE_TOPIC = 'sp3_tournament_live_2026/presence/tv';

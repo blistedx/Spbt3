@@ -1,9 +1,33 @@
 {
   "version": 2,
-  "rewrites": [
+  "cleanUrls": true,
+  "headers": [
     {
-      "source": "/(.*)",
-      "destination": "/api/index.js"
+      "source": "/(.*)\\.(png|jpg|jpeg|gif|svg|ico|webp|woff2|woff)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(js|css)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
     }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/exec", "destination": "/api/index.js" },
+    { "source": "/socket.io/(.*)", "destination": "/api/index.js" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/scorer", "destination": "/scorer.html" },
+    { "source": "/tv", "destination": "/tv.html" },
+    { "source": "/(.*)", "destination": "/api/index.js" }
   ]
 }

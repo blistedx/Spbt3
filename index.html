@@ -29,18 +29,18 @@
   <!-- Performance Preconnect & DNS Prefetch -->
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
   <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-  <link rel="dns-prefetch" href="https://unpkg.com">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
     rel="stylesheet">
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="/alert-modal.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <script src="/alert-modal.js" defer></script>
   <script>
     (function () {
       try {
@@ -6993,7 +6993,8 @@
 
       // Ultra-fast Real-Time MQTT WebSocket Listener (< 50ms Cross-Device)
       const MQTT_TOPIC = 'sp3_tournament_live_2026/scores';
-      if (typeof mqtt !== 'undefined') {
+      function initWebMqtt() {
+        if (typeof mqtt === 'undefined') return;
         try {
           const clientId = 'sp3_web_' + Math.random().toString(16).substring(2, 9);
           const brokerUrls = [
@@ -7040,6 +7041,13 @@
             }
           });
         } catch (e) { }
+      }
+
+      if (typeof mqtt !== 'undefined') {
+        initWebMqtt();
+      } else {
+        window.addEventListener('DOMContentLoaded', initWebMqtt);
+        window.addEventListener('load', initWebMqtt);
       }
 
       // Instant 0ms WebSocket Real-Time Listener

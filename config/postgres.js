@@ -41,12 +41,20 @@ async function query(text, params) {
   }
 }
 
+let isInitialized = false;
+let initPromise = null;
+
 async function initPostgres() {
+  if (isInitialized) return pool;
+  if (initPromise) return initPromise;
   if (!pool) {
     console.warn('⚠️ PostgreSQL connection skipped: DATABASE_URL is not set.');
     return null;
   }
-  console.log('📡 Connecting to Neon PostgreSQL online database...');
+
+  initPromise = (async () => {
+    try {
+      console.log('📡 Connecting to Neon PostgreSQL online database...');
 
   const schemaSql = `
     -- 1. Tournament Settings Table
@@ -212,7 +220,16 @@ async function initPostgres() {
     await query("INSERT INTO live_match (court_id, status, is_live, is_complete) VALUES ('Court 1', 'NO_LIVE_MATCH', false, false)");
   }
 
+  isInitialized = true;
   return pool;
+} catch (err) {
+  initPromise = null;
+  console.error('❌ PostgreSQL Initialization Error:', err.message);
+  throw err;
+}
+})();
+
+return initPromise;
 }
 
 module.exports = {

@@ -14,9 +14,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
-    <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/alert-modal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js" defer></script>
+    <script src="/alert-modal.js" defer></script>
     <style>
         /* ─── RESET & THEME VARIABLES ─── */
         *,
@@ -2749,7 +2748,12 @@
             }
 
             // Initialize Scorer Real-Time MQTT Engine
-            initScorerMqtt();
+            if (typeof mqtt !== 'undefined') {
+                initScorerMqtt();
+            } else {
+                window.addEventListener('DOMContentLoaded', initScorerMqtt);
+                window.addEventListener('load', initScorerMqtt);
+            }
 
             // ─── UI RENDER HELPER ───
             function updateUI() {
