@@ -72,6 +72,7 @@ setupScoreSocket(io);
 // Static Asset Directories with Browser Caching
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
 app.use(express.static(path.join(__dirname), {
+  extensions: ['html'],
   maxAge: '1d',
   setHeaders: (res, filePath) => {
     if (/\.(png|jpg|jpeg|gif|ico|svg|webp)$/i.test(filePath)) {
@@ -81,6 +82,13 @@ app.use(express.static(path.join(__dirname), {
     }
   }
 }));
+
+// Direct Page Routes
+app.get('/tv', (req, res) => res.sendFile(path.join(__dirname, 'tv.html')));
+app.get('/scorer', (req, res) => res.sendFile(path.join(__dirname, 'scorer.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'privacy.html')));
+app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
 
 // Database middleware (Neon PostgreSQL online connection pool)
 app.use(async (req, res, next) => {

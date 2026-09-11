@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "cleanUrls": true,
   "headers": [
     {
       "source": "/(.*)\\.(png|jpg|jpeg|gif|svg|ico|webp|woff2|woff)",
@@ -22,12 +21,6 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.js" },
-    { "source": "/exec", "destination": "/api/index.js" },
-    { "source": "/socket.io/(.*)", "destination": "/api/index.js" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/scorer", "destination": "/scorer.html" },
-    { "source": "/tv", "destination": "/tv.html" },
     { "source": "/(.*)", "destination": "/api/index.js" }
   ]
 }
