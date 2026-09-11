@@ -3292,6 +3292,8 @@
             function resetMatch() {
                 if (state.isLive && !confirm('Reset match? All current score progress will be cleared.')) return;
 
+                state.selectedMatchId = null;
+                state.matchId = 'Court 1';
                 state.games = [
                     [0, 0],
                     [0, 0],

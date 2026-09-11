@@ -111,25 +111,36 @@ async function syncFromDb() {
 
     // 3. Matches
     const matchRes = await query("SELECT * FROM matches ORDER BY created_at ASC");
-    matchesCache = matchRes.rows.map(m => ({
-      matchId: m.match_id,
-      id: m.match_id,
-      category: m.category,
-      round: m.round,
-      court: m.court,
-      team1P1: m.team1_p1,
-      team1P2: m.team1_p2,
-      team2P1: m.team2_p1,
-      team2P2: m.team2_p2,
-      team1Name: m.team1_name,
-      team2Name: m.team2_name,
-      scheduledTime: m.scheduled_time,
-      status: m.status,
-      winner: m.winner,
-      scores: typeof m.scores === 'string' ? JSON.parse(m.scores) : (m.scores || []),
-      sets: typeof m.sets === 'string' ? JSON.parse(m.sets) : (m.sets || []),
-      ...(m.raw_payload || {})
-    }));
+    matchesCache = matchRes.rows.map(m => {
+      const raw = m.raw_payload || {};
+      const p1 = raw.pair1 || raw.p1Name || m.team1_name || m.team1_p1 || 'Team 1';
+      const p2 = raw.pair2 || raw.p2Name || m.team2_name || m.team2_p1 || 'Team 2';
+      return {
+        matchId: m.match_id,
+        id: m.match_id,
+        category: m.category || 'Below 35',
+        round: m.round || 'Round 1',
+        court: m.court || 'Court 1',
+        team1P1: m.team1_p1,
+        team1P2: m.team1_p2,
+        team2P1: m.team2_p1,
+        team2P2: m.team2_p2,
+        team1Name: m.team1_name || p1,
+        team2Name: m.team2_name || p2,
+        p1Name: p1,
+        p2Name: p2,
+        pair1: p1,
+        pair2: p2,
+        scheduledTime: m.scheduled_time || raw.time || '05:00 PM',
+        time: raw.time || m.scheduled_time || '05:00 PM',
+        date: raw.date || '',
+        status: m.status || 'SCHEDULED',
+        winner: m.winner || '',
+        scores: typeof m.scores === 'string' ? JSON.parse(m.scores) : (m.scores || []),
+        sets: typeof m.sets === 'string' ? JSON.parse(m.sets) : (m.sets || []),
+        ...raw
+      };
+    });
 
     // 4. Live Match
     const liveRes = await query("SELECT * FROM live_match WHERE court_id = 'Court 1' LIMIT 1");
@@ -351,14 +362,37 @@ const dataStore = {
     return [...matchesCache];
   },
   saveMatches(matches) {
-    matchesCache = Array.isArray(matches) ? matches : [];
+    const list = Array.isArray(matches) ? matches : [];
+    matchesCache = list.map(m => ({
+      ...m,
+      matchId: m.matchId || m.id,
+      id: m.matchId || m.id
+    }));
+    // Persist every match to PostgreSQL database
+    for (const m of list) {
+      if (m && (m.matchId || m.id)) {
+        this.addOrUpdateMatch(m);
+      }
+    }
     return [...matchesCache];
   },
   addOrUpdateMatch(match) {
     const matchId = match.matchId || match.id || `M-${100 + matchesCache.length + 1}`;
     const idx = matchesCache.findIndex(m => (m.matchId === matchId || m.id === matchId));
     if (idx >= 0) {
-      matchesCache[idx] = { ...matchesCache[idx], ...match, matchId, id: matchId, updatedAt: new Date().toISOString() };
+      const existing = matchesCache[idx];
+      const preserveCompleted = existing.status === 'COMPLETED' && (match.status === 'UPCOMING' || !match.status);
+      matchesCache[idx] = {
+        ...existing,
+        ...match,
+        status: preserveCompleted ? existing.status : (match.status || existing.status),
+        winner: preserveCompleted ? existing.winner : (match.winner || existing.winner),
+        scores: preserveCompleted ? existing.scores : (match.scores || existing.scores),
+        sets: preserveCompleted ? existing.sets : (match.sets || existing.sets),
+        matchId,
+        id: matchId,
+        updatedAt: new Date().toISOString()
+      };
     } else {
       matchesCache.push({ ...match, matchId, id: matchId, updatedAt: new Date().toISOString() });
     }
@@ -382,10 +416,10 @@ const dataStore = {
         team1_name = EXCLUDED.team1_name,
         team2_name = EXCLUDED.team2_name,
         scheduled_time = EXCLUDED.scheduled_time,
-        status = EXCLUDED.status,
-        winner = EXCLUDED.winner,
-        scores = EXCLUDED.scores,
-        sets = EXCLUDED.sets,
+        status = CASE WHEN matches.status = 'COMPLETED' AND EXCLUDED.status = 'UPCOMING' THEN matches.status ELSE EXCLUDED.status END,
+        winner = CASE WHEN matches.status = 'COMPLETED' AND (EXCLUDED.winner IS NULL OR EXCLUDED.winner = '') THEN matches.winner ELSE EXCLUDED.winner END,
+        scores = CASE WHEN matches.status = 'COMPLETED' AND (EXCLUDED.scores IS NULL OR EXCLUDED.scores::text = '[]' OR EXCLUDED.scores::text = '[[0,0],[0,0],[0,0]]') THEN matches.scores ELSE EXCLUDED.scores END,
+        sets = CASE WHEN matches.status = 'COMPLETED' AND (EXCLUDED.sets IS NULL OR EXCLUDED.sets::text = '[]' OR EXCLUDED.sets::text = '[0,0]') THEN matches.sets ELSE EXCLUDED.sets END,
         raw_payload = EXCLUDED.raw_payload,
         updated_at = NOW()
     `, [
@@ -393,17 +427,17 @@ const dataStore = {
       match.category || 'Below 35',
       match.round || 'Round 1',
       match.court || 'Court 1',
-      match.team1P1 || match.team1_p1 || match.p1Name || match.player1 || '',
+      match.team1P1 || match.team1_p1 || match.p1Name || match.player1 || match.pair1 || '',
       match.team1P2 || match.team1_p2 || '',
-      match.team2P1 || match.team2_p1 || match.p2Name || match.player2 || '',
+      match.team2P1 || match.team2_p1 || match.p2Name || match.player2 || match.pair2 || '',
       match.team2P2 || match.team2_p2 || '',
-      match.team1Name || match.team1_name || match.p1Name || match.team1 || '',
-      match.team2Name || match.team2_name || match.p2Name || match.team2 || '',
-      match.scheduledTime || match.scheduled_time || '',
+      match.team1Name || match.team1_name || match.p1Name || match.pair1 || match.team1 || '',
+      match.team2Name || match.team2_name || match.p2Name || match.pair2 || match.team2 || '',
+      match.scheduledTime || match.scheduled_time || match.time || match.date || '',
       match.status || 'SCHEDULED',
       match.winner || '',
-      JSON.stringify(match.scores || []),
-      JSON.stringify(match.sets || []),
+      JSON.stringify(match.scores || match.games || []),
+      JSON.stringify(match.sets || match.setsWon || []),
       JSON.stringify(match)
     ]).catch(e => console.error('[PostgreSQL] addOrUpdateMatch error:', e.message));
 

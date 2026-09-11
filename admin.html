@@ -1963,15 +1963,17 @@
                                 <option value="Above 35">Above 35</option>
                             </select>
 
-                            <label>Pair 1 (Dropdown)</label>
-                            <select id="matchPair1Select" required>
+                            <label>Pair 1 (Select Registered Pair or Type Names)</label>
+                            <select id="matchPair1Select">
                                 <option value="">Select Pair 1 (Approved Teams)</option>
                             </select>
+                            <input type="text" id="matchPair1Custom" placeholder="Or enter Team 1 / Player names manually" style="margin-top:5px; font-size:12px; padding:7px 10px; border-radius:6px; border:1px solid #cbd5e1; width:100%; box-sizing:border-box;" />
 
-                            <label>Pair 2 (Dropdown)</label>
-                            <select id="matchPair2Select" required>
+                            <label style="margin-top:10px;">Pair 2 (Select Registered Pair or Type Names)</label>
+                            <select id="matchPair2Select">
                                 <option value="">Select Pair 2 (Approved Teams)</option>
                             </select>
+                            <input type="text" id="matchPair2Custom" placeholder="Or enter Team 2 / Player names manually" style="margin-top:5px; font-size:12px; padding:7px 10px; border-radius:6px; border:1px solid #cbd5e1; width:100%; box-sizing:border-box;" />
 
                             <label>Tournament Round (Dropdown)</label>
                             <select id="matchRoundSelect">
@@ -3235,9 +3237,9 @@
             const cat = catSelect.value;
             const approvedPairs = allRegistrations.filter(r => (r.category === cat) && ((r.status || "").toUpperCase() === "APPROVED"));
 
-            let options = '<option value="">Select Approved Pair</option>';
+            let options = '<option value="">Select Pair (Approved Teams)</option>';
             if (approvedPairs.length === 0) {
-                options = '<option value="">No approved pairs in ' + cat + ' yet</option>';
+                options = '<option value="">No approved teams in ' + cat + ' (Type names below)</option>';
             } else {
                 approvedPairs.forEach(p => {
                     options += "<option value=\"" + (p.regId) + "\">" + (p.player1Name) + " / " + (p.player2Name) + " (" + (p.regId) + ")</option>";
@@ -3250,8 +3252,18 @@
 
         function fetchAdminSchedule() {
             const onSuccess = function (res) {
-                if (res && res.success && res.schedule && res.schedule.length > 0) {
-                    allAdminSchedule = res.schedule;
+                if (res && res.success && res.schedule && Array.isArray(res.schedule)) {
+                    allAdminSchedule = res.schedule.map(m => ({
+                        ...m,
+                        matchId: m.matchId || m.id || ('M' + Date.now()),
+                        category: m.category || 'Below 35',
+                        round: m.round || 'Round 1',
+                        court: m.court || 'Court 1',
+                        pair1: m.pair1 || m.team1_name || m.team1Name || m.p1Name || 'Team 1',
+                        pair2: m.pair2 || m.team2_name || m.team2Name || m.p2Name || 'Team 2',
+                        time: m.time || m.scheduledTime || m.scheduled_time || '05:00 PM',
+                        status: m.status || 'UPCOMING'
+                    }));
                 }
                 renderAdminScheduleList();
             };
@@ -3279,15 +3291,42 @@
 
             let html = '';
             allAdminSchedule.forEach((m, idx) => {
-                html += "<div style=\"background:var(--paper); padding:10px; margin-bottom:8px; border-radius:8px; font-size:12px;\"><strong>" + (m.round) + "</strong> (" + (m.category) + ")<br>" + (m.pair1) + " vs " + (m.pair2) + "<br><small>" + (m.time) + " @ " + (m.court) + "</small></div>";
+                const p1 = m.pair1 || m.team1_name || m.team1Name || m.p1Name || 'Team 1';
+                const p2 = m.pair2 || m.team2_name || m.team2Name || m.p2Name || 'Team 2';
+                const rnd = m.round || 'Round 1';
+                const cat = m.category || 'Below 35';
+                const crt = m.court || 'Court 1';
+                const tm = m.time || m.scheduledTime || m.scheduled_time || '05:00 PM';
+                const mid = m.matchId || m.id || ('M' + (idx + 1));
+
+                html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--paper); padding:10px 12px; margin-bottom:8px; border-radius:8px; font-size:12px; border:1px solid var(--line); gap:8px;">
+                    <div>
+                        <span style="font-weight:700; color:var(--court);">${mid}</span> · <strong>${rnd}</strong> (${cat})<br>
+                        <span style="font-weight:600; color:#1e293b;">${p1}</span> vs <span style="font-weight:600; color:#1e293b;">${p2}</span><br>
+                        <small style="color:#64748b;">${tm} @ ${crt}</small>
+                    </div>
+                    <button type="button" onclick="handleDeleteScheduleMatch(${idx})" title="Delete Match" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:6px 10px; font-size:12px; cursor:pointer; font-weight:700; flex-shrink:0;">🗑️</button>
+                </div>`;
             });
             fixList.innerHTML = html;
         }
 
         function handleDeleteScheduleMatch(idx) {
+            const m = allAdminSchedule[idx];
+            const matchId = m ? (m.matchId || m.id) : null;
+            if (!confirm('Are you sure you want to remove this scheduled match?')) return;
             allAdminSchedule.splice(idx, 1);
             renderAdminScheduleList();
             syncAdminScheduleToSheet();
+            if (matchId && SCRIPT_URL) {
+                const currentPin = localStorage.getItem('sp3_admin_pin') || adminPin || "9903";
+                fetch(SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "adminDeleteScheduleMatch", pin: currentPin, matchId: matchId })
+                }).catch(() => {});
+            }
         }
 
         function syncAdminScheduleToSheet() {
@@ -3298,36 +3337,80 @@
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ action: "adminSaveMatchSchedule", pin: currentPin, schedule: allAdminSchedule })
-                }).catch(() => {});
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res && res.success) {
+                        console.log('Match schedule saved to server & database successfully.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error saving match schedule:', err);
+                });
             }
         }
 
         function handleScheduleMatch(e) {
             if (e) e.preventDefault();
             const cat = document.getElementById('matchCatSelect').value;
-            const p1Id = document.getElementById('matchPair1Select').value;
-            const p2Id = document.getElementById('matchPair2Select').value;
+            const p1Val = (document.getElementById('matchPair1Select')?.value || '').trim();
+            const p2Val = (document.getElementById('matchPair2Select')?.value || '').trim();
+            const p1Custom = (document.getElementById('matchPair1Custom')?.value || '').trim();
+            const p2Custom = (document.getElementById('matchPair2Custom')?.value || '').trim();
             const round = document.getElementById('matchRoundSelect').value;
             const court = document.getElementById('matchCourtSelect').value;
             const dt = document.getElementById('matchDateTime').value;
 
+            const p1Id = p1Custom || p1Val;
+            const p2Id = p2Custom || p2Val;
+
+            if (!p1Id || !p2Id) {
+                alert('Please select an approved pair or type names for both Pair 1 and Pair 2.');
+                return;
+            }
+
             const p1Obj = allRegistrations.find(r => r.regId === p1Id);
             const p2Obj = allRegistrations.find(r => r.regId === p2Id);
 
-            allAdminSchedule.unshift({
-                matchId: "M" + (allAdminSchedule.length + 1),
+            const pair1Name = p1Obj ? (p1Obj.player1Name + " / " + p1Obj.player2Name) : p1Id;
+            const pair2Name = p2Obj ? (p2Obj.player1Name + " / " + p2Obj.player2Name) : p2Id;
+
+            let formattedTime = "05:00 PM";
+            if (dt) {
+                try {
+                    const d = new Date(dt);
+                    formattedTime = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                } catch(err) {}
+            }
+
+            const newMatch = {
+                matchId: "M" + String(allAdminSchedule.length + 1).padStart(2, '0'),
                 day: "Day 1",
-                date: dt,
-                time: "05:00 PM",
+                date: dt || new Date().toISOString(),
+                time: formattedTime,
                 court: court,
                 category: cat,
                 round: round,
-                pair1: p1Obj ? (p1Obj.player1Name + " / " + p1Obj.player2Name) : p1Id,
-                pair2: p2Obj ? (p2Obj.player1Name + " / " + p2Obj.player2Name) : p2Id,
+                pair1: pair1Name,
+                pair2: pair2Name,
+                team1_name: pair1Name,
+                team2_name: pair2Name,
+                p1Name: pair1Name,
+                p2Name: pair2Name,
                 status: "UPCOMING"
-            });
+            };
+
+            allAdminSchedule.unshift(newMatch);
             renderAdminScheduleList();
             syncAdminScheduleToSheet();
+
+            // Clear custom inputs
+            const p1C = document.getElementById('matchPair1Custom');
+            const p2C = document.getElementById('matchPair2Custom');
+            if (p1C) p1C.value = '';
+            if (p2C) p2C.value = '';
+
+            alert('✓ Match scheduled successfully: ' + pair1Name + ' vs ' + pair2Name);
         }
 
         function renderActivityLog(list) {
