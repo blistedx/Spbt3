@@ -9,22 +9,28 @@ try {
 
 const { Pool } = require('pg');
 
-const CONNECTION_STRING = process.env.DATABASE_URL ||
-  'postgresql://neondb_owner:npg_tF62UuHZzWND@ep-damp-dawn-a5ow7lmk-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require';
+const CONNECTION_STRING = (process.env.DATABASE_URL && process.env.DATABASE_URL.trim()) || '';
 
-const pool = new Pool({
+const pool = CONNECTION_STRING ? new Pool({
   connectionString: CONNECTION_STRING,
   ssl: { rejectUnauthorized: false },
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000
-});
+}) : null;
 
-pool.on('error', (err) => {
-  console.error('[PostgreSQL] Unexpected client error:', err.message);
-});
+if (pool) {
+  pool.on('error', (err) => {
+    console.error('[PostgreSQL] Unexpected client error:', err.message);
+  });
+} else {
+  console.warn('[PostgreSQL] DATABASE_URL environment variable is not configured.');
+}
 
 async function query(text, params) {
+  if (!pool) {
+    return { rows: [] };
+  }
   const start = Date.now();
   try {
     const res = await pool.query(text, params);
@@ -36,6 +42,10 @@ async function query(text, params) {
 }
 
 async function initPostgres() {
+  if (!pool) {
+    console.warn('⚠️ PostgreSQL connection skipped: DATABASE_URL is not set.');
+    return null;
+  }
   console.log('📡 Connecting to Neon PostgreSQL online database...');
 
   const schemaSql = `

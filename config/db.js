@@ -8,8 +8,7 @@ async function connectDB() {
     return mongoose.connection;
   }
 
-  const DEFAULT_URI = 'mongodb+srv://blistedx_db_user:tashna4317@blis.3g7wqs8.mongodb.net/sp_badminton_tourney?retryWrites=true&w=majority&appName=blis';
-  const customUri = (process.env.MONGODB_URI && process.env.MONGODB_URI.trim()) || DEFAULT_URI;
+  const customUri = (process.env.MONGODB_URI && process.env.MONGODB_URI.trim()) || '';
 
   if (customUri) {
     try {
