@@ -3097,7 +3097,10 @@
             };
 
             window.exportAllMatchesReportToExcel = function () {
-                const fetchUrl = (CONFIG && CONFIG.SCRIPT_URL ? CONFIG.SCRIPT_URL : '') + "?action=getAllMatchesReport&_=" + Date.now();
+                const baseUrl = (typeof SCRIPT_URL !== 'undefined' && SCRIPT_URL)
+                    ? SCRIPT_URL
+                    : (typeof window.CONFIG !== 'undefined' && window.CONFIG.SCRIPT_URL ? window.CONFIG.SCRIPT_URL : '/exec');
+                const fetchUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + "action=getAllMatchesReport&_=" + Date.now();
 
                 function downloadCsv(reports) {
                     if (!reports || reports.length === 0) {
@@ -3180,25 +3183,29 @@
                     }).getAllMatchesReport();
                 } else {
                     fetch(fetchUrl)
-                        .then(r => r.json())
+                        .then(r => {
+                            if (!r.ok) throw new Error("HTTP " + r.status);
+                            return r.json();
+                        })
                         .then(res => {
                             if (res && res.reports && res.reports.length > 0) {
                                 downloadCsv(res.reports);
                             } else {
-                                fetch('/api/matches')
-                                    .then(r => r.json())
-                                    .then(mRes => {
-                                        if (mRes && mRes.matches && mRes.matches.length > 0) {
-                                            const completed = mRes.matches.filter(m => (m.status || '').toUpperCase() === 'COMPLETED');
-                                            downloadCsv(completed.length > 0 ? completed : mRes.matches);
-                                        } else {
-                                            downloadCsv([]);
-                                        }
-                                    })
-                                    .catch(() => downloadCsv([]));
+                                if (state.p1Name && (state.isComplete || (state.setsWon && (state.setsWon[0] > 0 || state.setsWon[1] > 0)))) {
+                                    window.exportMatchResultToExcel();
+                                } else {
+                                    alert('No completed matches found in tournament history yet.');
+                                }
                             }
                         })
-                        .catch(() => downloadCsv([]));
+                        .catch(err => {
+                            console.warn("Failed to fetch all matches report, falling back to local match:", err);
+                            if (state.p1Name && (state.isComplete || (state.setsWon && (state.setsWon[0] > 0 || state.setsWon[1] > 0)))) {
+                                window.exportMatchResultToExcel();
+                            } else {
+                                alert('Could not load matches report. Please check your network connection.');
+                            }
+                        });
                 }
             };
 

@@ -4205,7 +4205,10 @@
         window.printFinancialsReport = printFinancialsReport;
 
         window.exportAllTournamentMatchesCsv = function () {
-            const fetchUrl = (CONFIG && CONFIG.SCRIPT_URL ? CONFIG.SCRIPT_URL : '') + "?action=getAllMatchesReport&_=" + Date.now();
+            const baseUrl = (typeof SCRIPT_URL !== 'undefined' && SCRIPT_URL)
+                ? SCRIPT_URL
+                : (typeof window.CONFIG !== 'undefined' && window.CONFIG.SCRIPT_URL ? window.CONFIG.SCRIPT_URL : '/exec');
+            const fetchUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + "action=getAllMatchesReport&_=" + Date.now();
 
             function downloadCsv(reports) {
                 if (!reports || reports.length === 0) {
