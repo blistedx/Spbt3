@@ -2747,23 +2747,25 @@
                 const matchSig = (d.matchId || 'Court 1') + '_' + (nameP1 || liveState.p1Name || '') + '_' + (nameP2 || liveState.p2Name || '');
                 const isNewMatch = matchSig && matchSig !== bwfTracking.matchSignature;
 
-                // Anti-stale packet check: reject packet only if it is genuinely older (> 3000ms) than our last data
-                const isExplicitAction = (d.status === 'UPCOMING' || (d.status === 'LIVE' && incomingGames[incomingGame] && incomingGames[incomingGame][0] === 0 && incomingGames[incomingGame][1] === 0));
-                if (!isNewMatch && !isExplicitAction && incomingTs > 0 && liveState.lastDataTimestamp && incomingTs < (liveState.lastDataTimestamp - 3000)) {
-                    return;
-                }
+                // Extract score comparison
+                const checkG = liveState.currentGame || 0;
+                const curGScore = (liveState.games && liveState.games[checkG]) ? liveState.games[checkG] : [0, 0];
+                const incGScore = (incomingGames && incomingGames[incomingGame]) ? incomingGames[incomingGame] : [0, 0];
+                const curPts = (curGScore[0] || 0) + (curGScore[1] || 0);
+                const incPts = (incGScore[0] || 0) + (incGScore[1] || 0);
 
-                // Monotonic score check: in the same game of the same match, reject stale packets with lower score
-                // BUT NEVER reject when match is UPCOMING or when score is reset to 0-0!
-                if (!isNewMatch && !isFirstPacket && !isExplicitAction && liveState.games && incomingGame === (liveState.currentGame || 0)) {
-                    const checkG = liveState.currentGame || 0;
-                    const curGScore = liveState.games[checkG] || [0, 0];
-                    const incGScore = incomingGames[checkG] || [0, 0];
-                    const curPts = (curGScore[0] || 0) + (curGScore[1] || 0);
-                    const incPts = (incGScore[0] || 0) + (incGScore[1] || 0);
-                    if (incPts < curPts) {
-                        if (incomingTs > 0 && incomingTs < (liveState.lastDataTimestamp - 3000)) {
-                            return; // Reject stale out-of-order packet with lower score
+                // Anti-stale packet check:
+                // 1. Explicit actions (Match Setup, Reset to 0-0, Upcoming) -> ALWAYS ACCEPT
+                // 2. Score advancing (next game, or higher points in current game) -> ALWAYS ACCEPT IMMEDIATELY (NEVER DROP A POINT!)
+                // 3. Only if incoming score is lower in the same game, guard against old stale echoes:
+                const isExplicitAction = (d.status === 'UPCOMING' || (d.status === 'LIVE' && incGScore[0] === 0 && incGScore[1] === 0));
+                const isScoreAdvancing = (incomingGame > checkG) || (incomingGame === checkG && incPts > curPts);
+
+                if (!isNewMatch && !isFirstPacket && !isExplicitAction && !isScoreAdvancing && liveState.games) {
+                    if (incomingGame === checkG && incPts < curPts) {
+                        // Reject only if this packet with a lower score is older than our last data by > 10000ms
+                        if (incomingTs > 0 && liveState.lastDataTimestamp && incomingTs < (liveState.lastDataTimestamp - 10000)) {
+                            return;
                         }
                     }
                 }
@@ -3237,7 +3239,10 @@
                 }
 
                 const controller = (window.AbortController) ? new AbortController() : null;
-                const timeoutId = controller ? setTimeout(() => controller.abort(), 2500) : null;
+                const timeoutId = controller ? setTimeout(() => {
+                    try { controller.abort(); } catch (e) {}
+                    isFetchingServer = false;
+                }, 1800) : null;
 
                 fetch(CONFIG.SCRIPT_URL + "?action=getLiveMatch&_=" + Date.now(), {
                     cache: 'no-store',
@@ -3358,7 +3363,7 @@
             renderTV();
 
             // Continuous High-Speed Real-Time Sync Polling (guarantees cross-device sync even without WebSockets)
-            setInterval(fetchLiveScoreFromServer, 750);
+            setInterval(fetchLiveScoreFromServer, 500);
 
         })();
     </script>

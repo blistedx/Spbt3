@@ -466,29 +466,27 @@ const dataStore = {
       const res = await query("SELECT * FROM live_match WHERE court_id = 'Court 1' LIMIT 1");
       if (res.rows && res.rows.length > 0) {
         const l = res.rows[0];
-        const dbTs = l.updated_at ? new Date(l.updated_at).getTime() : 0;
-        if (dbTs >= (liveMatchCache.updatedAt || 0) || !liveMatchCache.p1Name) {
-          liveMatchCache = {
-            court_id: l.court_id,
-            matchId: l.match_id,
-            category: l.category,
-            p1Name: l.p1_name,
-            p2Name: l.p2_name,
-            targetPoints: l.target_points,
-            score: l.score,
-            status: l.status,
-            isLive: l.is_live,
-            isComplete: l.is_complete,
-            server: l.server,
-            currentGame: l.current_game,
-            games: typeof l.games === 'string' ? JSON.parse(l.games) : (l.games || [[0, 0], [0, 0], [0, 0]]),
-            setsWon: typeof l.sets_won === 'string' ? JSON.parse(l.sets_won) : (l.sets_won || [0, 0]),
-            interval: typeof l.interval === 'string' ? JSON.parse(l.interval) : (l.interval || { active: false, secondsLeft: 0, intervalTakenForGame: [false, false, false] }),
-            rallyLog: typeof l.rally_log === 'string' ? JSON.parse(l.rally_log) : (l.rally_log || []),
-            customMessage: l.custom_message || '',
-            updatedAt: dbTs || Date.now()
-          };
-        }
+        const dbTs = l.updated_at ? new Date(l.updated_at).getTime() : Date.now();
+        liveMatchCache = {
+          court_id: l.court_id,
+          matchId: l.match_id,
+          category: l.category,
+          p1Name: l.p1_name,
+          p2Name: l.p2_name,
+          targetPoints: l.target_points,
+          score: l.score,
+          status: l.status,
+          isLive: l.is_live,
+          isComplete: l.is_complete,
+          server: l.server,
+          currentGame: l.current_game,
+          games: typeof l.games === 'string' ? JSON.parse(l.games) : (l.games || [[0, 0], [0, 0], [0, 0]]),
+          setsWon: typeof l.sets_won === 'string' ? JSON.parse(l.sets_won) : (l.sets_won || [0, 0]),
+          interval: typeof l.interval === 'string' ? JSON.parse(l.interval) : (l.interval || { active: false, secondsLeft: 0, intervalTakenForGame: [false, false, false] }),
+          rallyLog: typeof l.rally_log === 'string' ? JSON.parse(l.rally_log) : (l.rally_log || []),
+          customMessage: l.custom_message || '',
+          updatedAt: dbTs || Date.now()
+        };
       }
     } catch (e) {}
     return { ...liveMatchCache };

@@ -6883,7 +6883,7 @@
         }
 
         const incomingTs = typeof data.updatedAt === 'string' ? new Date(data.updatedAt).getTime() : (Number(data.updatedAt) || Number(data.ts) || 0);
-        if (incomingTs > 0 && window._lastTickerTs && incomingTs < (window._lastTickerTs - 3000)) {
+        if (incomingTs > 0 && window._lastTickerTs && incomingTs < (window._lastTickerTs - 15000)) {
           return;
         }
         if (incomingTs > 0) window._lastTickerTs = Math.max(window._lastTickerTs || 0, incomingTs);

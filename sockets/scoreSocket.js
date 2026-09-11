@@ -54,26 +54,26 @@ function setupScoreSocket(io) {
     });
 
     // Score point / match update event (Instant 0ms broadcast & Neon PostgreSQL persistence)
-    socket.on('score_point', (data) => {
-      handleMatchUpdate(data);
+    socket.on('score_point', async (data) => {
+      await handleMatchUpdate(data);
     });
 
-    socket.on('update_score', (data) => {
-      handleMatchUpdate(data);
+    socket.on('update_score', async (data) => {
+      await handleMatchUpdate(data);
     });
 
-    socket.on('sync_match', (data) => {
-      handleMatchUpdate(data);
+    socket.on('sync_match', async (data) => {
+      await handleMatchUpdate(data);
     });
 
-    function handleMatchUpdate(data) {
+    async function handleMatchUpdate(data) {
       try {
         if (!data) return;
         const matchId = data.matchId || 'Court 1';
 
         // 1. Full match object from scorer desk -> Update Neon live_match & matches tables
         if (data.p1Name || data.p2Name || data.games || data.score || data.status || data.setsWon) {
-          const updatedLive = dataStore.saveLiveMatch({
+          const updatedLive = await dataStore.saveLiveMatch({
             ...data,
             updatedAt: data.updatedAt || Date.now()
           });
@@ -124,7 +124,7 @@ function setupScoreSocket(io) {
         currentMatch.isLive = true;
         currentMatch.updatedAt = Date.now();
 
-        const updated = dataStore.saveLiveMatch(currentMatch);
+        const updated = await dataStore.saveLiveMatch(currentMatch);
 
         // Sync to Neon matches table
         dataStore.addOrUpdateMatch({
@@ -153,13 +153,13 @@ function setupScoreSocket(io) {
     }
 
     // Undo score event
-    socket.on('undo_point', (data) => {
+    socket.on('undo_point', async (data) => {
       try {
         if (!data) return;
         const matchId = data.matchId || 'Court 1';
         const currentMatch = dataStore.getLiveMatch();
         if (data.match) {
-          handleMatchUpdate(data.match);
+          await handleMatchUpdate(data.match);
           return;
         }
 
@@ -171,7 +171,7 @@ function setupScoreSocket(io) {
             currentMatch.games[currG][1] = Math.max(0, currentMatch.games[currG][1] - 1);
           }
         }
-        const updated = dataStore.saveLiveMatch(currentMatch);
+        const updated = await dataStore.saveLiveMatch(currentMatch);
         io.emit('score_update', updated);
         io.emit('tv_score_update', updated);
         io.emit('match_state', updated);
@@ -182,10 +182,10 @@ function setupScoreSocket(io) {
     });
 
     // Switch sides
-    socket.on('switch_sides', (data) => {
+    socket.on('switch_sides', async (data) => {
       try {
         if (data && data.match) {
-          handleMatchUpdate(data.match);
+          await handleMatchUpdate(data.match);
           return;
         }
         const currentMatch = dataStore.getLiveMatch();
@@ -199,7 +199,7 @@ function setupScoreSocket(io) {
             g[1] = temp;
           });
         }
-        const updated = dataStore.saveLiveMatch(currentMatch);
+        const updated = await dataStore.saveLiveMatch(currentMatch);
         io.emit('score_update', updated);
         io.emit('tv_score_update', updated);
         io.emit('match_state', updated);
@@ -209,12 +209,12 @@ function setupScoreSocket(io) {
     });
 
     // Change server
-    socket.on('change_server', (data) => {
+    socket.on('change_server', async (data) => {
       try {
         const currentMatch = dataStore.getLiveMatch();
         if (data && data.server) {
           currentMatch.server = data.server;
-          const updated = dataStore.saveLiveMatch(currentMatch);
+          const updated = await dataStore.saveLiveMatch(currentMatch);
           io.emit('score_update', updated);
           io.emit('tv_score_update', updated);
           io.emit('match_state', updated);
@@ -225,13 +225,13 @@ function setupScoreSocket(io) {
     });
 
     // Interval Update (Pause/Resume/Start/Stop)
-    socket.on('interval_update', (data) => {
+    socket.on('interval_update', async (data) => {
       try {
         const currentMatch = dataStore.getLiveMatch();
         if (data && data.interval) {
           currentMatch.interval = data.interval;
           currentMatch.updatedAt = data.updatedAt || Date.now();
-          const updated = dataStore.saveLiveMatch(currentMatch);
+          const updated = await dataStore.saveLiveMatch(currentMatch);
           io.emit('score_update', updated);
           io.emit('tv_score_update', updated);
           io.emit('match_state', updated);
@@ -242,11 +242,11 @@ function setupScoreSocket(io) {
     });
 
     // Custom Broadcast Notice Message to TV Overlay
-    socket.on('broadcast_message', (data) => {
+    socket.on('broadcast_message', async (data) => {
       try {
         const currentMatch = dataStore.getLiveMatch();
         currentMatch.customMessage = (data && data.message !== undefined) ? data.message : '';
-        const updated = dataStore.saveLiveMatch(currentMatch);
+        const updated = await dataStore.saveLiveMatch(currentMatch);
         io.emit('score_update', updated);
         io.emit('tv_score_update', updated);
         io.emit('match_state', updated);
@@ -256,10 +256,10 @@ function setupScoreSocket(io) {
     });
 
     // Set won event
-    socket.on('set_won', (data) => {
+    socket.on('set_won', async (data) => {
       try {
         if (data && data.match) {
-          handleMatchUpdate(data.match);
+          await handleMatchUpdate(data.match);
         }
       } catch (err) {
         console.error('[ScoreSocket] Error handling set_won:', err.message);

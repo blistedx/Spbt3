@@ -2737,22 +2737,47 @@
             }
 
             // ─── INSTANT REAL-TIME & DEBOUNCED HTTP SERVER SYNC ───
+            // ─── INSTANT REAL-TIME & RESILIENT HTTP SERVER SYNC ───
             let httpSyncDebounceTimer = null;
             let lastPendingPayload = null;
+            let syncRetryTimer = null;
 
             function flushHttpSync() {
                 if (httpSyncDebounceTimer) {
                     clearTimeout(httpSyncDebounceTimer);
                     httpSyncDebounceTimer = null;
                 }
-                if (lastPendingPayload && SCRIPT_URL) {
-                    const toSend = lastPendingPayload;
-                    fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(toSend)
-                    }).catch(() => { });
-                }
+                if (!lastPendingPayload || !SCRIPT_URL) return;
+
+                const toSend = { ...lastPendingPayload };
+                const payloadTs = toSend.updatedAt;
+
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(toSend)
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res && res.success) {
+                        if (lastPendingPayload && lastPendingPayload.updatedAt === payloadTs) {
+                            if (syncRetryTimer) { clearTimeout(syncRetryTimer); syncRetryTimer = null; }
+                        }
+                    } else {
+                        scheduleHttpRetry();
+                    }
+                })
+                .catch(() => {
+                    scheduleHttpRetry();
+                });
+            }
+
+            function scheduleHttpRetry() {
+                if (syncRetryTimer) return;
+                syncRetryTimer = setTimeout(() => {
+                    syncRetryTimer = null;
+                    if (lastPendingPayload) flushHttpSync();
+                }, 350);
             }
 
             function syncMatchScoreToSheet(status) {
@@ -2783,9 +2808,8 @@
                 // 4. Ultra-fast MQTT broadcast
                 broadcastMqttPayload(payload);
 
-                // 5. Debounced HTTP Cloud Sync (120ms ensures rapid clicks never race or drop)
-                if (httpSyncDebounceTimer) clearTimeout(httpSyncDebounceTimer);
-                httpSyncDebounceTimer = setTimeout(flushHttpSync, 120);
+                // 5. Instant 0ms HTTP Cloud Sync with automatic retry
+                flushHttpSync();
             }
 
             // ─── BROADCAST STATE TO TV & MAIN SITE ───
