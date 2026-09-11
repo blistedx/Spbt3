@@ -2118,8 +2118,10 @@
                 if (m.setsWon && Array.isArray(m.setsWon)) state.setsWon = m.setsWon;
                 if (typeof m.server === 'number') state.server = m.server;
                 if (m.status) state.status = m.status;
-                state.isLive = (m.status === 'LIVE' || m.status === 'IN PROGRESS' || m.status === 'Live' || !!m.isLive);
-                state.isComplete = (m.status === 'COMPLETED' || m.status === 'Completed' || !!m.isComplete);
+                const isIncomingLive = (m.status === 'LIVE' || m.status === 'IN PROGRESS' || m.status === 'Live' || m.isLive === true);
+                const isIncomingComplete = (m.status === 'COMPLETED' || m.status === 'Completed' || (m.status !== 'UPCOMING' && m.status !== 'NO_LIVE_MATCH' && !isIncomingLive && m.isComplete === true));
+                state.isLive = isIncomingLive;
+                state.isComplete = isIncomingComplete;
                 if (Array.isArray(m.rallyLog) && m.rallyLog.length > 0) state.rallyLog = m.rallyLog;
                 if (m.matchStartTime) state.matchStartTime = m.matchStartTime;
                 if (m.matchEndTime) state.matchEndTime = m.matchEndTime;
@@ -2650,6 +2652,8 @@
                     targetPoints: state.targetPoints,
                     score: scoreStr,
                     status: matchStatus,
+                    isLive: (matchStatus === 'LIVE' || matchStatus === 'IN PROGRESS'),
+                    isComplete: (matchStatus === 'COMPLETED'),
                     server: state.server,
                     currentGame: state.currentGame,
                     games: state.games,
@@ -2788,7 +2792,7 @@
                     matchStatusBadge.className = 'status-badge';
                     matchStatusBadge.innerHTML = '🏁 Completed';
                     startBtn.textContent = '▶ Start Match';
-                    startBtn.disabled = true;
+                    startBtn.disabled = false;
                 } else if (state.isLive) {
                     matchStatusBadge.className = 'status-badge live';
                     matchStatusBadge.innerHTML = '<span class="pulse"></span> Live Match';
@@ -2797,7 +2801,8 @@
                 } else {
                     matchStatusBadge.className = 'status-badge';
                     matchStatusBadge.innerHTML = '⚡ Ready / Paused';
-                    startBtn.textContent = '▶ Resume Match';
+                    const hasStarted = (state.rallyLog && state.rallyLog.length > 0) || (state.games && (state.games[0][0] > 0 || state.games[0][1] > 0));
+                    startBtn.textContent = hasStarted ? '▶ Resume Match' : '▶ Start Match';
                     startBtn.disabled = false;
                 }
 
@@ -3311,7 +3316,15 @@
             }
 
             function toggleMatch() {
-                if (state.isComplete) return;
+                if (state.isComplete) {
+                    state.isComplete = false;
+                    state.isLive = true;
+                    state.matchStartTime = Date.now();
+                    state.status = 'LIVE';
+                    updateUI();
+                    syncMatchScoreToSheet('LIVE');
+                    return;
+                }
                 state.isLive = !state.isLive;
                 if (state.isLive && !state.matchStartTime) {
                     state.matchStartTime = Date.now();
@@ -3391,12 +3404,15 @@
                 state.isComplete = false;
                 state.status = 'UPCOMING';
                 state.rallyLog = [];
+                state.matchStartTime = null;
+                state.matchEndTime = null;
 
                 setupModal.classList.remove('open');
                 logEmpty.style.display = 'block';
                 logEntries.innerHTML = '';
                 updateUI();
                 syncMatchScoreToSheet('UPCOMING');
+                if (typeof flushHttpSync === 'function') flushHttpSync();
                 broadcastLiveState();
             }
 

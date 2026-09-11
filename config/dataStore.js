@@ -421,9 +421,13 @@ const dataStore = {
     return { ...liveMatchCache };
   },
   saveLiveMatch(payload) {
+    const isLive = payload.status === 'LIVE' || payload.status === 'IN PROGRESS' || (payload.isLive === true);
+    const isComplete = payload.status === 'COMPLETED' || (payload.status !== 'UPCOMING' && payload.status !== 'NO_LIVE_MATCH' && !isLive && payload.isComplete === true);
     liveMatchCache = {
       ...liveMatchCache,
       ...payload,
+      isLive,
+      isComplete,
       updatedAt: Date.now()
     };
 

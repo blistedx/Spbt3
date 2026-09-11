@@ -209,7 +209,7 @@ async function initPostgres() {
   // Seed default live match row if missing
   const checkLive = await query("SELECT court_id FROM live_match WHERE court_id = 'Court 1'");
   if (checkLive.rows.length === 0) {
-    await query("INSERT INTO live_match (court_id, status, is_live, is_complete) VALUES ('Court 1', 'NO_LIVE_MATCH', false, true)");
+    await query("INSERT INTO live_match (court_id, status, is_live, is_complete) VALUES ('Court 1', 'NO_LIVE_MATCH', false, false)");
   }
 
   return pool;
