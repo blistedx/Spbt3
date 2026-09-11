@@ -2423,6 +2423,7 @@
                             client.on('connect', () => {
                                 updateRealtimeBadge(true);
                                 client.subscribe('sp3_tournament_live_2026/presence/tv', { qos: 0 });
+                                client.subscribe('sp3_tournament_live_2026/scores', { qos: 0 });
                                 broadcastMqttPayload();
                             });
                             client.on('message', (topic, msgBuffer) => {
@@ -2431,6 +2432,14 @@
                                         const tvData = JSON.parse(msgBuffer.toString());
                                         if (tvData && tvData.deviceId) {
                                             handleIncomingTvPresence(tvData);
+                                        }
+                                    } catch(e) {}
+                                } else if (topic.includes('scores')) {
+                                    try {
+                                        const parsed = JSON.parse(msgBuffer.toString());
+                                        const matchData = parsed.payload || parsed.data || parsed;
+                                        if (matchData && typeof applyScorerIncomingState === 'function') {
+                                            applyScorerIncomingState(matchData);
                                         }
                                     } catch(e) {}
                                 }
@@ -2710,6 +2719,8 @@
                 if (scorerSocket && scorerSocket.connected) {
                     try {
                         scorerSocket.emit('score_point', payload);
+                        scorerSocket.emit('update_score', payload);
+                        scorerSocket.emit('sync_match', payload);
                     } catch (e) {}
                 }
 
@@ -3416,6 +3427,7 @@
                 state.matchStartTime = null;
                 state.matchEndTime = null;
 
+                state.lastLocalTap = Date.now();
                 setupModal.classList.remove('open');
                 logEmpty.style.display = 'block';
                 logEntries.innerHTML = '';
@@ -3513,6 +3525,14 @@
                         .catch(() => { });
                 }
             }
+
+            // Continuous High-Speed Real-Time Sync Polling across all scorer mobile devices
+            setInterval(() => {
+                const now = Date.now();
+                if (!state.lastLocalTap || (now - state.lastLocalTap > 2000)) {
+                    loadLiveMatchFromSheet();
+                }
+            }, 1200);
 
             // ─── ADMIN PORTAL NAVIGATION (DIRECT ACCESS) ───
             window.handleAdminNav = function (e) {

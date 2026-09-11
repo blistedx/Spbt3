@@ -6882,6 +6882,17 @@
           return;
         }
 
+        const p1Name = (data.p1Name || data.pair1 || data.team1_name || data.player1 || '').trim();
+        const p2Name = (data.p2Name || data.pair2 || data.team2_name || data.player2 || '').trim();
+        const hasPlayers = (p1Name.length > 0 && p2Name.length > 0);
+
+        if (!hasPlayers && !data.customMessage) {
+          ticker.style.display = 'none';
+          return;
+        }
+
+        const pill = ticker.querySelector('.ticker-live-pill');
+
         // 1. Custom Broadcast Announcement (shows prominently on website)
         if (data.customMessage && data.customMessage.trim() !== '') {
           const customMsg = data.customMessage.trim();
@@ -6890,30 +6901,57 @@
             scoreEl.textContent = (data.isLive && !data.isComplete) ? ("LIVE · " + (data.score || 'In Progress')) : "NOTICE";
           }
           if (metaEl) metaEl.textContent = (data.matchId || 'Court 1') + " · Desk Broadcast";
+          if (pill) {
+            pill.innerHTML = '<span class="dot" style="background:#f59e0b;"></span> ANNOUNCEMENT';
+            pill.style.background = 'rgba(245, 158, 11, 0.15)';
+            pill.style.color = '#d97706';
+            pill.style.borderColor = '#f59e0b';
+          }
           ticker.style.display = 'block';
           return;
         }
 
-        const isMatchLive = (data.isLive === true || data.status === 'LIVE' || data.status === 'Live' || data.status === 'IN PROGRESS') &&
-                            !data.isComplete &&
-                            data.status !== 'COMPLETED' &&
-                            data.status !== 'Completed' &&
-                            data.status !== 'Scheduled' &&
-                            data.status !== 'NO_LIVE_MATCH' &&
-                            (data.p1Name || data.pair1) &&
-                            (data.p2Name || data.pair2);
+        const isCompleted = (data.status === 'COMPLETED' || data.status === 'Completed' || (data.isComplete && !data.isLive));
+        const isLive = (data.isLive === true || data.status === 'LIVE' || data.status === 'Live' || data.status === 'IN PROGRESS') && !isCompleted;
 
-        if (isMatchLive) {
-          const g = data.currentGame || 0;
-          const p1 = (data.games && data.games[g]) ? data.games[g][0] : 0;
-          const p2 = (data.games && data.games[g]) ? data.games[g][1] : 0;
+        const g = (typeof data.currentGame === 'number') ? data.currentGame : 0;
+        const currentScores = (data.games && data.games[g]) ? data.games[g] : [0, 0];
+        const p1Pts = currentScores[0] || 0;
+        const p2Pts = currentScores[1] || 0;
+        const sWon = (data.setsWon && Array.isArray(data.setsWon)) ? data.setsWon : [0, 0];
 
-          if (titleEl) titleEl.textContent = (data.p1Name || data.pair1 || 'P1') + " vs " + (data.p2Name || data.pair2 || 'P2');
-          if (scoreEl) scoreEl.textContent = "G" + (g + 1) + " · " + (p1) + " - " + (p2);
-          if (metaEl) metaEl.textContent = (data.matchId || 'Court 1') + " · " + (data.category || '');
+        if (titleEl) titleEl.textContent = p1Name + " vs " + p2Name;
+        if (metaEl) metaEl.textContent = (data.matchId || 'Court 1') + " · " + (data.category || 'Below 35');
+
+        if (isLive) {
+          if (pill) {
+            pill.innerHTML = '<span class="dot" style="background:#10b981;"></span> LIVE MATCH';
+            pill.style.background = 'rgba(16, 185, 129, 0.15)';
+            pill.style.color = '#059669';
+            pill.style.borderColor = '#10b981';
+          }
+          if (scoreEl) scoreEl.textContent = "G" + (g + 1) + " · " + p1Pts + " - " + p2Pts + " (" + sWon[0] + "-" + sWon[1] + ")";
+          ticker.style.display = 'block';
+        } else if (isCompleted) {
+          if (pill) {
+            pill.innerHTML = '🏆 FINAL RESULT';
+            pill.style.background = 'rgba(99, 102, 241, 0.15)';
+            pill.style.color = '#4f46e5';
+            pill.style.borderColor = '#6366f1';
+          }
+          const winText = data.winner ? `${data.winner} won` : 'Match Completed';
+          if (scoreEl) scoreEl.textContent = `${winText} (${sWon[0]} - ${sWon[1]})`;
           ticker.style.display = 'block';
         } else {
-          ticker.style.display = 'none';
+          // UPCOMING / PLAYERS UPDATED READY TO PLAY
+          if (pill) {
+            pill.innerHTML = '<span class="dot" style="background:#0284c7;"></span> UPCOMING MATCH';
+            pill.style.background = 'rgba(2, 132, 199, 0.12)';
+            pill.style.color = '#0284c7';
+            pill.style.borderColor = '#38bdf8';
+          }
+          if (scoreEl) scoreEl.textContent = 'READY TO START';
+          ticker.style.display = 'block';
         }
       }
 
