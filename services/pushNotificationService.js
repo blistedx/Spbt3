@@ -78,8 +78,7 @@ const pushNotificationService = {
       try {
         const pushOptions = {
           TTL: 86400, // 24 hours delivery window
-          urgency: 'high', // High priority for lockscreen delivery even when PWA/browser is closed
-          topic: 'sp3-alert'
+          urgency: 'high' // Maximum priority for heads-up lockscreen delivery even when PWA/browser is closed
         };
         await webpush.sendNotification(pushSubscription, payload, pushOptions);
         sentCount++;

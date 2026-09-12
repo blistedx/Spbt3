@@ -1,5 +1,5 @@
 // S.P. Badminton Tourney 3 · Service Worker
-const CACHE_NAME = 'sp3-cache-v1';
+const CACHE_NAME = 'sp3-cache-v3';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -99,27 +99,44 @@ self.addEventListener('push', (event) => {
   }
 
   const title = data.title || 'S.P. Badminton Tourney 3';
+  const origin = self.location.origin;
+  const iconUrl = data.icon ? (data.icon.startsWith('http') ? data.icon : new URL(data.icon, origin).href) : new URL('/icon-192.png', origin).href;
+  const badgeUrl = data.badge ? (data.badge.startsWith('http') ? data.badge : new URL(data.badge, origin).href) : new URL('/favicon-32x32.png', origin).href;
+  const uniqueTag = data.tag || ('sp3-alert-' + Date.now() + '-' + Math.floor(Math.random() * 10000));
+
   const options = {
     body: data.body || 'Live Match & Tournament Update',
-    icon: data.icon || '/logo.png',
-    badge: data.badge || '/favicon-32x32.png',
-    tag: data.tag || 'sp3-alert',
+    icon: iconUrl,
+    badge: badgeUrl,
+    tag: uniqueTag,
     renotify: true,
     requireInteraction: true,
-    vibrate: [200, 100, 200],
+    silent: false,
+    vibrate: [200, 100, 200, 100, 200],
     data: {
       url: (data.data && data.data.url) || data.url || '/',
       timestamp: (data.data && data.data.timestamp) || Date.now()
     },
     actions: [
-      { action: 'open', title: '🏸 Open View' },
+      { action: 'open', title: '🏸 Open Match' },
       { action: 'dismiss', title: 'Close' }
     ]
   };
 
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
+  const showPromise = self.registration.showNotification(title, options).catch((err) => {
+    console.warn('[ServiceWorker] showNotification failed with actions, retrying basic notification:', err);
+    return self.registration.showNotification(title, {
+      body: options.body,
+      icon: iconUrl,
+      badge: badgeUrl,
+      tag: uniqueTag,
+      renotify: true,
+      vibrate: [200, 100, 200],
+      data: options.data
+    });
+  });
+
+  event.waitUntil(showPromise);
 });
 
 self.addEventListener('notificationclick', (event) => {
