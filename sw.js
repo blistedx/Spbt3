@@ -86,3 +86,65 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// ================= WEB PUSH NOTIFICATIONS =================
+self.addEventListener('push', (event) => {
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = { title: 'S.P. Badminton Tourney 3', body: event.data.text() };
+    }
+  }
+
+  const title = data.title || 'S.P. Badminton Tourney 3';
+  const options = {
+    body: data.body || 'Live Match & Tournament Update',
+    icon: data.icon || '/logo.png',
+    badge: data.badge || '/favicon-32x32.png',
+    tag: data.tag || 'sp3-alert',
+    renotify: true,
+    vibrate: [100, 50, 100],
+    data: {
+      url: (data.data && data.data.url) || data.url || '/',
+      timestamp: (data.data && data.data.timestamp) || Date.now()
+    },
+    actions: [
+      { action: 'open', title: '🏸 Open View' },
+      { action: 'dismiss', title: 'Close' }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  if (event.action === 'dismiss') return;
+
+  const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If a tab is already open, focus it and navigate
+      for (const client of clientList) {
+        if ('focus' in client) {
+          if (client.url.includes(self.location.origin)) {
+            client.focus();
+            if ('navigate' in client && targetUrl !== '/') {
+              client.navigate(targetUrl);
+            }
+            return;
+          }
+        }
+      }
+      // Otherwise open a new window
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});

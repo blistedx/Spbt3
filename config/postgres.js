@@ -71,6 +71,7 @@ async function initPostgres() {
       upi_id VARCHAR(100) DEFAULT 'blistedx@okhdfcbank',
       upi_name VARCHAR(100) DEFAULT 'S.P. Badminton Club',
       upi_qr_url VARCHAR(255) DEFAULT 'qr_code.png',
+      logo_url TEXT DEFAULT '/logo.png',
       entry_fee VARCHAR(50) DEFAULT '1000',
       stat_categories VARCHAR(50) DEFAULT '02',
       stat_players VARCHAR(50) DEFAULT '50+',
@@ -199,11 +200,27 @@ async function initPostgres() {
       ip VARCHAR(100),
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
+
+    -- 9. Web Push Subscriptions Table
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id BIGSERIAL PRIMARY KEY,
+      endpoint TEXT UNIQUE NOT NULL,
+      p256dh TEXT NOT NULL,
+      auth TEXT NOT NULL,
+      audience_type VARCHAR(50) DEFAULT 'ALL',
+      user_identifier VARCHAR(150) DEFAULT '',
+      user_agent TEXT DEFAULT '',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
   `;
 
   await query(schemaSql);
   await query("ALTER TABLE live_match ADD COLUMN IF NOT EXISTS custom_message TEXT DEFAULT ''").catch(() => {});
-  console.log('✅ PostgreSQL Schema initialized (All 8 tables verified)!');
+  await query("ALTER TABLE settings ADD COLUMN IF NOT EXISTS logo_url TEXT DEFAULT '/logo.png'").catch(() => {});
+  await query("ALTER TABLE settings ADD COLUMN IF NOT EXISTS vapid_public_key TEXT DEFAULT ''").catch(() => {});
+  await query("ALTER TABLE settings ADD COLUMN IF NOT EXISTS vapid_private_key TEXT DEFAULT ''").catch(() => {});
+  console.log('✅ PostgreSQL Schema initialized (All 9 tables verified)!');
 
   // Seed default settings row if missing
   const checkSettings = await query("SELECT id FROM settings WHERE id = 'current'");

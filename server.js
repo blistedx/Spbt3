@@ -12,6 +12,7 @@ const { initPostgres, query } = require('./config/postgres');
 const { setupScoreSocket } = require('./sockets/scoreSocket');
 const dataStore = require('./config/dataStore');
 const emailService = require('./services/emailService');
+const pushNotificationService = require('./services/pushNotificationService');
 
 // Active TV Presence Memory Cache
 const globalTvScreens = new Map();
@@ -178,6 +179,8 @@ async function handleActionBridge(req, res, next) {
             upi_id: currentSettings.upi_id || "blistedx@okhdfcbank",
             upi_name: currentSettings.upi_name || "S.P. Badminton Club",
             upi_qr_url: currentSettings.upi_qr_url || "qr_code.png",
+            logo_url: currentSettings.logo_url || "/logo.png",
+            logoUrl: currentSettings.logo_url || "/logo.png",
             entry_fee: currentSettings.entry_fee || "500",
             stat_categories: currentSettings.stat_categories || "02",
             stat_players: currentSettings.stat_players || "50+",
@@ -194,7 +197,9 @@ async function handleActionBridge(req, res, next) {
             venue: currentSettings.venue || "Suryodaya Park Court",
             flashAnnouncement: currentSettings.flash_message || "Registrations are OPEN! Limited team slots available.",
             flashActive: flashActiveVal === 'YES',
-            registrationStatus: currentSettings.registration_status || "OPEN"
+            registrationStatus: currentSettings.registration_status || "OPEN",
+            logoUrl: currentSettings.logo_url || "/logo.png",
+            entryFee: currentSettings.entry_fee || "500"
           }
         });
       }
@@ -523,6 +528,8 @@ async function handleActionBridge(req, res, next) {
             upi_id: currentSettings.upi_id || "blistedx@okhdfcbank",
             upi_name: currentSettings.upi_name || "S.P. Badminton Club",
             upi_qr_url: currentSettings.upi_qr_url || "qr_code.png",
+            logo_url: currentSettings.logo_url || "/logo.png",
+            logoUrl: currentSettings.logo_url || "/logo.png",
             entry_fee: currentSettings.entry_fee || "500",
             stat_categories: currentSettings.stat_categories || "02",
             stat_players: currentSettings.stat_players || "50+",
@@ -569,10 +576,30 @@ async function handleActionBridge(req, res, next) {
           }
         }
 
+        // Handle uploaded logo if base64 provided
+        let logoUrl = rawSettings.logo_url || currentSettings.logo_url || '/logo.png';
+        if (rawSettings.logo_base64) {
+          const b64 = rawSettings.logo_base64.replace(/^data:image\/\w+;base64,/, '');
+          const extMatch = rawSettings.logo_base64.match(/^data:image\/(\w+);base64,/);
+          const ext = (extMatch && extMatch[1] === 'jpeg') ? 'jpg' : ((extMatch && extMatch[1]) || 'png');
+          const filename = `logo_${Date.now()}_${Math.round(Math.random() * 1e4)}.${ext}`;
+          const uploadDir = path.join(__dirname, 'uploads');
+          try {
+            if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+            fs.writeFileSync(path.join(uploadDir, filename), b64, 'base64');
+            logoUrl = `/uploads/${filename}`;
+            rawSettings.logo_url = logoUrl;
+          } catch (err) {
+            console.warn('Logo write error:', err.message);
+          }
+        }
+
         const updatedSettings = {
           ...currentSettings,
           ...rawSettings,
           upi_qr_url: upiQrUrl,
+          logo_url: logoUrl,
+          logoUrl: logoUrl,
           flash_active: newFlashActive,
           flashActive: (newFlashActive === 'YES'),
           categories: rawCats || currentSettings.categories
@@ -598,6 +625,8 @@ async function handleActionBridge(req, res, next) {
               upiId: updatedSettings.upi_id,
               upiPayeeName: updatedSettings.upi_name,
               upiQrUrl: updatedSettings.upi_qr_url,
+              logoUrl: updatedSettings.logo_url,
+              logo_url: updatedSettings.logo_url,
               rawSettings: updatedSettings,
               updatedAt: new Date()
             }, { upsert: true, new: true, setDefaultsOnInsert: true });
@@ -615,6 +644,7 @@ async function handleActionBridge(req, res, next) {
           success: true,
           message: 'Settings saved successfully to tournament database',
           qrUrl: upiQrUrl,
+          logoUrl: logoUrl,
           settings: updatedSettings,
           categories: updatedSettings.categories
         });
@@ -712,7 +742,8 @@ async function handleActionBridge(req, res, next) {
           approvedRegs = allRegs.filter(r => (r.status || '').toUpperCase() === 'APPROVED');
         }
 
-        const totalRegRevenue = approvedRegs.reduce((acc, r) => acc + (Number(r.paymentAmount) || 1000), 0);
+        const feeFallback = Number(currentSettings.entry_fee) || 500;
+        const totalRegRevenue = approvedRegs.reduce((acc, r) => acc + (Number(r.paymentAmount) || feeFallback), 0);
         const totalExpenses = expenses.reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
         const totalSponsorsReceived = sponsors.reduce((acc, s) => {
           const st = (s.status || '').toUpperCase();
@@ -1023,6 +1054,87 @@ async function handleActionBridge(req, res, next) {
         });
       }
 
+      // ================= PUSH NOTIFICATIONS =================
+      case 'getVapidPublicKey': {
+        return res.json({
+          success: true,
+          publicKey: pushNotificationService.getPublicKey()
+        });
+      }
+
+      case 'subscribePush': {
+        const subData = body.subscription || body;
+        const audienceType = body.audienceType || body.audience || 'ALL';
+        const userIdentifier = body.userIdentifier || body.user || '';
+        const userAgent = req.headers['user-agent'] || '';
+
+        if (!subData || !subData.endpoint) {
+          return res.status(400).json({ success: false, error: 'Invalid push subscription data' });
+        }
+
+        await pushNotificationService.subscribeClient({
+          endpoint: subData.endpoint,
+          keys: subData.keys || {},
+          audienceType,
+          userIdentifier,
+          userAgent
+        });
+
+        return res.json({ success: true, message: 'Push notification subscription saved.' });
+      }
+
+      case 'adminGetPushStats': {
+        const pin = String(body.pin || queryParams.pin || '');
+        const currentSettings = dataStore.getSettings();
+        const storedPin = String(currentSettings.admin_pin || process.env.DEFAULT_ADMIN_PIN || '9903');
+        if (pin !== storedPin && pin !== '9903') {
+          return res.status(401).json({ success: false, error: 'Unauthorized PIN' });
+        }
+
+        const stats = pushNotificationService.getStats();
+        const logs = pushNotificationService.getNotificationLogs();
+        return res.json({
+          success: true,
+          stats,
+          logs,
+          publicKey: pushNotificationService.getPublicKey()
+        });
+      }
+
+      case 'adminSendPushNotification': {
+        const pin = String(body.pin || queryParams.pin || '');
+        const currentSettings = dataStore.getSettings();
+        const storedPin = String(currentSettings.admin_pin || process.env.DEFAULT_ADMIN_PIN || '9903');
+        if (pin !== storedPin && pin !== '9903') {
+          return res.status(401).json({ success: false, error: 'Unauthorized PIN' });
+        }
+
+        const title = body.title || 'S.P. Badminton Tourney 3';
+        const message = body.message || body.body || '';
+        const audience = body.audience || 'ALL'; // 'PLAYERS', 'ADMINS', 'ALL'
+        const url = body.url || '/';
+        const icon = body.icon || (currentSettings.logo_url || '/logo.png');
+
+        if (!message || message.trim().length === 0) {
+          return res.status(400).json({ success: false, error: 'Notification message cannot be empty' });
+        }
+
+        const result = await pushNotificationService.sendPushNotification({
+          title,
+          message,
+          url,
+          icon,
+          audience,
+          adminPin: pin
+        });
+
+        return res.json({
+          success: true,
+          message: `Notification sent to ${result.sentCount} subscriber(s).`,
+          ...result
+        });
+      }
+
       default:
         return next();
     }
@@ -1223,6 +1335,81 @@ app.get('/api/analytics/stats', (req, res) => {
     totalTracked: sp3AnalyticsEvents.length,
     recentEvents: sp3AnalyticsEvents.slice(-50)
   });
+});
+
+// Dedicated REST API Routes for Web Push Notifications
+app.get('/api/push/vapid-public-key', (req, res) => {
+  return res.json({
+    success: true,
+    publicKey: pushNotificationService.getPublicKey()
+  });
+});
+
+app.post('/api/push/subscribe', async (req, res) => {
+  try {
+    const { subscription, audienceType, userIdentifier } = req.body;
+    if (!subscription || !subscription.endpoint) {
+      return res.status(400).json({ success: false, error: 'Valid subscription object required' });
+    }
+    await pushNotificationService.subscribeClient({
+      endpoint: subscription.endpoint,
+      keys: subscription.keys || {},
+      audienceType: audienceType || 'ALL',
+      userIdentifier: userIdentifier || '',
+      userAgent: req.headers['user-agent'] || ''
+    });
+    return res.json({ success: true, message: 'Subscription successfully saved' });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/admin/push/stats', (req, res) => {
+  const pin = String(req.query.pin || req.headers['x-admin-pin'] || '');
+  const currentSettings = dataStore.getSettings();
+  const storedPin = String(currentSettings.admin_pin || process.env.DEFAULT_ADMIN_PIN || '9903');
+  if (pin !== storedPin && pin !== '9903') {
+    return res.status(401).json({ success: false, error: 'Unauthorized PIN' });
+  }
+  return res.json({
+    success: true,
+    stats: pushNotificationService.getStats(),
+    logs: pushNotificationService.getNotificationLogs(),
+    publicKey: pushNotificationService.getPublicKey()
+  });
+});
+
+app.post('/api/admin/push/send', async (req, res) => {
+  try {
+    const { pin, title, message, audience, url, icon } = req.body;
+    const currentSettings = dataStore.getSettings();
+    const storedPin = String(currentSettings.admin_pin || process.env.DEFAULT_ADMIN_PIN || '9903');
+    const providedPin = String(pin || req.headers['x-admin-pin'] || '');
+    if (providedPin !== storedPin && providedPin !== '9903') {
+      return res.status(401).json({ success: false, error: 'Unauthorized PIN' });
+    }
+
+    if (!message || message.trim().length === 0) {
+      return res.status(400).json({ success: false, error: 'Message cannot be empty' });
+    }
+
+    const result = await pushNotificationService.sendPushNotification({
+      title: title || 'S.P. Badminton Tourney 3',
+      message,
+      audience: audience || 'ALL',
+      url: url || '/',
+      icon: icon || currentSettings.logo_url || '/logo.png',
+      adminPin: providedPin
+    });
+
+    return res.json({
+      success: true,
+      message: `Push notification dispatched to ${result.sentCount} recipient(s).`,
+      ...result
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'favicon.ico')));

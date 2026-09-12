@@ -3697,13 +3697,14 @@
     <div class="sidebar-head">
       <div class="brand" style="display:flex; align-items:center; gap:10px;">
         <img
+          id="mobileSidebarLogoImg"
           src="logo.png"
-          alt="SP3 Logo"
-          class="mark"
+          alt="Tournament Logo"
+          class="mark dyn-tourney-logo"
           style="width:38px; height:38px; object-fit:contain; border-radius:50%; flex-shrink:0; display:block;" />
         <div>
-          <b style="font-family:'Outfit','Inter',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.04em; line-height:1.2; display:block;">SURYODAYA PARK</b>
-          <span style="font-family:'Space Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:0.1em; display:block;">TOURNEY 2026</span>
+          <b id="mobileSidebarBrandName" class="dyn-tourney-name" style="font-family:'Outfit','Inter',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.04em; line-height:1.2; display:block;">SURYODAYA PARK</b>
+          <span id="mobileSidebarBrandSub" class="dyn-tourney-sub" style="font-family:'Space Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:0.1em; display:block;">TOURNEY 2026</span>
         </div>
       </div>
       <button class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="Close Sidebar">&times;</button>
@@ -3797,7 +3798,7 @@
       <button class="theme-toggle-btn full-width" onclick="toggleDarkTheme()" style="justify-content:center; margin-bottom:10px;" title="Toggle Dark/Light Mode">
         <span class="theme-icon">🌙</span> <span class="theme-text">Dark Theme</span>
       </button>
-      <button class="btn solid full-width" onclick="closeMobileSidebar(); openRegister()">
+      <button id="sidebarRegBtn" class="btn solid full-width sidebar-reg-btn" onclick="closeMobileSidebar(); openRegister()">
         Register Your Pair &rarr;
       </button>
       <a href="https://maps.app.goo.gl/QnaBgoVEJa7tdQfx7" target="_blank" rel="noopener noreferrer" class="sidebar-caption" title="Open Suryodaya Park on Google Maps">
@@ -3816,10 +3817,11 @@
     <nav>
       <a href="#" class="logo">
         <img
+          id="mainHeaderLogoImg"
           src="logo.png"
-          alt="Suryodaya Park 2026 Badminton Tourney" class="mark"
+          alt="Tournament Logo" class="mark dyn-tourney-logo"
           style="width:38px; height:38px; object-fit:contain; border-radius:50%;" />
-        <div><b>SURYODAYA PARK</b><span>TOURNEY&nbsp;2026</span></div>
+        <div><b id="mainHeaderTourneyName" class="dyn-tourney-name">SURYODAYA PARK</b><span id="mainHeaderTourneySub" class="dyn-tourney-sub">TOURNEY&nbsp;2026</span></div>
       </a>
       <ul class="navlinks">
         <li>
@@ -3916,10 +3918,13 @@
         </li>
       </ul>
       <div class="nav-right-actions">
+        <button id="btnHeaderPushAlerts" class="theme-toggle-btn" onclick="requestPublicPushSubscription('ALL')" title="Enable Live Push Alerts" aria-label="Notifications" style="display:inline-flex; align-items:center; gap:6px;">
+          <span style="font-size:14px;">🔔</span> <span class="theme-text" id="headerPushText">Alerts</span>
+        </button>
         <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleDarkTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
           <span class="theme-icon">🌙</span> <span class="theme-text">Dark</span>
         </button>
-        <a href="javascript:void(0)" class="btn solid header-reg-btn" onclick="openRegister()">Register Pair</a>
+        <a href="javascript:void(0)" id="headerRegBtn" class="btn solid header-reg-btn" onclick="openRegister()">Register Pair</a>
         <button class="mobile-hamburger-btn" id="btnOpenSidebar" onclick="openMobileSidebar()"
           aria-label="Open Navigation Menu">
           <span></span>
@@ -3934,19 +3939,19 @@
   <div class="hero">
     <div class="main">
       <div class="copy">
-        <div class="hero-live-badge">
+        <div class="hero-live-badge" id="heroLiveBadge">
           <span class="pulse-ring-dot"></span>
-          <span>🔥 Official Registration Open · ₹1000 / Pair</span>
+          <span id="heroLiveBadgeText">🔥 Official Registration Open · ₹1000 / Pair</span>
         </div>
-        <div class="eyebrow"><span class="dot"></span> MEN'S DOUBLES &middot; KNOCKOUT &middot; SURYODAYA PARK</div>
+        <div class="eyebrow"><span class="dot"></span> <span class="dyn-tourney-subtitle">MEN'S DOUBLES &middot; KNOCKOUT &middot; SURYODAYA PARK</span></div>
         <h1><span class="l1">COURT IS</span><span class="l2">CALLING</span></h1>
-        <p class="lede">
-          <b>Suryodaya Park Badminton Tourney Season 3</b> brings Below 35 and Above 35 men's doubles pairs together for three days of
+        <p class="lede" id="heroLedeText">
+          <b class="dyn-tourney-name">Suryodaya Park Badminton Tourney Season 3</b> brings Below 35 and Above 35 men's doubles pairs together for three days of
           straight-knockout badminton on one outdoor court. Register your pair, get your bracket, and settle it on
           court.
         </p>
         <div class="cta-row">
-          <a href="javascript:void(0)" class="btn solid cta-main-btn" onclick="openRegister()" style="padding:14px 28px !important; font-size:15px !important;">
+          <a href="javascript:void(0)" id="heroRegBtn" class="btn solid cta-main-btn" onclick="openRegister()" style="padding:14px 28px !important; font-size:15px !important;">
             <span>⚡</span>
             <span>Register Your Pair</span>
           </a>
@@ -4728,7 +4733,7 @@
           </div>
 
           <div class="cta-button-row">
-            <button type="button" class="btn solid cta-main-btn" onclick="openRegister()">
+            <button type="button" id="prefooterRegBtn" class="btn solid cta-main-btn" onclick="openRegister()">
               <span>⚡</span>
               <span>Register Your Pair Now (₹1000)</span>
             </button>
@@ -5232,7 +5237,17 @@
           </div>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:18px;">
+        <div style="margin-top:14px; background:rgba(30,122,69,0.06); border:1px solid rgba(30,122,69,0.2); border-radius:14px; padding:12px 14px; text-align:left;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:12.5px; font-weight:700; color:var(--court-deep);">🔔 Get Instant Match Alerts</div>
+            <button type="button" id="btnSubscribePlayerPush" onclick="subscribeCurrentPlayerToPush()" style="background:var(--court); color:#fff; border:none; padding:6px 12px; border-radius:8px; font-size:11.5px; font-weight:700; cursor:pointer;">
+              Enable Alerts
+            </button>
+          </div>
+          <div style="font-size:11px; color:#555; margin-top:4px;">Receive lock-screen alerts for your court call, schedule times &amp; approval.</div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:16px;">
           <button type="button" class="btn solid full-width" onclick="closeModals(); openStatusModal();" style="font-size:13px; padding:11px;">
             Track Verification Status
           </button>
@@ -5367,12 +5382,21 @@
           catDisplay.style.color = "var(--court)";
           document.getElementById('finalCategory').value = p1Category;
 
-          // Update Entry Fee Display dynamically for selected category
+          // Update Entry Fee Display and QR code dynamically for selected category
           if (window._cachedCategories && Array.isArray(window._cachedCategories)) {
-            const matched = window._cachedCategories.find(c => (c.name || "").toLowerCase().includes(p1Category.toLowerCase().replace(" ", "")));
+            const cleanCat = p1Category.toLowerCase().replace(/\s+/g, "");
+            const matched = window._cachedCategories.find(c => (c.name || "").toLowerCase().replace(/\s+/g, "").includes(cleanCat));
             if (matched && matched.fee) {
               const feeEl = document.getElementById('displayEntryFee');
               if (feeEl) feeEl.innerHTML = "&#8377;" + matched.fee + " / Team";
+
+              // Also refresh modal QR code amount if dynamically generated
+              const qrImg = document.getElementById('officialUpiQrImg');
+              const cfg = window.publicConfigCache || {};
+              const s = cfg.settings || cfg || {};
+              if (qrImg) {
+                qrImg.src = resolveQrImageUrl(s.upi_qr_url, s.upi_id || "blistedx@okhdfcbank", s.upi_name || "S.P. Badminton Club", matched.fee);
+              }
             }
           }
 
@@ -5649,14 +5673,21 @@
         feeModalEl.innerHTML = "&#8377;" + primeFee + " / Team";
       }
 
-      // 3. Tournament Name & Subtitle
-      if (settings.tournament_name) {
-        document.title = settings.tournament_name;
-        document.querySelectorAll('.dyn-tourney-name').forEach(el => el.innerText = settings.tournament_name);
-      }
-      if (settings.tournament_subtitle) {
-        document.querySelectorAll('.dyn-tourney-subtitle').forEach(el => el.innerText = settings.tournament_subtitle);
-      }
+      // 3. Tournament Name, Subtitle & Branding Logo
+      const tName = settings.tournament_name || "S.P. BADMINTON TOURNEY 3";
+      const tSub = settings.tournament_subtitle || "Men's Doubles · Knockout · Suryodaya Park";
+      const tLogo = settings.logo_url || settings.logoUrl || "/logo.png";
+
+      document.title = tName;
+      document.querySelectorAll('.dyn-tourney-name').forEach(el => el.innerText = tName);
+      document.querySelectorAll('.dyn-tourney-subtitle').forEach(el => el.innerText = tSub);
+      document.querySelectorAll('.dyn-tourney-logo').forEach(el => {
+        if (el.tagName === 'IMG') el.src = tLogo;
+      });
+      if (document.getElementById('mainHeaderLogoImg')) document.getElementById('mainHeaderLogoImg').src = tLogo;
+      if (document.getElementById('mobileSidebarLogoImg')) document.getElementById('mobileSidebarLogoImg').src = tLogo;
+      if (document.getElementById('mainHeaderTourneyName')) document.getElementById('mainHeaderTourneyName').innerText = tName.toUpperCase();
+      if (document.getElementById('mobileSidebarBrandName')) document.getElementById('mobileSidebarBrandName').innerText = tName.toUpperCase();
 
       // 4. Venue & Dates
       if (settings.venue) {
@@ -5666,26 +5697,76 @@
         document.querySelectorAll('.dyn-dates').forEach(el => el.innerText = settings.dates);
       }
 
-      // 5. Registration Status (OPEN / CLOSED)
+      // 5. Registration Status (OPEN / CLOSED) & Live CTA Reflection
       const regStatus = (settings.registration_status || "OPEN").toUpperCase();
-      const regBtns = document.querySelectorAll('.header-reg-btn, .btn-register-main');
-      if (regStatus === "CLOSED") {
-        regBtns.forEach(b => {
-          b.innerText = "Registrations Closed";
-          b.style.opacity = "0.75";
-        });
-      } else {
-        regBtns.forEach(b => {
-          b.innerText = "Register Pair";
-          b.style.opacity = "1";
-        });
+      const isClosed = (regStatus === "CLOSED");
+
+      // Header button
+      const headerBtn = document.getElementById('headerRegBtn') || document.querySelector('.header-reg-btn');
+      if (headerBtn) {
+        headerBtn.innerText = isClosed ? "Registrations Closed" : "Register Pair";
+        headerBtn.style.opacity = isClosed ? "0.75" : "1";
+        headerBtn.style.cursor = isClosed ? "not-allowed" : "pointer";
+      }
+
+      // Mobile sidebar button
+      const sbRegBtn = document.getElementById('sidebarRegBtn');
+      if (sbRegBtn) {
+        sbRegBtn.innerText = isClosed ? "Registrations Closed" : "Register Your Pair →";
+        sbRegBtn.disabled = isClosed;
+        sbRegBtn.style.opacity = isClosed ? "0.7" : "1";
+        sbRegBtn.style.cursor = isClosed ? "not-allowed" : "pointer";
+      }
+
+      // Hero Live Badge
+      const heroBadgeText = document.getElementById('heroLiveBadgeText');
+      const heroBadge = document.getElementById('heroLiveBadge');
+      if (heroBadgeText) {
+        heroBadgeText.innerText = isClosed ? "🔒 Registrations Closed · Next Season Soon" : ("🔥 Official Registration Open · ₹" + primeFee + " / Pair");
+      }
+
+      // Hero CTA Button
+      const heroRegBtn = document.getElementById('heroRegBtn');
+      if (heroRegBtn) {
+        if (isClosed) {
+          heroRegBtn.innerHTML = "<span>🔒</span> <span>Registrations Closed</span>";
+          heroRegBtn.style.opacity = "0.75";
+          heroRegBtn.style.cursor = "not-allowed";
+        } else {
+          heroRegBtn.innerHTML = "<span>⚡</span> <span>Register Your Pair</span>";
+          heroRegBtn.style.opacity = "1";
+          heroRegBtn.style.cursor = "pointer";
+        }
+      }
+
+      // Prefooter CTA Button
+      const prefooterBtn = document.getElementById('prefooterRegBtn');
+      if (prefooterBtn) {
+        if (isClosed) {
+          prefooterBtn.innerHTML = "<span>🔒</span> <span>Registrations Closed</span>";
+          prefooterBtn.disabled = true;
+          prefooterBtn.style.opacity = "0.75";
+          prefooterBtn.style.cursor = "not-allowed";
+        } else {
+          prefooterBtn.innerHTML = "<span>⚡</span> <span>Register Your Pair Now (₹" + primeFee + ")</span>";
+          prefooterBtn.disabled = false;
+          prefooterBtn.style.opacity = "1";
+          prefooterBtn.style.cursor = "pointer";
+        }
+      }
+
+      // Modal submit button state
+      const modalSubBtn = document.getElementById('submitBtn');
+      if (modalSubBtn && isClosed) {
+        modalSubBtn.disabled = true;
+        modalSubBtn.innerText = "Registrations Closed";
       }
 
       // 6. Dynamic Categories (Fee & Max Pairs & Status)
       if (categories && Array.isArray(categories)) {
         categories.forEach(cat => {
           const catName = cat.name || "";
-          const fee = cat.fee || "1000";
+          const fee = cat.fee || primeFee || "1000";
           const maxPairs = cat.maxPairs || "32";
           const status = (cat.status || "ACTIVE").toUpperCase();
 
@@ -5693,34 +5774,38 @@
             const bFeeEl = document.getElementById('below35FeeDisplay');
             if (bFeeEl) bFeeEl.innerText = "₹" + fee + " / Pair";
             const bSlotEl = document.getElementById('below35SlotInfo');
-            if (bSlotEl) bSlotEl.innerText = "MAX " + maxPairs + " PAIRS · " + (status === 'ACTIVE' ? 'OPEN' : 'CLOSED');
+            if (bSlotEl) bSlotEl.innerText = "MAX " + maxPairs + " PAIRS · " + (isClosed ? 'CLOSED' : (status === 'ACTIVE' ? 'OPEN' : 'CLOSED'));
             const bBtn = document.getElementById('below35RegBtn');
             if (bBtn) {
-              if (status === 'INACTIVE' || regStatus === 'CLOSED') {
+              if (status === 'INACTIVE' || isClosed) {
                 bBtn.innerText = "Closed";
                 bBtn.disabled = true;
                 bBtn.style.opacity = "0.6";
+                bBtn.style.cursor = "not-allowed";
               } else {
                 bBtn.innerText = "Register in Below 35 →";
                 bBtn.disabled = false;
                 bBtn.style.opacity = "1";
+                bBtn.style.cursor = "pointer";
               }
             }
           } else if (catName.toLowerCase().includes('above')) {
             const aFeeEl = document.getElementById('above35FeeDisplay');
             if (aFeeEl) aFeeEl.innerText = "₹" + fee + " / Pair";
             const aSlotEl = document.getElementById('above35SlotInfo');
-            if (aSlotEl) aSlotEl.innerText = "MAX " + maxPairs + " PAIRS · " + (status === 'ACTIVE' ? 'OPEN' : 'CLOSED');
+            if (aSlotEl) aSlotEl.innerText = "MAX " + maxPairs + " PAIRS · " + (isClosed ? 'CLOSED' : (status === 'ACTIVE' ? 'OPEN' : 'CLOSED'));
             const aBtn = document.getElementById('above35RegBtn');
             if (aBtn) {
-              if (status === 'INACTIVE' || regStatus === 'CLOSED') {
+              if (status === 'INACTIVE' || isClosed) {
                 aBtn.innerText = "Closed";
                 aBtn.disabled = true;
                 aBtn.style.opacity = "0.6";
+                aBtn.style.cursor = "not-allowed";
               } else {
                 aBtn.innerText = "Register in Above 35 →";
                 aBtn.disabled = false;
                 aBtn.style.opacity = "1";
+                aBtn.style.cursor = "pointer";
               }
             }
           }
@@ -5729,8 +5814,16 @@
     }
 
     function openRegister(prefCat) {
-      if (publicConfigCache && publicConfigCache.settings && publicConfigCache.settings.registration_status === 'CLOSED') {
-        alert("Registrations for S.P. Badminton Tourney 3 are currently CLOSED.");
+      const cfg = publicConfigCache || {};
+      const s = cfg.settings || cfg || {};
+      const regStatus = (s.registration_status || "OPEN").toUpperCase();
+      if (regStatus === 'CLOSED') {
+        const tName = s.tournament_name || "S.P. Badminton Tourney 3";
+        if (typeof showToast === 'function') {
+          showToast("Registrations for " + tName + " are currently CLOSED.", "error");
+        } else {
+          alert("Registrations for " + tName + " are currently CLOSED.");
+        }
         return;
       }
       document.getElementById('regModal').classList.add('open');
@@ -6353,6 +6446,113 @@
       if (sidebar) sidebar.classList.remove('open');
       if (backdrop) backdrop.classList.remove('open');
       document.body.style.overflow = '';
+    }
+
+    // ================= CLIENT WEB PUSH NOTIFICATION HELPERS =================
+    let publicVapidKeyCache = null;
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    async function getPublicVapidKey() {
+      if (publicVapidKeyCache) return publicVapidKeyCache;
+      try {
+        const res = await fetch('/api/push/vapid-public-key');
+        const data = await res.json();
+        if (data && data.publicKey) {
+          publicVapidKeyCache = data.publicKey;
+          return data.publicKey;
+        }
+      } catch (e) {
+        console.warn('Failed to fetch VAPID key:', e);
+      }
+      return null;
+    }
+
+    async function requestPublicPushSubscription(audienceType, userIdentifier) {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        alert("Push notifications are not supported in this browser.");
+        return false;
+      }
+
+      try {
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+          showToast("Notification permission was not granted.");
+          return false;
+        }
+
+        const vapidKey = await getPublicVapidKey();
+        if (!vapidKey) {
+          showToast("Push notification server is currently busy.");
+          return false;
+        }
+
+        const reg = await navigator.serviceWorker.ready;
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          const convertedKey = urlBase64ToUint8Array(vapidKey);
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedKey
+          });
+        }
+
+        const aud = audienceType || 'ALL';
+        const ident = userIdentifier || ('user_' + Math.random().toString(36).substring(2, 9));
+
+        const res = await fetch('/api/push/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subscription: sub,
+            audienceType: aud,
+            userIdentifier: ident
+          })
+        });
+
+        const data = await res.json();
+        if (data && data.success) {
+          showToast("🔔 Live Match & Score Alerts Enabled!");
+          const hBtn = document.getElementById('btnHeaderPushAlerts');
+          if (hBtn) {
+            hBtn.style.background = 'rgba(34, 197, 94, 0.15)';
+            hBtn.style.borderColor = '#22c55e';
+            const hText = document.getElementById('headerPushText');
+            if (hText) hText.innerText = 'Alerts Active';
+          }
+          return true;
+        }
+      } catch (err) {
+        console.warn('Push registration error:', err);
+        showToast("Error registering for alerts: " + err.message);
+      }
+      return false;
+    }
+
+    async function subscribeCurrentPlayerToPush() {
+      const btn = document.getElementById('btnSubscribePlayerPush');
+      if (btn) { btn.disabled = true; btn.innerText = "Enabling..."; }
+
+      const regIdEl = document.getElementById('successRegId');
+      const regId = (regIdEl && regIdEl.innerText) ? regIdEl.innerText.trim() : 'PLAYER';
+
+      const ok = await requestPublicPushSubscription('PLAYERS', regId);
+      if (ok && btn) {
+        btn.innerText = "✓ Active";
+        btn.style.background = "#15803d";
+      } else if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Enable Alerts";
+      }
     }
 
     function copyUpiId() {
@@ -6988,6 +7188,17 @@
           webSocket.on('score_updated', function (d) {
             if (d && d.match) renderTickerData(d.match);
             else if (d) renderTickerData(d);
+          });
+          webSocket.on('settings_update', function (updatedSettings) {
+            if (updatedSettings) {
+              const currentCfg = window.publicConfigCache || {};
+              const merged = Object.assign({}, currentCfg, {
+                settings: Object.assign({}, currentCfg.settings || {}, updatedSettings)
+              });
+              window.publicConfigCache = merged;
+              try { localStorage.setItem('sp3_public_config', JSON.stringify(merged)); } catch (e) {}
+              applyPublicConfig(merged);
+            }
           });
         }
       } catch (e) { }

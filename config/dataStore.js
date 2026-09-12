@@ -17,6 +17,7 @@ const DEFAULT_SETTINGS = {
   upi_id: "blistedx@okhdfcbank",
   upi_name: "S.P. Badminton Club",
   upi_qr_url: "qr_code.png",
+  logo_url: "/logo.png",
   entry_fee: "1000",
   stat_categories: "02",
   stat_players: "50+",
@@ -53,6 +54,7 @@ let registrationsCache = [];
 let matchesCache = [];
 let financialsCache = { expenses: [], sponsors: [] };
 let liveMatchCache = { ...DEFAULT_LIVE_MATCH };
+let pushSubscriptionsCache = [];
 
 async function syncFromDb() {
   try {
@@ -72,6 +74,7 @@ async function syncFromDb() {
         upi_id: r.upi_id,
         upi_name: r.upi_name,
         upi_qr_url: r.upi_qr_url,
+        logo_url: r.logo_url || "/logo.png",
         entry_fee: r.entry_fee,
         stat_categories: r.stat_categories,
         stat_players: r.stat_players,
@@ -194,7 +197,20 @@ async function syncFromDb() {
       }))
     };
 
-    console.log(`[PostgreSQL DataStore] Synced from Neon DB: ${registrationsCache.length} regs, ${matchesCache.length} matches, ${financialsCache.expenses.length} expenses.`);
+    // 6. Push Subscriptions
+    const pushRes = await query("SELECT * FROM push_subscriptions ORDER BY created_at DESC").catch(() => ({ rows: [] }));
+    pushSubscriptionsCache = (pushRes.rows || []).map(p => ({
+      endpoint: p.endpoint,
+      keys: { p256dh: p.p256dh, auth: p.auth },
+      p256dh: p.p256dh,
+      auth: p.auth,
+      audience_type: p.audience_type || 'ALL',
+      user_identifier: p.user_identifier || '',
+      user_agent: p.user_agent || '',
+      updated_at: p.updated_at ? p.updated_at.toISOString() : new Date().toISOString()
+    }));
+
+    console.log(`[PostgreSQL DataStore] Synced from Neon DB: ${registrationsCache.length} regs, ${matchesCache.length} matches, ${financialsCache.expenses.length} expenses, ${pushSubscriptionsCache.length} push subs.`);
   } catch (err) {
     console.warn('[PostgreSQL DataStore] Sync warning:', err.message);
   }
@@ -214,8 +230,8 @@ const dataStore = {
     settingsCache = { ...settingsCache, ...newSettings };
 
     query(`
-      INSERT INTO settings (id, tournament_name, tournament_subtitle, venue, dates, flash_message, flash_active, registration_status, admin_pin, upi_id, upi_name, upi_qr_url, entry_fee, stat_categories, stat_players, stat_days, categories, updated_at)
-      VALUES ('current', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW())
+      INSERT INTO settings (id, tournament_name, tournament_subtitle, venue, dates, flash_message, flash_active, registration_status, admin_pin, upi_id, upi_name, upi_qr_url, logo_url, entry_fee, stat_categories, stat_players, stat_days, categories, updated_at)
+      VALUES ('current', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW())
       ON CONFLICT (id) DO UPDATE SET
         tournament_name = EXCLUDED.tournament_name,
         tournament_subtitle = EXCLUDED.tournament_subtitle,
@@ -228,6 +244,7 @@ const dataStore = {
         upi_id = EXCLUDED.upi_id,
         upi_name = EXCLUDED.upi_name,
         upi_qr_url = EXCLUDED.upi_qr_url,
+        logo_url = EXCLUDED.logo_url,
         entry_fee = EXCLUDED.entry_fee,
         stat_categories = EXCLUDED.stat_categories,
         stat_players = EXCLUDED.stat_players,
@@ -246,6 +263,7 @@ const dataStore = {
       settingsCache.upi_id,
       settingsCache.upi_name,
       settingsCache.upi_qr_url,
+      settingsCache.logo_url || "/logo.png",
       settingsCache.entry_fee,
       settingsCache.stat_categories,
       settingsCache.stat_players,
@@ -653,6 +671,84 @@ const dataStore = {
     query("DELETE FROM sponsors WHERE id = $1", [sponId])
       .catch(e => console.error('[PostgreSQL] deleteSponsor error:', e.message));
     return true;
+  },
+
+  // WEB PUSH SUBSCRIPTIONS
+  getPushSubscriptions(audienceType) {
+    if (!audienceType || audienceType === 'ALL') {
+      return [...pushSubscriptionsCache];
+    }
+    const target = audienceType.toUpperCase();
+    return pushSubscriptionsCache.filter(sub => {
+      const a = (sub.audience_type || sub.audienceType || 'ALL').toUpperCase();
+      if (target === 'PLAYERS') return a === 'PLAYERS' || a === 'ALL';
+      if (target === 'ADMINS') return a === 'ADMINS' || a === 'ALL';
+      return a === target;
+    });
+  },
+
+  async savePushSubscription({ endpoint, keys, audienceType, userIdentifier, userAgent }) {
+    if (!endpoint || !keys || !keys.p256dh || !keys.auth) return null;
+    const aud = (audienceType || 'ALL').toUpperCase();
+    const ident = userIdentifier || '';
+    const ua = userAgent || '';
+
+    const newSub = {
+      endpoint,
+      keys: { p256dh: keys.p256dh, auth: keys.auth },
+      p256dh: keys.p256dh,
+      auth: keys.auth,
+      audience_type: aud,
+      user_identifier: ident,
+      user_agent: ua,
+      updated_at: new Date().toISOString()
+    };
+
+    const existingIdx = pushSubscriptionsCache.findIndex(s => s.endpoint === endpoint);
+    if (existingIdx >= 0) {
+      pushSubscriptionsCache[existingIdx] = { ...pushSubscriptionsCache[existingIdx], ...newSub };
+    } else {
+      pushSubscriptionsCache.push(newSub);
+    }
+
+    query(`
+      INSERT INTO push_subscriptions (endpoint, p256dh, auth, audience_type, user_identifier, user_agent, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      ON CONFLICT (endpoint) DO UPDATE SET
+        p256dh = EXCLUDED.p256dh,
+        auth = EXCLUDED.auth,
+        audience_type = EXCLUDED.audience_type,
+        user_identifier = EXCLUDED.user_identifier,
+        user_agent = EXCLUDED.user_agent,
+        updated_at = NOW()
+    `, [endpoint, keys.p256dh, keys.auth, aud, ident, ua])
+      .catch(e => console.error('[PostgreSQL] savePushSubscription error:', e.message));
+
+    return newSub;
+  },
+
+  deletePushSubscription(endpoint) {
+    if (!endpoint) return false;
+    pushSubscriptionsCache = pushSubscriptionsCache.filter(s => s.endpoint !== endpoint);
+    query("DELETE FROM push_subscriptions WHERE endpoint = $1", [endpoint])
+      .catch(e => console.error('[PostgreSQL] deletePushSubscription error:', e.message));
+    return true;
+  },
+
+  getPushStats() {
+    let total = pushSubscriptionsCache.length;
+    let players = 0;
+    let admins = 0;
+    let general = 0;
+
+    pushSubscriptionsCache.forEach(s => {
+      const a = (s.audience_type || s.audienceType || 'ALL').toUpperCase();
+      if (a === 'PLAYERS') players++;
+      else if (a === 'ADMINS') admins++;
+      else general++;
+    });
+
+    return { total, players, admins, general };
   }
 };
 
