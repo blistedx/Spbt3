@@ -105,7 +105,8 @@ self.addEventListener('push', (event) => {
     badge: data.badge || '/favicon-32x32.png',
     tag: data.tag || 'sp3-alert',
     renotify: true,
-    vibrate: [100, 50, 100],
+    requireInteraction: true,
+    vibrate: [200, 100, 200],
     data: {
       url: (data.data && data.data.url) || data.url || '/',
       timestamp: (data.data && data.data.timestamp) || Date.now()

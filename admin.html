@@ -2368,16 +2368,11 @@
                                 </select>
                             </div>
 
-                            <!-- 3. TITLE & DESTINATION URL -->
-                            <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:12px; margin-bottom:14px;">
-                                <div>
-                                    <label style="font-size:12px; font-weight:700; color:#333; display:block; margin-bottom:4px;">Notification Title *</label>
-                                    <input type="text" id="pushTitleInput" required placeholder="e.g. S.P. Tourney 3 · Schedule Live" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); font-size:13px; font-weight:600;" oninput="updatePushPreview()">
-                                </div>
-                                <div>
-                                    <label style="font-size:12px; font-weight:700; color:#333; display:block; margin-bottom:4px;">Target View / URL</label>
-                                    <input type="text" id="pushUrlInput" value="/" placeholder="/#schedule, /#draws, /tv" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); font-size:13px;" oninput="updatePushPreview()">
-                                </div>
+                            <!-- 3. NOTIFICATION TITLE -->
+                            <div style="margin-bottom:14px;">
+                                <label style="font-size:12px; font-weight:700; color:#333; display:block; margin-bottom:4px;">Notification Title *</label>
+                                <input type="text" id="pushTitleInput" required placeholder="e.g. S.P. Tourney 3 · Schedule Live" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); font-size:13px; font-weight:600;" oninput="updatePushPreview()">
+                                <input type="hidden" id="pushUrlInput" value="/">
                             </div>
 
                             <!-- 4. MESSAGE BODY -->
@@ -2442,9 +2437,6 @@
                                         </div>
                                         <div style="font-size:12px; color:#cbd5e1; line-height:1.35;" id="previewNotifBody">
                                             Live Tournament Notification will be displayed here as you type.
-                                        </div>
-                                        <div style="display:inline-block; margin-top:8px; font-size:10.5px; color:#94a3b8; font-family:monospace; background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;" id="previewNotifUrl">
-                                            Destination: /
                                         </div>
                                     </div>
                                 </div>
@@ -4852,14 +4844,22 @@
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
 
             try {
-                const reg = await navigator.serviceWorker.ready;
+                // Ensure Service Worker is registered
+                const reg = await navigator.serviceWorker.register('/sw.js');
+                await navigator.serviceWorker.ready;
                 let sub = await reg.pushManager.getSubscription();
 
                 if (!sub) {
                     if (!currentVapidPublicKey) {
-                        const r = await fetch('/api/push/vapid-public-key');
-                        const d = await r.json();
-                        if (d && d.publicKey) currentVapidPublicKey = d.publicKey;
+                        try {
+                            const r = await fetch('/api/push/vapid-public-key');
+                            const d = await r.json();
+                            if (d && d.publicKey) currentVapidPublicKey = d.publicKey;
+                        } catch (e) {
+                            const r2 = await fetch('/exec?action=getVapidPublicKey');
+                            const d2 = await r2.json();
+                            if (d2 && d2.publicKey) currentVapidPublicKey = d2.publicKey;
+                        }
                     }
                     if (!currentVapidPublicKey) return false;
 
@@ -4881,6 +4881,7 @@
                     })
                 });
 
+                localStorage.setItem('sp3_admin_push_subscribed', 'true');
                 isPushSubscribed = true;
                 updateAdminPushBadge(true);
                 return true;
@@ -4895,6 +4896,11 @@
             const text = document.getElementById('adminSubStatusText');
             const btn = document.getElementById('btnToggleAdminPush');
 
+            // 1. Instant optimistic check from localStorage so it never flashes "NO" on refresh
+            if (localStorage.getItem('sp3_admin_push_subscribed') === 'true') {
+                updateAdminPushBadge(true);
+            }
+
             if (!("Notification" in window) || !('serviceWorker' in navigator)) {
                 if (badge) { badge.innerText = "UNSUPPORTED"; badge.className = "status-badge status-rejected"; }
                 if (text) text.innerText = "Push notifications not supported in this browser.";
@@ -4902,20 +4908,32 @@
                 return;
             }
 
-            if (Notification.permission === "granted") {
-                const reg = await navigator.serviceWorker.ready.catch(() => null);
-                const sub = reg ? await reg.pushManager.getSubscription() : null;
-                if (sub) {
-                    updateAdminPushBadge(true);
+            try {
+                // Ensure service worker is registered
+                const reg = await navigator.serviceWorker.register('/sw.js');
+                if (Notification.permission === "granted") {
+                    const sub = await reg.pushManager.getSubscription();
+                    if (sub) {
+                        localStorage.setItem('sp3_admin_push_subscribed', 'true');
+                        updateAdminPushBadge(true);
+                    } else if (localStorage.getItem('sp3_admin_push_subscribed') === 'true') {
+                        // Resubscribe in background to stay permanently ON
+                        ensureAdminSubscribed().then(ok => updateAdminPushBadge(ok)).catch(() => {});
+                    } else {
+                        updateAdminPushBadge(false);
+                    }
+                } else if (Notification.permission === "denied") {
+                    localStorage.removeItem('sp3_admin_push_subscribed');
+                    if (badge) { badge.innerText = "BLOCKED"; badge.className = "status-badge status-rejected"; }
+                    if (text) text.innerText = "Notifications are blocked in browser site settings.";
+                    if (btn) { btn.innerText = "Permission Blocked in Browser"; btn.disabled = true; }
                 } else {
-                    updateAdminPushBadge(false);
+                    if (localStorage.getItem('sp3_admin_push_subscribed') !== 'true') {
+                        updateAdminPushBadge(false);
+                    }
                 }
-            } else if (Notification.permission === "denied") {
-                if (badge) { badge.innerText = "BLOCKED"; badge.className = "status-badge status-rejected"; }
-                if (text) text.innerText = "Notifications are blocked in browser site settings.";
-                if (btn) { btn.innerText = "Permission Blocked in Browser"; btn.disabled = true; }
-            } else {
-                updateAdminPushBadge(false);
+            } catch (e) {
+                console.warn('[Admin] Subscription check error:', e);
             }
         }
 
@@ -4926,16 +4944,22 @@
 
             if (active) {
                 if (badge) { badge.innerText = "ACTIVE & SUBSCRIBED"; badge.className = "status-badge status-approved"; }
-                if (text) text.innerText = "This browser will receive Admin alerts & Match dispatches.";
-                if (btn) { btn.innerText = "✓ Subscribed to Admin Alerts"; btn.style.color = "var(--court)"; }
+                if (text) text.innerText = "This browser will receive Admin alerts & Match dispatches (even when PWA is closed).";
+                if (btn) { btn.innerText = "✓ Subscribed to Admin Alerts (ON)"; btn.style.color = "var(--court)"; btn.style.borderColor = "var(--court)"; }
             } else {
                 if (badge) { badge.innerText = "NOT SUBSCRIBED"; badge.className = "status-badge status-pending"; }
                 if (text) text.innerText = "Click below to subscribe this admin device.";
-                if (btn) { btn.innerText = "🔔 Enable Push on this Device"; btn.style.color = ""; btn.disabled = false; }
+                if (btn) { btn.innerText = "🔔 Enable Push on this Device"; btn.style.color = ""; btn.style.borderColor = ""; btn.disabled = false; }
             }
         }
 
         async function handleToggleAdminPushSubscription() {
+            if (localStorage.getItem('sp3_admin_push_subscribed') === 'true' && Notification.permission === "granted") {
+                showToast("🔔 Push alerts are already ON for this admin device!");
+                updateAdminPushBadge(true);
+                return;
+            }
+
             const perm = await Notification.requestPermission();
             if (perm !== "granted") {
                 alert("Permission was not granted for push notifications.");
@@ -4950,6 +4974,13 @@
                 alert("Could not complete push subscription. Please check console.");
             }
         }
+
+        // Auto-run status check immediately & on window load
+        try {
+            checkAdminPushSubscriptionStatus();
+            window.addEventListener('DOMContentLoaded', checkAdminPushSubscriptionStatus);
+            window.addEventListener('load', checkAdminPushSubscriptionStatus);
+        } catch(e) {}
 
         window.switchNav = switchNav;
         window.filterByStatusAndGo = filterByStatusAndGo;

@@ -6477,10 +6477,88 @@
       return null;
     }
 
+    function updateHeaderPushUI(active) {
+      const hBtn = document.getElementById('btnHeaderPushAlerts');
+      const hText = document.getElementById('headerPushText');
+      if (!hBtn) return;
+      if (active) {
+        hBtn.style.background = 'rgba(34, 197, 94, 0.2)';
+        hBtn.style.borderColor = '#22c55e';
+        hBtn.style.color = '#15803d';
+        if (hText) hText.innerText = 'Alerts ON';
+        hBtn.setAttribute('title', 'Live Alerts are ON: you will receive match updates even when browser is closed');
+      } else {
+        hBtn.style.background = '';
+        hBtn.style.borderColor = '';
+        hBtn.style.color = '';
+        if (hText) hText.innerText = 'Alerts';
+        hBtn.setAttribute('title', 'Enable Live Push Alerts');
+      }
+    }
+
+    async function initPublicPushAlertState() {
+      // 1. Instant check from localStorage
+      if (localStorage.getItem('sp3_player_push_subscribed') === 'true') {
+        updateHeaderPushUI(true);
+      }
+
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+      try {
+        const reg = await navigator.serviceWorker.register('/sw.js');
+        if (Notification.permission === 'granted') {
+          const sub = await reg.pushManager.getSubscription();
+          if (sub) {
+            localStorage.setItem('sp3_player_push_subscribed', 'true');
+            updateHeaderPushUI(true);
+          } else if (localStorage.getItem('sp3_player_push_subscribed') === 'true') {
+            const vapidKey = await getPublicVapidKey();
+            if (vapidKey) {
+              const convertedKey = urlBase64ToUint8Array(vapidKey);
+              const newSub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertedKey
+              });
+              await fetch('/api/push/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  subscription: newSub,
+                  audienceType: 'ALL',
+                  userIdentifier: localStorage.getItem('sp3_player_ident') || ('user_' + Math.random().toString(36).substring(2, 9))
+                })
+              });
+              localStorage.setItem('sp3_player_push_subscribed', 'true');
+              updateHeaderPushUI(true);
+            }
+          }
+        } else if (Notification.permission === 'denied') {
+          localStorage.removeItem('sp3_player_push_subscribed');
+          updateHeaderPushUI(false);
+        }
+      } catch (err) {
+        console.warn('[Push] State check error:', err);
+      }
+    }
+
+    // Initialize Push alert state immediately & on load
+    try {
+      initPublicPushAlertState();
+      window.addEventListener('DOMContentLoaded', initPublicPushAlertState);
+      window.addEventListener('load', initPublicPushAlertState);
+    } catch (e) {}
+
     async function requestPublicPushSubscription(audienceType, userIdentifier) {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
         alert("Push notifications are not supported in this browser.");
         return false;
+      }
+
+      // If already active, notify user
+      if (localStorage.getItem('sp3_player_push_subscribed') === 'true' && Notification.permission === 'granted') {
+        showToast("🔔 Live Match Alerts are already ON for this device!");
+        updateHeaderPushUI(true);
+        return true;
       }
 
       try {
@@ -6521,14 +6599,10 @@
 
         const data = await res.json();
         if (data && data.success) {
+          localStorage.setItem('sp3_player_push_subscribed', 'true');
+          localStorage.setItem('sp3_player_ident', ident);
           showToast("🔔 Live Match & Score Alerts Enabled!");
-          const hBtn = document.getElementById('btnHeaderPushAlerts');
-          if (hBtn) {
-            hBtn.style.background = 'rgba(34, 197, 94, 0.15)';
-            hBtn.style.borderColor = '#22c55e';
-            const hText = document.getElementById('headerPushText');
-            if (hText) hText.innerText = 'Alerts Active';
-          }
+          updateHeaderPushUI(true);
           return true;
         }
       } catch (err) {

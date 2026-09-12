@@ -75,7 +75,12 @@ const pushNotificationService = {
       };
 
       try {
-        await webpush.sendNotification(pushSubscription, payload);
+        const pushOptions = {
+          TTL: 86400, // 24 hours delivery window
+          urgency: 'high', // High priority for lockscreen delivery even when PWA/browser is closed
+          topic: 'sp3-alert'
+        };
+        await webpush.sendNotification(pushSubscription, payload, pushOptions);
         sentCount++;
       } catch (err) {
         failedCount++;
