@@ -146,8 +146,10 @@ async function getMergedSettings() {
 
 // Universal Compatibility Bridge for Action-based Query & POST Requests
 async function handleActionBridge(req, res, next) {
-  const action = req.query.action || (req.body && req.body.action);
-  const pin = req.query.pin || (req.body && (req.body.pin || req.body.adminPin));
+  const body = req.body || {};
+  const queryParams = req.query || {};
+  const action = queryParams.action || body.action;
+  const pin = queryParams.pin || body.pin || body.adminPin;
 
   if (!action && req.method === 'POST' && (req.body.p1Name || req.body.player1Name)) {
     // Implicit registration POST

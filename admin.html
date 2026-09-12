@@ -4818,7 +4818,11 @@
                 });
                 const data = await res.json();
                 if (data && data.success) {
-                    showToast("Test notification sent! Check your screen.");
+                    if (data.sentCount === 0) {
+                        showToast("ℹ️ Push sent, but 0 Admin browsers are subscribed yet. Enable notifications first!");
+                    } else {
+                        showToast("✅ Test notification sent! Check your screen.");
+                    }
                     fetchPushStats();
                 } else {
                     alert("Test push failed: " + (data && data.error ? data.error : "Check console"));
