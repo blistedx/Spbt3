@@ -7158,27 +7158,17 @@
           return;
         }
 
-        const pill = ticker.querySelector('.ticker-live-pill');
-        const isUpcoming = (data.status === 'UPCOMING' || data.status === 'Scheduled');
-        const isCompleted = (data.status === 'COMPLETED' || data.status === 'Completed' || (data.isComplete && !data.isLive));
-        const isLive = (data.isLive === true || data.status === 'LIVE' || data.status === 'Live' || data.status === 'IN PROGRESS') && !isCompleted;
+        const statusStr = String(data.status || '').toUpperCase();
+        const isCompleted = (statusStr === 'COMPLETED' || data.isComplete === true || data.is_complete === true);
+        const isLive = (data.isLive === true || data.is_live === true || statusStr === 'LIVE' || statusStr === 'IN PROGRESS') && !isCompleted;
 
-        // 1. Custom Broadcast Announcement (only if no active upcoming or live match)
-        if (data.customMessage && data.customMessage.trim() !== '' && !isLive && !isUpcoming) {
-          const customMsg = data.customMessage.trim();
-          if (titleEl) titleEl.textContent = customMsg;
-          if (scoreEl) scoreEl.textContent = "NOTICE";
-          if (metaEl) metaEl.textContent = (data.matchId || 'Court 1') + " · Desk Broadcast";
-          if (pill) {
-            pill.innerHTML = '<span class="dot" style="background:#f59e0b;"></span> ANNOUNCEMENT';
-            pill.style.background = 'rgba(245, 158, 11, 0.15)';
-            pill.style.color = '#d97706';
-            pill.style.borderColor = '#f59e0b';
-          }
-          ticker.style.display = 'block';
+        // Strictly hide top ticker banner when no match is actively LIVE on court
+        if (!isLive) {
+          ticker.style.display = 'none';
           return;
         }
 
+        const pill = ticker.querySelector('.ticker-live-pill');
         const g = (typeof data.currentGame === 'number') ? data.currentGame : 0;
         const currentScores = (data.games && data.games[g]) ? data.games[g] : [0, 0];
         const p1Pts = currentScores[0] || 0;
@@ -7188,49 +7178,14 @@
         if (titleEl) titleEl.textContent = p1Name + " vs " + p2Name;
         if (metaEl) metaEl.textContent = (data.matchId || 'Court 1') + " · " + (data.category || 'Below 35');
 
-        if (isUpcoming) {
-          if (pill) {
-            pill.innerHTML = '<span class="dot" style="background:#38bdf8;"></span> UPCOMING';
-            pill.style.background = 'rgba(56, 189, 248, 0.15)';
-            pill.style.color = '#0284c7';
-            pill.style.borderColor = '#38bdf8';
-          }
-          if (scoreEl) scoreEl.textContent = "Next On Court · Warm-up";
-          ticker.style.display = 'block';
-          return;
+        if (pill) {
+          pill.innerHTML = '<span class="dot" style="background:#10b981;"></span> LIVE MATCH';
+          pill.style.background = 'rgba(16, 185, 129, 0.15)';
+          pill.style.color = '#059669';
+          pill.style.borderColor = '#10b981';
         }
-
-        if (isLive) {
-          if (pill) {
-            pill.innerHTML = '<span class="dot" style="background:#10b981;"></span> LIVE MATCH';
-            pill.style.background = 'rgba(16, 185, 129, 0.15)';
-            pill.style.color = '#059669';
-            pill.style.borderColor = '#10b981';
-          }
-          if (scoreEl) scoreEl.textContent = "G" + (g + 1) + " · " + p1Pts + " - " + p2Pts + " (" + sWon[0] + "-" + sWon[1] + ")";
-          ticker.style.display = 'block';
-          return;
-        } else if (isCompleted) {
-          if (pill) {
-            pill.innerHTML = '🏆 FINAL RESULT';
-            pill.style.background = 'rgba(99, 102, 241, 0.15)';
-            pill.style.color = '#4f46e5';
-            pill.style.borderColor = '#6366f1';
-          }
-          const winText = data.winner ? `${data.winner} won` : 'Match Completed';
-          if (scoreEl) scoreEl.textContent = `${winText} (${sWon[0]} - ${sWon[1]})`;
-          ticker.style.display = 'block';
-        } else {
-          // UPCOMING / PLAYERS UPDATED READY TO PLAY
-          if (pill) {
-            pill.innerHTML = '<span class="dot" style="background:#0284c7;"></span> UPCOMING MATCH';
-            pill.style.background = 'rgba(2, 132, 199, 0.12)';
-            pill.style.color = '#0284c7';
-            pill.style.borderColor = '#38bdf8';
-          }
-          if (scoreEl) scoreEl.textContent = 'READY TO START';
-          ticker.style.display = 'block';
-        }
+        if (scoreEl) scoreEl.textContent = "G" + (g + 1) + " · " + p1Pts + " - " + p2Pts + " (" + sWon[0] + "-" + sWon[1] + ")";
+        ticker.style.display = 'block';
       }
 
       function fetchLiveMatchFromSheet() {

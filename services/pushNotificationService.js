@@ -10,7 +10,7 @@ const dataStore = require('../config/dataStore');
 // Ensure VAPID keys from environment or generated fallback
 let vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
 let vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-let vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@suryodayapark.org';
+let vapidSubject = process.env.VAPID_SUBJECT || 'mailto:blistedx@gmail.com';
 
 if (!vapidPublicKey || !vapidPrivateKey) {
   try {
