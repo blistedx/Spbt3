@@ -1977,6 +1977,17 @@
                                 applyScorerIncomingState(data);
                             }
                         });
+
+                        scorerSocket.on('schedule_updated', function (data) {
+                            if (data && data.schedule && data.schedule.length > 0) {
+                                scheduledMatchesList = data.schedule;
+                                if (typeof populateScheduleDropdown === 'function') {
+                                    populateScheduleDropdown(scheduledMatchesList);
+                                }
+                            } else if (typeof fetchScheduledMatches === 'function') {
+                                fetchScheduledMatches();
+                            }
+                        });
                     }
                 } catch (e) {}
             }
@@ -2412,18 +2423,48 @@
                 }
             }
 
-            function fetchScheduledMatches() {
+            function populateScheduleDropdown(list) {
                 const sel = document.getElementById('modalScheduledMatchSelect');
-                if (!sel) return;
+                if (!sel || !list || list.length === 0) return;
 
+                let opts = '<option value="">-- Choose from Scheduled Matches (All Rounds) --</option>';
+
+                // Group by Category & Round cleanly
+                const groups = {};
+                list.forEach(m => {
+                    const cat = m.category || 'General';
+                    const round = m.round || 'Round of 32';
+                    const groupKey = `${cat} — ${round} (${m.day || 'Day 1'})`;
+                    if (!groups[groupKey]) groups[groupKey] = [];
+                    groups[groupKey].push(m);
+                });
+
+                Object.keys(groups).forEach(key => {
+                    opts += `<optgroup label="${key}">`;
+                    groups[key].forEach(m => {
+                        const mid = m.matchId || m.id;
+                        const p1 = m.pair1 || m.team1Name || 'TBD';
+                        const p2 = m.pair2 || m.team2Name || 'TBD';
+                        const status = (m.status || 'UPCOMING').toUpperCase();
+                        let statusTag = '';
+                        if (status === 'COMPLETED') {
+                            statusTag = ` [✓ Completed: ${m.winner || 'Done'}]`;
+                        } else if (status === 'LIVE' || status === 'IN PROGRESS') {
+                            statusTag = ' [● LIVE NOW]';
+                        }
+                        opts += `<option value="${mid}">${mid}: ${p1} vs ${p2} · ${m.court || 'Court 1'} (${m.time || 'TBD'})${statusTag}</option>`;
+                    });
+                    opts += '</optgroup>';
+                });
+
+                sel.innerHTML = opts;
+            }
+
+            function fetchScheduledMatches() {
                 const onSuccess = function (res) {
                     if (res && res.success && res.schedule && res.schedule.length > 0) {
                         scheduledMatchesList = res.schedule;
-                        let opts = '<option value="">-- Choose from Scheduled Matches --</option>';
-                        scheduledMatchesList.forEach(m => {
-                            opts += "<option value=\"" + (m.matchId) + "\">" + (m.matchId) + " · " + (m.round) + " · " + (m.pair1) + " vs " + (m.pair2) + " (" + (m.court) + " · " + (m.category) + ")</option>";
-                        });
-                        sel.innerHTML = opts;
+                        populateScheduleDropdown(scheduledMatchesList);
                     }
                 };
 
@@ -2439,14 +2480,14 @@
 
             window.handleScheduledMatchSelect = function (matchId) {
                 if (!matchId) return;
-                const match = scheduledMatchesList.find(m => m.matchId === matchId);
+                const match = scheduledMatchesList.find(m => (m.matchId === matchId || m.id === matchId));
                 if (!match) return;
 
-                state.selectedMatchId = match.matchId;
-                if (modalP1Name) modalP1Name.value = match.pair1;
-                if (modalP2Name) modalP2Name.value = match.pair2;
+                state.selectedMatchId = match.matchId || match.id;
+                if (modalP1Name) modalP1Name.value = match.pair1 || match.team1Name || '';
+                if (modalP2Name) modalP2Name.value = match.pair2 || match.team2Name || '';
                 if (modalCategory) modalCategory.value = match.category || 'Below 35';
-                if (modalMatchId) modalMatchId.value = match.matchId + ' (' + (match.court || 'Court 1') + ')';
+                if (modalMatchId) modalMatchId.value = match.matchId || match.id;
             };
 
             // ─── 2-SECOND CONTINUOUS LIVE SCORE SYNC POLLING (HOST & CLIENTS) ───

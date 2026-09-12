@@ -983,13 +983,13 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 24px;
-    gap: 12px;
+    gap: 16px;
     max-width: 1440px;
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
   }
-  .logo{ display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; flex-shrink: 0; }
+  .logo{ display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; flex: 1 1 0; min-width: 0; justify-content: flex-start; }
   .logo .mark{width:36px;height:36px;flex-shrink:0; border-radius:50%;}
   .logo b{font-family:'Outfit','Inter', -apple-system, sans-serif; font-weight:800; font-size:14px; letter-spacing:0.04em; color:var(--ink); line-height:1.15; text-transform:uppercase; display:block; white-space:nowrap;}
   .logo span{font-family:'Space Mono', monospace; color:var(--court); font-size:10px; display:block; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; margin-top:1px; white-space:nowrap;}
@@ -1009,7 +1009,8 @@
     box-shadow: 0 10px 30px -4px rgba(20, 24, 15, 0.07), 0 4px 12px rgba(20, 24, 15, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.9);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     max-width: 100%;
-    margin: 0;
+    margin: 0 auto;
+    flex: 0 0 auto;
   }
   .navlinks:hover {
     box-shadow: 0 16px 40px -4px rgba(30, 122, 69, 0.12), 0 6px 16px rgba(20, 24, 15, 0.04);
@@ -1023,17 +1024,20 @@
     color: var(--ink);
     text-decoration: none;
     opacity: 0.78;
-    padding: 6px 11px;
-    border-radius: 999px;
+    width: 38px;
+    height: 38px;
+    padding: 0 !important;
+    border-radius: 50% !important;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     white-space: nowrap;
     position: relative;
-    letter-spacing: 0.01em;
-    font-size: 12.5px;
+  }
+  .navlinks a .nav-text {
+    display: none !important;
   }
   .navlinks a .nav-icon {
     display: inline-flex;
@@ -1042,19 +1046,23 @@
     flex-shrink: 0;
     transition: transform 0.2s ease;
   }
+  .navlinks a .nav-icon svg {
+    width: 17px;
+    height: 17px;
+  }
   .navlinks a:hover .nav-icon {
     transform: scale(1.15);
   }
   .navlinks a:hover {
     opacity: 1;
     color: var(--court-deep);
-    background: rgba(30, 122, 69, 0.09);
+    background: rgba(30, 122, 69, 0.12);
     transform: translateY(-1px);
   }
   .navlinks a.active {
     opacity: 1;
     color: #ffffff !important;
-    background: linear-gradient(135deg, #1E7A45 0%, #123F26 100%);
+    background: linear-gradient(135deg, #1E7A45 0%, #123F26 100%) !important;
     font-weight: 700;
     box-shadow: 0 4px 14px rgba(30, 122, 69, 0.35);
   }
@@ -1063,45 +1071,59 @@
   }
   .navlinks a.nav-pill-live {
     color: #c25e19 !important;
-    background: rgba(217, 114, 44, 0.1);
-    border: 1px solid rgba(217, 114, 44, 0.25);
-    font-weight: 700;
+    background: rgba(217, 114, 44, 0.12) !important;
+    border: 1px solid rgba(217, 114, 44, 0.3) !important;
     opacity: 1;
+    position: relative;
+    width: 38px;
+    height: 38px;
+    padding: 0 !important;
+    border-radius: 50% !important;
   }
   .navlinks a.nav-pill-live:hover {
-    background: rgba(217, 114, 44, 0.2);
+    background: rgba(217, 114, 44, 0.22) !important;
     box-shadow: 0 4px 12px rgba(217, 114, 44, 0.25);
     transform: translateY(-1px);
   }
   .navlinks a.nav-pill-admin {
     color: var(--court-deep) !important;
-    background: rgba(30, 122, 69, 0.08);
-    border: 1px solid rgba(30, 122, 69, 0.22);
-    font-weight: 700;
+    background: rgba(30, 122, 69, 0.08) !important;
+    border: 1px solid rgba(30, 122, 69, 0.25) !important;
     opacity: 1;
+    width: 38px;
+    height: 38px;
+    padding: 0 !important;
+    border-radius: 50% !important;
   }
   .navlinks a.nav-pill-admin:hover {
-    background: var(--court);
+    background: var(--court) !important;
     color: #ffffff !important;
     box-shadow: 0 4px 12px rgba(30, 122, 69, 0.3);
     transform: translateY(-1px);
   }
   .nav-live-dot {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: #ea580c;
     display: inline-block;
     animation: blinkDot 1.2s infinite;
+    position: absolute;
+    top: 5px;
+    right: 5px;
     flex-shrink: 0;
   }
-  .navlinks a[data-tooltip] {
+  .navlinks a[data-tooltip],
+  .nav-right-actions button[data-tooltip],
+  .nav-right-actions a[data-tooltip] {
     position: relative;
   }
-  .navlinks a[data-tooltip]::after {
+  .navlinks a[data-tooltip]::after,
+  .nav-right-actions button[data-tooltip]::after,
+  .nav-right-actions a[data-tooltip]::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: -32px;
+    bottom: -34px;
     left: 50%;
     transform: translateX(-50%) translateY(4px);
     background: rgba(15, 23, 42, 0.94);
@@ -1120,16 +1142,59 @@
     font-family: 'Inter', sans-serif;
     letter-spacing: 0.01em;
   }
-  .navlinks a[data-tooltip]:hover::after {
+  .navlinks a[data-tooltip]:hover::after,
+  .nav-right-actions button[data-tooltip]:hover::after,
+  .nav-right-actions a[data-tooltip]:hover::after {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
   }
-  [data-theme="dark"] .navlinks a[data-tooltip]::after {
+  [data-theme="dark"] .navlinks a[data-tooltip]::after,
+  [data-theme="dark"] .nav-right-actions button[data-tooltip]::after,
+  [data-theme="dark"] .nav-right-actions a[data-tooltip]::after {
     background: #142019;
     color: #f8fafc;
     border: 1px solid rgba(34, 197, 94, 0.3);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  }
+  .nav-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: flex-end;
+  }
+  .nav-right-actions .theme-toggle-btn {
+    width: 38px;
+    height: 38px;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    cursor: pointer;
+  }
+  .nav-right-actions .theme-toggle-btn .theme-text {
+    display: none !important;
+  }
+  .header-reg-btn.icon-only-reg {
+    width: 38px;
+    height: 38px;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 38px !important;
+  }
+  .header-reg-btn.icon-only-reg .reg-btn-text {
+    display: none !important;
+  }
+  .header-reg-btn.icon-only-reg .reg-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .btn{
     font-family:'Inter',sans-serif; font-weight:700; font-size:13px;
@@ -1723,17 +1788,19 @@
     font-family: 'Space Mono', monospace;
   }
   .bracket-tree {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
     gap: 20px;
     width: 100%;
     align-items: stretch;
-  }
-  .bracket-round {
+    overflow-x: auto;
+    padding-bottom: 12px;
+    -webkit-overflow-scrolling: touch;
+  }  .bracket-round {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    min-width: 0;
+    width: 290px;
+    min-width: 290px;
+    flex: 1;
   }
 
   @media (max-width: 768px) {
@@ -1748,8 +1815,8 @@
       padding: 0 4px 6px;
     }
     .bracket-round {
-      width: 205px;
-      min-width: 205px;
+      width: 270px;
+      min-width: 270px;
       flex-shrink: 0;
     }
   }
@@ -1790,17 +1857,17 @@
   }
   .bracket-card-header {
     background: var(--paper);
-    padding: 6px 10px;
+    padding: 7px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 10px;
-    font-weight: 700;
-    color: #666;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid rgba(20,24,15,0.06);
   }
   .bracket-card-header .badge-match {
     font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--court-deep);
   }
   .bracket-card-header .status-pill {
     padding: 2px 7px;
@@ -1826,32 +1893,46 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 9px 12px;
-    font-size: 12.5px;
+    padding: 10px 12px;
+    font-size: 13px;
     border-bottom: 1px solid rgba(20,24,15,0.06);
     transition: background 0.15s ease;
+    gap: 8px;
   }
   .bracket-team-row:last-child {
     border-bottom: none;
   }
   .bracket-team-row.winner {
-    background: rgba(30,122,69,0.08);
+    background: rgba(30,122,69,0.12);
     font-weight: 700;
     color: var(--court-deep);
+    border-left: 3.5px solid var(--court);
   }
   .bracket-team-name {
     display: flex;
     align-items: center;
-    gap: 6px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 150px;
+    gap: 7px;
+    flex: 1;
+    min-width: 0;
+    line-height: 1.35;
   }
-  .bracket-team-name .seed {
-    font-family: 'Space Mono', monospace;
-    font-size: 9.5px;
-    color: #999;
+  .bracket-team-name .team-bullet {
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .bracket-team-name .team-title {
+    word-break: break-word;
+    white-space: normal;
+  }
+  .bracket-team-name .player-name {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .bracket-team-name .player-sep {
+    color: var(--court);
+    font-weight: 800;
+    font-size: 11px;
+    margin: 0 2px;
   }
   .bracket-team-score {
     font-family: 'Space Mono', monospace;
@@ -1859,6 +1940,8 @@
     font-weight: 700;
     color: var(--ink);
     margin-left: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .bracket-card.champion-card {
     background: linear-gradient(135deg, #123F26, #1E7A45);
@@ -2127,16 +2210,72 @@
   }
   .match-teams-box {
     margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
   .match-team-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 0;
-    font-size: 14px;
+    padding: 8px 10px;
+    font-size: 13.5px;
+    line-height: 1.35;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
   }
-  .match-team-row strong {
+  .match-team-row.winner-row {
+    background: rgba(30, 122, 69, 0.12);
+    border-color: rgba(30, 122, 69, 0.3);
+    border-left: 3.5px solid var(--court);
+  }
+  .match-team-row .team-line {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 1;
+    min-width: 0;
+  }
+  .match-team-row .team-avatar {
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .match-team-row .player-name {
+    font-weight: 700;
     color: var(--ink);
+    word-break: break-word;
+  }
+  .match-team-row .player-sep {
+    color: var(--court);
+    font-weight: 800;
+    font-size: 11px;
+    margin: 0 3px;
+  }
+  .winner-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 800;
+    color: #15803d;
+    background: #dcfce7;
+    padding: 2px 7px;
+    border-radius: 6px;
+    white-space: nowrap;
+    margin-left: 6px;
+    border: 1px solid #86efac;
+    flex-shrink: 0;
+  }
+  .match-score-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--court-deep);
+    background: rgba(30,122,69,0.08);
+    border: 1px solid rgba(30,122,69,0.2);
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    text-align: center;
   }
   .match-vs-divider {
     text-align: center;
@@ -2144,7 +2283,7 @@
     font-weight: 800;
     letter-spacing: 0.08em;
     color: #999;
-    margin: 2px 0;
+    margin: 0;
   }
   .match-card-bottom {
     display: flex;
@@ -2688,6 +2827,30 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: flex-end;
+  }
+
+  .btn.btn-closed-pill {
+    background: rgba(239, 68, 68, 0.08) !important;
+    border: 1.5px solid rgba(239, 68, 68, 0.35) !important;
+    color: #dc2626 !important;
+    font-weight: 700;
+    cursor: not-allowed !important;
+    opacity: 0.95;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .btn.btn-closed-pill:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    background: rgba(239, 68, 68, 0.14) !important;
+  }
+  [data-theme="dark"] .btn.btn-closed-pill {
+    background: rgba(239, 68, 68, 0.16) !important;
+    border-color: rgba(239, 68, 68, 0.45) !important;
+    color: #f87171 !important;
   }
 
   .mobile-hamburger-btn {
@@ -2862,49 +3025,76 @@
 
   /* ================= RESOLUTION ADAPTATION & RESPONSIVE BREAKPOINTS ================= */
   
-  /* Laptops, MacBooks, Tablets & Scaled Windows Displays (1025px to 1400px) */
-  @media (max-width: 1400px) and (min-width: 1025px) {
+  /* Laptops & Standard Displays (1200px to 1440px) */
+  @media (max-width: 1440px) and (min-width: 1200px) {
     .site-header nav {
-      padding: 8px 16px;
-      gap: 10px;
+      padding: 8px 18px;
+      gap: 12px;
     }
     .logo .mark { width: 34px; height: 34px; }
     .logo b { font-size: 13px; }
     .logo span { font-size: 9px; }
     .navlinks {
+      gap: 4px;
+      padding: 3px 6px;
+    }
+    .navlinks a {
+      width: 38px;
+      height: 38px;
+      padding: 0 !important;
+      border-radius: 50% !important;
+    }
+    .navlinks a .nav-text,
+    .navlinks a.nav-pill-live .nav-text {
+      display: none !important;
+    }
+    .nav-right-actions .theme-toggle-btn,
+    .header-reg-btn.icon-only-reg {
+      width: 38px;
+      height: 38px;
+      padding: 0 !important;
+      border-radius: 50% !important;
+    }
+  }
+
+  /* Compact Laptops & Scaled Displays (1025px to 1199px) */
+  @media (max-width: 1199px) and (min-width: 1025px) {
+    .site-header nav {
+      padding: 8px 14px;
+      gap: 8px;
+    }
+    .logo .mark { width: 32px; height: 32px; }
+    .logo b { font-size: 12.5px; }
+    .logo span { font-size: 8.5px; }
+    .navlinks {
       gap: 3px;
       padding: 3px 5px;
     }
-    .navlinks a .nav-text {
-      display: none;
+    .navlinks a .nav-text,
+    .navlinks a.nav-pill-live .nav-text {
+      display: none !important;
     }
     .navlinks a {
-      padding: 7px 11px;
-      border-radius: 999px;
-      gap: 0;
+      width: 36px;
+      height: 36px;
+      padding: 0 !important;
+      border-radius: 50% !important;
     }
     .navlinks a.nav-pill-live {
-      padding: 7px 11px;
-      gap: 4px;
-    }
-    .navlinks a.nav-pill-live .nav-text {
-      display: inline-block;
-      font-size: 11px;
+      width: 36px;
+      height: 36px;
+      padding: 0 !important;
     }
     .navlinks a .nav-icon svg {
       width: 16px;
       height: 16px;
     }
-    .theme-toggle-btn {
-      padding: 6px 10px;
-      font-size: 11.5px;
-    }
-    .theme-toggle-btn .theme-text {
-      display: inline-block;
-    }
-    .header-reg-btn {
-      padding: 8px 15px;
-      font-size: 12px;
+    .nav-right-actions .theme-toggle-btn,
+    .header-reg-btn.icon-only-reg {
+      width: 36px;
+      height: 36px;
+      padding: 0 !important;
+      border-radius: 50% !important;
     }
   }
 
@@ -3921,13 +4111,16 @@
         </li>
       </ul>
       <div class="nav-right-actions">
-        <button id="btnHeaderPushAlerts" class="theme-toggle-btn" onclick="requestPublicPushSubscription('ALL')" title="Enable Live Push Alerts" aria-label="Notifications" style="display:inline-flex; align-items:center; gap:6px;">
-          <span style="font-size:14px;">🔔</span> <span class="theme-text" id="headerPushText">Alerts</span>
+        <button id="btnHeaderPushAlerts" class="theme-toggle-btn" onclick="requestPublicPushSubscription('ALL')" title="Enable Live Push Alerts" data-tooltip="Live Alerts" aria-label="Notifications">
+          <span style="font-size:15px; line-height:1;">🔔</span> <span class="theme-text" id="headerPushText" style="display:none;">Alerts</span>
         </button>
-        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleDarkTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
-          <span class="theme-icon">🌙</span> <span class="theme-text">Dark</span>
+        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleDarkTheme()" title="Toggle Dark/Light Mode" data-tooltip="Theme" aria-label="Toggle Theme">
+          <span class="theme-icon" style="font-size:15px; line-height:1;">🌙</span> <span class="theme-text" style="display:none;">Dark</span>
         </button>
-        <a href="javascript:void(0)" id="headerRegBtn" class="btn solid header-reg-btn" onclick="openRegister()">Register Pair</a>
+        <a href="javascript:void(0)" id="headerRegBtn" class="btn solid header-reg-btn icon-only-reg" onclick="openRegister()" title="Register Pair" data-tooltip="Register Pair">
+          <span class="reg-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg></span>
+          <span class="reg-btn-text" style="display:none;">Register</span>
+        </a>
         <button class="mobile-hamburger-btn" id="btnOpenSidebar" onclick="openMobileSidebar()"
           aria-label="Open Navigation Menu">
           <span></span>
@@ -4690,7 +4883,7 @@
           </svg>
           <span>Call Organizer</span>
         </a>
-        <a href="mailto:support@spbadminton.in" class="btn">
+        <a href="mailto:blistedx@gmail.com" class="btn">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -5538,19 +5731,19 @@
           tournament_subtitle: "Men's Doubles · Knockout · Suryodaya Park",
           venue: "Suryodaya Park Court",
           dates: "28–30 Aug 2026",
-          flash_message: "Registrations are OPEN! Limited team slots available.",
+          flash_message: "Registrations are CLOSED. Limited team slots filled.",
           flash_active: "NO",
-          registration_status: "OPEN",
+          registration_status: "CLOSED",
           upi_id: "blistedx@okhdfcbank",
           upi_name: "S.P. Badminton Club",
-          upi_qr_url: "",
+          upi_qr_url: "qr_code.png",
           stat_categories: "02",
           stat_players: "50+",
           stat_days: "03"
         },
         categories: [
-          { name: "Below 35", status: "ACTIVE", fee: "1000", maxPairs: "32" },
-          { name: "Above 35", status: "ACTIVE", fee: "1000", maxPairs: "32" }
+          { name: "Below 35", status: "INACTIVE", fee: "1000", maxPairs: "32" },
+          { name: "Above 35", status: "INACTIVE", fee: "1000", maxPairs: "32" }
         ]
       };
 
@@ -5559,13 +5752,51 @@
           .withSuccessHandler(onSuccess)
           .withFailureHandler(() => onSuccess(defaultConfig))
           .getPublicTournamentConfig();
-      } else if (SCRIPT_URL) {
-        fetch(SCRIPT_URL + "?action=getPublicConfig" + "&_=" + Date.now(), { cache: "no-store" })
-          .then(r => r.json())
-          .then(onSuccess)
-          .catch(() => onSuccess(defaultConfig));
       } else {
-        onSuccess(defaultConfig);
+        const primaryUrl = SCRIPT_URL ? (SCRIPT_URL + "?action=getPublicConfig" + "&_=" + Date.now()) : ("/exec?action=getPublicConfig&_=" + Date.now());
+        fetch(primaryUrl, { cache: "no-store" })
+          .then(r => {
+            if (!r.ok) throw new Error('Status ' + r.status);
+            return r.json();
+          })
+          .then(onSuccess)
+          .catch(() => {
+            fetch("/api/settings/public?_=" + Date.now(), { cache: "no-store" })
+              .then(r => {
+                if (!r.ok) throw new Error('Status ' + r.status);
+                return r.json();
+              })
+              .then(res => {
+                if (res && res.success && res.config) {
+                  const normalized = {
+                    success: true,
+                    settings: {
+                      tournament_name: res.config.tournamentName,
+                      tournament_subtitle: res.config.subtitle,
+                      venue: res.config.venue,
+                      dates: res.config.dates,
+                      flash_message: res.config.flashAnnouncement,
+                      flash_active: res.config.flashActive ? 'YES' : 'NO',
+                      registration_status: res.config.registrationStatus || 'CLOSED',
+                      upi_id: res.config.upiId,
+                      upi_name: res.config.upiPayeeName,
+                      upi_qr_url: res.config.upiQrUrl,
+                      logo_url: res.config.logoUrl
+                    },
+                    categories: (res.config.categories || []).map(c => ({
+                      name: c.name,
+                      status: c.active ? 'ACTIVE' : 'INACTIVE',
+                      fee: c.entryFee,
+                      maxPairs: c.maxSlots
+                    }))
+                  };
+                  onSuccess(normalized);
+                } else {
+                  onSuccess(defaultConfig);
+                }
+              })
+              .catch(() => onSuccess(defaultConfig));
+          });
       }
     }
 
@@ -5616,6 +5847,26 @@
       }
 
       return u;
+    }
+
+    function isRegistrationClosed(customCfg) {
+      const cfg = customCfg || publicConfigCache || {};
+      const settings = cfg.settings || cfg || {};
+      const config = cfg.config || {};
+      const categories = cfg.categories || settings.categories || [];
+
+      const rawStatus = (
+        settings.registration_status ||
+        settings.registrationStatus ||
+        config.registration_status ||
+        config.registrationStatus ||
+        cfg.registration_status ||
+        cfg.registrationStatus ||
+        'CLOSED'
+      ).toString().toUpperCase();
+
+      const allCatsInactive = Array.isArray(categories) && categories.length > 0 && categories.every(cat => (cat.status || '').toUpperCase() === 'INACTIVE');
+      return (rawStatus === 'CLOSED') || allCatsInactive;
     }
 
     function applyPublicConfig(cfg) {
@@ -5701,15 +5952,28 @@
       }
 
       // 5. Registration Status (OPEN / CLOSED) & Live CTA Reflection
-      const regStatus = (settings.registration_status || "OPEN").toUpperCase();
-      const isClosed = (regStatus === "CLOSED");
+      const isClosed = isRegistrationClosed(cfg);
 
       // Header button
       const headerBtn = document.getElementById('headerRegBtn') || document.querySelector('.header-reg-btn');
       if (headerBtn) {
-        headerBtn.innerText = isClosed ? "Registrations Closed" : "Register Pair";
-        headerBtn.style.opacity = isClosed ? "0.75" : "1";
-        headerBtn.style.cursor = isClosed ? "not-allowed" : "pointer";
+        if (isClosed) {
+          headerBtn.innerHTML = "<span class=\"reg-icon\">🔒</span><span class=\"reg-btn-text\" style=\"display:none;\">Closed</span>";
+          headerBtn.classList.add('btn-closed-pill');
+          headerBtn.classList.remove('solid');
+          headerBtn.style.opacity = "0.95";
+          headerBtn.style.cursor = "not-allowed";
+          headerBtn.title = "Registrations are currently closed";
+          headerBtn.setAttribute('data-tooltip', 'Registration Closed');
+        } else {
+          headerBtn.innerHTML = "<span class=\"reg-icon\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle><line x1=\"20\" y1=\"8\" x2=\"20\" y2=\"14\"></line><line x1=\"23\" y1=\"11\" x2=\"17\" y2=\"11\"></line></svg></span><span class=\"reg-btn-text\" style=\"display:none;\">Register</span>";
+          headerBtn.classList.remove('btn-closed-pill');
+          headerBtn.classList.add('solid');
+          headerBtn.style.opacity = "1";
+          headerBtn.style.cursor = "pointer";
+          headerBtn.title = "Register Your Pair";
+          headerBtn.setAttribute('data-tooltip', 'Register Pair');
+        }
       }
 
       // Mobile sidebar button
@@ -5817,10 +6081,9 @@
     }
 
     function openRegister(prefCat) {
-      const cfg = publicConfigCache || {};
-      const s = cfg.settings || cfg || {};
-      const regStatus = (s.registration_status || "OPEN").toUpperCase();
-      if (regStatus === 'CLOSED') {
+      if (isRegistrationClosed()) {
+        const cfg = publicConfigCache || {};
+        const s = cfg.settings || cfg || {};
         const tName = s.tournament_name || "S.P. Badminton Tourney 3";
         if (typeof showToast === 'function') {
           showToast("Registrations for " + tName + " are currently CLOSED.", "error");
@@ -6527,12 +6790,14 @@
           hBtn.style.color = '#15803d';
           if (hText) hText.innerText = 'Alerts ON';
           hBtn.setAttribute('title', 'Live Alerts are ON: you will receive match updates even when app is closed');
+          hBtn.setAttribute('data-tooltip', 'Alerts ON');
         } else {
           hBtn.style.background = '';
           hBtn.style.borderColor = '';
           hBtn.style.color = '';
           if (hText) hText.innerText = 'Alerts';
           hBtn.setAttribute('title', 'Enable Live Push Alerts');
+          hBtn.setAttribute('data-tooltip', 'Live Alerts');
         }
       }
 
@@ -6925,26 +7190,131 @@
       }
     };
 
+    function formatFullTeamNames(pairText) {
+      if (!pairText) return '<span class="tbd-team">TBD</span>';
+      const clean = String(pairText).trim();
+      if (clean.toLowerCase().startsWith('winner')) {
+        return '<span class="tbd-team" style="font-style:italic; opacity:0.85; font-size:12px; color:var(--court-deep);">⏳ ' + clean + '</span>';
+      }
+      if (clean.includes('/')) {
+        const parts = clean.split('/').map(p => p.trim());
+        return '<span class="player-name">' + parts[0] + '</span> <span class="player-sep">&amp;</span> <span class="player-name">' + parts.slice(1).join(' / ') + '</span>';
+      }
+      return '<span class="player-name">' + clean + '</span>';
+    }
+
     function renderBracketTree() {
       const container = document.getElementById('bracketTreeContainer');
       if (!container) return;
 
-      const data = defaultBracketData[currentBracketCat] || defaultBracketData['Below 35'];
+      const liveMatches = (allMatchesSchedule || []).filter(m => {
+        const c = (m.category || '').trim();
+        return (currentBracketCat === 'Below 35')
+          ? (c === 'Below 35' || c === 'Under 35' || c.toLowerCase().includes('below') || c.toLowerCase().includes('under'))
+          : (c === 'Above 35' || c.toLowerCase().includes('above'));
+      });
 
       function createMatchCard(m) {
-        const isLive = m.status === 'LIVE';
-        const isDone = m.status === 'DONE';
+        const statusUpper = (m.status || 'UPCOMING').toUpperCase();
+        const isLive = statusUpper === 'LIVE' || statusUpper === 'IN PROGRESS';
+        const isDone = statusUpper === 'COMPLETED' || statusUpper === 'DONE' || m.isComplete;
         const statusClass = isLive ? 'live' : (isDone ? 'done' : 'upcoming');
         const statusText = isLive ? '⚡ Live Now' : (isDone ? 'Completed' : 'Upcoming');
+        const mid = m.matchId || m.id || m.match_id || 'Match';
+        const crt = m.court || 'Court 1';
+        const p1 = m.pair1 || m.team1_name || m.team1Name || m.p1 || 'TBD';
+        const p2 = m.pair2 || m.team2_name || m.team2Name || m.p2 || 'TBD';
+        const s1 = m.score1 || (m.scores && m.scores[0] ? m.scores[0][0] : (m.score ? m.score.split(',')[0] : '—'));
+        const s2 = m.score2 || (m.scores && m.scores[0] ? m.scores[0][1] : '—');
 
-        return "\n        <div class=\"bracket-card\">\n          <div class=\"bracket-card-header\">\n            <span class=\"badge-match\">" + (m.id) + " · " + (m.court) + "</span>\n            <span class=\"status-pill " + (statusClass) + "\">" + (statusText) + "</span>\n          </div>\n          <div class=\"bracket-team-row " + (m.winner === 1 ? 'winner' : '') + "\">\n            <div class=\"bracket-team-name\">\n              <span class=\"seed\">" + (m.seed1 || '') + "</span>\n              <span>" + (m.p1 || 'TBD') + "</span>\n            </div>\n            <div class=\"bracket-team-score\">" + (m.score1 || '—') + "</div>\n          </div>\n          <div class=\"bracket-team-row " + (m.winner === 2 ? 'winner' : '') + "\">\n            <div class=\"bracket-team-name\">\n              <span class=\"seed\">" + (m.seed2 || '') + "</span>\n              <span>" + (m.p2 || 'TBD') + "</span>\n            </div>\n            <div class=\"bracket-team-score\">" + (m.score2 || '—') + "</div>\n          </div>\n        </div>\n      ";
+        const winStr = String(m.winner || '').trim().toLowerCase();
+        const p1Str = String(p1).trim().toLowerCase();
+        const p2Str = String(p2).trim().toLowerCase();
+        const isP1Win = isDone && winStr && (winStr === '1' || winStr === 'team1' || winStr === p1Str);
+        const isP2Win = isDone && winStr && (winStr === '2' || winStr === 'team2' || winStr === p2Str);
+
+        return `
+        <div class="bracket-card ${isLive ? 'is-live' : ''}">
+          <div class="bracket-card-header">
+            <span class="badge-match">${mid} · ${crt}</span>
+            <span class="status-pill ${statusClass}">${statusText}</span>
+          </div>
+          <div class="bracket-team-row ${isP1Win ? 'winner' : ''}">
+            <div class="bracket-team-name">
+              <span class="team-bullet">${isP1Win ? '🏆' : '🏸'}</span>
+              <span class="team-title">${formatFullTeamNames(p1)}</span>
+            </div>
+            <div class="bracket-team-score">${s1}</div>
+          </div>
+          <div class="bracket-team-row ${isP2Win ? 'winner' : ''}">
+            <div class="bracket-team-name">
+              <span class="team-bullet">${isP2Win ? '🏆' : '🏸'}</span>
+              <span class="team-title">${formatFullTeamNames(p2)}</span>
+            </div>
+            <div class="bracket-team-score">${s2}</div>
+          </div>
+        </div>`;
       }
 
+      if (liveMatches.length > 0) {
+        const r32 = liveMatches.filter(m => (m.round || '').toLowerCase().includes('32'));
+        const r16 = liveMatches.filter(m => (m.round || '').toLowerCase().includes('16'));
+        const qf = liveMatches.filter(m => (m.round || '').toLowerCase().includes('quarter') || (m.round || '').includes('QF'));
+        const sf = liveMatches.filter(m => (m.round || '').toLowerCase().includes('semi') || (m.round || '').includes('SF'));
+        const finals = liveMatches.filter(m => (m.round || '').toLowerCase().includes('final') && !(m.round || '').toLowerCase().includes('semi') && !(m.round || '').toLowerCase().includes('quarter'));
+
+        let roundsHtml = '';
+        if (r32.length > 0) {
+          roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Round of 32 (${r32.length} Matches)</div><div class="bracket-matches">${r32.map(createMatchCard).join('')}</div></div>`;
+        }
+        if (r16.length > 0) {
+          roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Round of 16 (${r16.length} Matches)</div><div class="bracket-matches">${r16.map(createMatchCard).join('')}</div></div>`;
+        }
+        if (qf.length > 0) {
+          roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Quarter-Finals (QF)</div><div class="bracket-matches">${qf.map(createMatchCard).join('')}</div></div>`;
+        }
+        if (sf.length > 0) {
+          roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Semi-Finals (SF)</div><div class="bracket-matches">${sf.map(createMatchCard).join('')}</div></div>`;
+        }
+        if (finals.length > 0) {
+          roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Grand Final 🏆</div><div class="bracket-matches">${finals.map(createMatchCard).join('')}</div></div>`;
+        }
+
+        if (roundsHtml) {
+          container.innerHTML = roundsHtml;
+          return;
+        }
+      }
+
+      const data = defaultBracketData[currentBracketCat] || defaultBracketData['Below 35'];
       let qfHtml = data.qf.map(createMatchCard).join('');
       let sfHtml = data.sf.map(createMatchCard).join('');
       let finalHtml = data.finals.map(createMatchCard).join('');
 
-      container.innerHTML = "\n      <!-- ROUND 1: QUARTER FINALS -->\n      <div class=\"bracket-round\">\n        <div class=\"bracket-round-title\">Quarter-Finals (QF)</div>\n        <div class=\"bracket-matches\">\n          " + (qfHtml) + "\n        </div>\n      </div>\n\n      <!-- ROUND 2: SEMI FINALS -->\n      <div class=\"bracket-round\">\n        <div class=\"bracket-round-title\">Semi-Finals (SF)</div>\n        <div class=\"bracket-matches\">\n          " + (sfHtml) + "\n        </div>\n      </div>\n\n      <!-- ROUND 3: CHAMPIONSHIP FINAL -->\n      <div class=\"bracket-round\">\n        <div class=\"bracket-round-title\">Final</div>\n        <div class=\"bracket-matches\">\n          " + (finalHtml) + "\n        </div>\n      </div>\n    ";
+      container.innerHTML = `
+      <!-- ROUND 1: QUARTER FINALS -->
+      <div class="bracket-round">
+        <div class="bracket-round-title">Quarter-Finals (QF)</div>
+        <div class="bracket-matches">
+          ${qfHtml}
+        </div>
+      </div>
+
+      <!-- ROUND 2: SEMI FINALS -->
+      <div class="bracket-round">
+        <div class="bracket-round-title">Semi-Finals (SF)</div>
+        <div class="bracket-matches">
+          ${sfHtml}
+        </div>
+      </div>
+
+      <!-- ROUND 3: CHAMPIONSHIP FINAL -->
+      <div class="bracket-round">
+        <div class="bracket-round-title">Final</div>
+        <div class="bracket-matches">
+          ${finalHtml}
+        </div>
+      </div>`;
     }
 
     function switchBracketCategory(cat) {
@@ -6959,17 +7329,7 @@
     /* ================= DAILY MATCH SCHEDULE & FIXTURES ENGINE ================= */
     let currentScheduleDay = 'Day 1';
     let currentScheduleCat = 'ALL';
-    let allMatchesSchedule = [
-      { matchId: 'M01', day: 'Day 1', date: '28 Oct 2026', time: '05:00 PM', court: 'Court 1', category: 'Below 35', round: 'Round of 16', pair1: 'Mohit / Rudra', pair2: 'Sharma / Gupta', score: '21-18, 21-16', status: 'COMPLETED' },
-      { matchId: 'M02', day: 'Day 1', date: '28 Oct 2026', time: '05:45 PM', court: 'Court 2', category: 'Below 35', round: 'Round of 16', pair1: 'Singh / Patel', pair2: 'Verma / Yadav', score: '21-19, 17-21, 14-12', status: 'LIVE' },
-      { matchId: 'M03', day: 'Day 1', date: '28 Oct 2026', time: '06:30 PM', court: 'Court 1', category: 'Above 35', round: 'Round of 16', pair1: 'Kapoor / Joshi', pair2: 'Kumar / Reddy', score: '-', status: 'UPCOMING' },
-      { matchId: 'M04', day: 'Day 1', date: '28 Oct 2026', time: '07:15 PM', court: 'Court 2', category: 'Above 35', round: 'Round of 16', pair1: 'Deshmukh / Roy', pair2: 'Iyer / Nair', score: '-', status: 'UPCOMING' },
-      { matchId: 'M05', day: 'Day 2', date: '29 Oct 2026', time: '05:00 PM', court: 'Court 1', category: 'Below 35', round: 'Quarter-Final', pair1: 'Winner M01', pair2: 'Winner M02', score: '-', status: 'UPCOMING' },
-      { matchId: 'M06', day: 'Day 2', date: '29 Oct 2026', time: '06:00 PM', court: 'Court 2', category: 'Above 35', round: 'Quarter-Final', pair1: 'Winner M03', pair2: 'Winner M04', score: '-', status: 'UPCOMING' },
-      { matchId: 'M07', day: 'Day 2', date: '29 Oct 2026', time: '07:30 PM', court: 'Court 1', category: 'Below 35', round: 'Semi-Final', pair1: 'TBD', pair2: 'TBD', score: '-', status: 'UPCOMING' },
-      { matchId: 'M08', day: 'Day 3', date: '30 Oct 2026', time: '05:30 PM', court: 'Center Court', category: 'Above 35', round: 'Grand Finale 🏆', pair1: 'Finalist 1', pair2: 'Finalist 2', score: '-', status: 'UPCOMING' },
-      { matchId: 'M09', day: 'Day 3', date: '30 Oct 2026', time: '06:45 PM', court: 'Center Court', category: 'Below 35', round: 'Grand Finale 🏆', pair1: 'Finalist 1', pair2: 'Finalist 2', score: '-', status: 'UPCOMING' }
-    ];
+    let allMatchesSchedule = [];
 
     function fetchAndRenderSchedule() {
       const onSuccess = function (res) {
@@ -6977,6 +7337,7 @@
           allMatchesSchedule = res.schedule;
         }
         renderScheduleGrid();
+        renderBracketTree();
       };
 
       if (isGAS) {
@@ -7023,29 +7384,49 @@
 
         const isFinal = (m.round || '').toLowerCase().includes('final');
         const isLive = statusClass === 'live';
+        const isDone = statusClass === 'completed' || m.isComplete;
+
+        const p1 = m.pair1 || m.team1_name || m.team1Name || 'Team A';
+        const p2 = m.pair2 || m.team2_name || m.team2Name || 'Team B';
+        const winStr = String(m.winner || '').trim().toLowerCase();
+        const p1Str = String(p1).trim().toLowerCase();
+        const p2Str = String(p2).trim().toLowerCase();
+        const isP1Win = isDone && winStr && (winStr === '1' || winStr === 'team1' || winStr === p1Str);
+        const isP2Win = isDone && winStr && (winStr === '2' || winStr === 'team2' || winStr === p2Str);
 
         let scoreBox = '';
-        if (m.score && m.score !== '-') {
-          scoreBox = '<div style="font-family:\'Space Mono\',monospace; font-size:12px; font-weight:700; color:var(--court-deep); background:rgba(30,122,69,0.08); padding:6px 10px; border-radius:8px; margin-bottom:12px; text-align:center;">Score: ' + m.score + '</div>';
+        if (m.scores && Array.isArray(m.scores) && m.scores.length > 0 && (m.scores[0][0] > 0 || m.scores[0][1] > 0)) {
+          const setsList = m.scores.filter(s => s && (s[0] > 0 || s[1] > 0)).map((s, idx) => `Set ${idx + 1}: ${s[0]}-${s[1]}`).join(' &nbsp;|&nbsp; ');
+          scoreBox = '<div class="match-score-pill">🏸 ' + setsList + (m.sets ? ` (${m.sets[0]} - ${m.sets[1]} Sets)` : '') + '</div>';
+        } else if (m.score && m.score !== '-') {
+          scoreBox = '<div class="match-score-pill">🏸 Score: ' + m.score + '</div>';
         }
 
         html += '<div class="match-timeline-card ' + (isLive ? 'live-card' : '') + '">' +
           '<div class="match-card-top">' +
           '<div class="match-meta-pill">' +
-          '<span>' + (m.time || 'TBD') + '</span>' +
+          '<span>' + (m.time || m.scheduledTime || 'TBD') + '</span>' +
           '<span>·</span>' +
           '<span>' + (m.court || 'Court 1') + '</span>' +
           '</div>' +
           '<span class="match-stage-badge ' + (isFinal ? 'final' : '') + '">' + (m.round || 'Round of 16') + '</span>' +
           '</div>' +
           '<div class="match-teams-box">' +
-          '<div class="match-team-row"><strong>' + (m.pair1 || 'Team A') + '</strong></div>' +
+          '<div class="match-team-row ' + (isP1Win ? 'winner-row' : '') + '">' +
+          '<div class="team-line"><span class="team-avatar">' + (isP1Win ? '🏆' : '🏸') + '</span>' +
+          formatFullTeamNames(p1) + '</div>' +
+          (isP1Win ? '<span class="winner-badge">WINNER</span>' : '') +
+          '</div>' +
           '<div class="match-vs-divider">— VS —</div>' +
-          '<div class="match-team-row"><strong>' + (m.pair2 || 'Team B') + '</strong></div>' +
+          '<div class="match-team-row ' + (isP2Win ? 'winner-row' : '') + '">' +
+          '<div class="team-line"><span class="team-avatar">' + (isP2Win ? '🏆' : '🏸') + '</span>' +
+          formatFullTeamNames(p2) + '</div>' +
+          (isP2Win ? '<span class="winner-badge">WINNER</span>' : '') +
+          '</div>' +
           '</div>' +
           scoreBox +
           '<div class="match-card-bottom">' +
-          '<span class="match-category-tag">' + (m.category || 'Below 35') + '</span>' +
+          '<span class="match-category-tag">' + (m.category || 'Below 35') + ' · ' + (m.matchId || m.id || '') + '</span>' +
           '<span class="match-status-pill ' + statusClass + '">' + statusText + '</span>' +
           '</div>' +
           '</div>';
@@ -7299,11 +7680,23 @@
             if (d && d.match) renderTickerData(d.match);
             else if (d) renderTickerData(d);
           });
+          webSocket.on('schedule_updated', function (d) {
+            if (d && d.schedule && d.schedule.length > 0) {
+              allMatchesSchedule = d.schedule;
+              renderScheduleGrid();
+              renderBracketTree();
+            } else {
+              fetchAndRenderSchedule();
+            }
+          });
           webSocket.on('settings_update', function (updatedSettings) {
             if (updatedSettings) {
               const currentCfg = window.publicConfigCache || {};
+              const newSettings = (updatedSettings.settings || updatedSettings);
+              const newCats = updatedSettings.categories || currentCfg.categories;
               const merged = Object.assign({}, currentCfg, {
-                settings: Object.assign({}, currentCfg.settings || {}, updatedSettings)
+                settings: Object.assign({}, currentCfg.settings || {}, newSettings),
+                categories: newCats || currentCfg.categories
               });
               window.publicConfigCache = merged;
               try { localStorage.setItem('sp3_public_config', JSON.stringify(merged)); } catch (e) {}
@@ -7574,6 +7967,7 @@
             if (icon) icon.innerText = isDark ? '☀️' : '🌙';
             if (text) text.innerText = isDark ? (btn.classList.contains('full-width') ? 'Light Theme' : 'Light') : (btn.classList.contains('full-width') ? 'Dark Theme' : 'Dark');
             btn.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            btn.setAttribute('data-tooltip', isDark ? 'Light Theme' : 'Dark Theme');
           }
         });
       } catch (e) { }

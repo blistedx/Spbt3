@@ -1148,6 +1148,478 @@
             margin-top: 4px;
         }
 
+        /* ================= DRAG & DROP BRACKET SCHEDULER ================= */
+        .bracket-scheduler-card {
+            background: #ffffff;
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .sched-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 18px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .sched-cat-pills {
+            display: flex;
+            gap: 8px;
+            background: var(--paper-dim);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+        }
+
+        .sched-cat-pill {
+            padding: 8px 16px;
+            border-radius: 9px;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            background: transparent;
+            color: var(--ink);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sched-cat-pill.active {
+            background: var(--court);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(30, 122, 69, 0.25);
+        }
+
+        .sched-actions-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .sched-size-select {
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1.5px solid var(--line);
+            background: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ink);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .sched-size-select:focus {
+            border-color: var(--court);
+        }
+
+        .btn-sched-action {
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            border: 1.5px solid var(--line);
+            background: #fff;
+            color: var(--ink);
+        }
+
+        .btn-sched-action:hover {
+            background: var(--paper);
+            border-color: var(--court);
+        }
+
+        .btn-sched-action.primary {
+            background: var(--court);
+            color: #fff;
+            border-color: var(--court);
+            box-shadow: 0 4px 12px rgba(30, 122, 69, 0.25);
+        }
+
+        .btn-sched-action.primary:hover {
+            background: var(--court-deep);
+        }
+
+        .btn-sched-action.danger {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .btn-sched-action.danger:hover {
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        .sched-workspace {
+            display: grid;
+            grid-template-columns: 310px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .sched-workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sched-pool-pane {
+            background: var(--paper);
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sched-pool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sched-pool-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sched-pool-badge {
+            background: rgba(30, 122, 69, 0.12);
+            color: var(--court);
+            border: 1px solid rgba(30, 122, 69, 0.25);
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .sched-pool-search {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            font-size: 12px;
+            outline: none;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .sched-pool-search:focus {
+            border-color: var(--court);
+        }
+
+        .sched-pool-list {
+            max-height: 560px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+        }
+
+        .sched-pool-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sched-pool-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .team-pool-item {
+            background: #fff;
+            border: 1.5px solid var(--line);
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: grab;
+            user-select: none;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+        }
+
+        .team-pool-item:active {
+            cursor: grabbing;
+        }
+
+        .team-pool-item:hover {
+            border-color: var(--court);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(30, 122, 69, 0.1);
+        }
+
+        .team-pool-item.selected-for-place {
+            border-color: var(--court);
+            background: rgba(30, 122, 69, 0.06);
+            box-shadow: 0 0 0 2px var(--court);
+        }
+
+        .team-pool-item.is-dragging {
+            opacity: 0.4;
+            transform: scale(0.97);
+        }
+
+        .team-grip {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .team-seed-badge {
+            background: var(--paper-dim);
+            color: #475569;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .team-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .team-item-names {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .team-item-reg {
+            font-size: 10px;
+            color: #64748b;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .sched-bracket-pane {
+            background: var(--paper);
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .sched-bracket-columns {
+            display: flex;
+            gap: 16px;
+            min-width: min-content;
+            align-items: stretch;
+        }
+
+        .sched-round-column {
+            display: flex;
+            flex-direction: column;
+            min-width: 290px;
+            max-width: 320px;
+            flex: 1;
+        }
+
+        .sched-round-hdr {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--court-deep);
+            background: rgba(30, 122, 69, 0.1);
+            border: 1px solid rgba(30, 122, 69, 0.2);
+            padding: 6px 12px;
+            border-radius: 999px;
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .sched-matches-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            justify-content: space-around;
+            flex: 1;
+        }
+
+        .sched-match-card {
+            background: #ffffff;
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .sched-match-card:hover {
+            border-color: rgba(30, 122, 69, 0.4);
+            box-shadow: 0 4px 14px rgba(30, 122, 69, 0.08);
+        }
+
+        .sched-match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #475569;
+            border-bottom: 1px dashed var(--line);
+            padding-bottom: 6px;
+        }
+
+        .sched-match-id {
+            color: var(--court);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .sched-match-court-sel {
+            font-size: 10.5px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            background: var(--paper);
+            color: var(--ink);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .sched-match-time-inp {
+            font-size: 10.5px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            background: var(--paper);
+            color: var(--ink);
+            width: 86px;
+            font-weight: 600;
+        }
+
+        .sched-slot {
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 11.5px;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-height: 40px;
+            box-sizing: border-box;
+        }
+
+        .sched-slot.empty {
+            border: 1.5px dashed #cbd5e1;
+            background: #f8fafc;
+            color: #64748b;
+            cursor: pointer;
+            justify-content: center;
+        }
+
+        .sched-slot.empty:hover {
+            border-color: var(--court);
+            background: rgba(30, 122, 69, 0.04);
+            color: var(--court);
+        }
+
+        .sched-slot.empty.drag-over {
+            border-color: var(--court);
+            background: rgba(30, 122, 69, 0.14);
+            border-style: solid;
+            color: var(--court-deep);
+            transform: scale(1.02);
+        }
+
+        .sched-slot.filled {
+            border: 1.5px solid var(--line);
+            background: #ffffff;
+            cursor: grab;
+        }
+
+        .sched-slot.filled:active {
+            cursor: grabbing;
+        }
+
+        .sched-slot.filled:hover {
+            border-color: var(--court);
+        }
+
+        .sched-slot.filled.drag-over {
+            border-color: var(--court);
+            background: rgba(30, 122, 69, 0.1);
+        }
+
+        .slot-team-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-weight: 700;
+            color: var(--ink);
+            flex: 1;
+            min-width: 0;
+        }
+
+        .btn-unassign-slot {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+
+        .btn-unassign-slot:hover {
+            background: #ef4444;
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .sched-vs-badge {
+            text-align: center;
+            font-size: 9.5px;
+            font-weight: 800;
+            color: #94a3b8;
+            letter-spacing: 0.1em;
+            line-height: 1;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 1024px) {
             .two-col {
@@ -1960,6 +2432,88 @@
 
             <!-- ================= VIEW 3: SCHEDULE MATCHES ================= -->
             <div id="view-schedule" class="tab-view">
+                <!-- INTERACTIVE DRAG & DROP TOURNAMENT BRACKET SCHEDULER -->
+                <div class="bracket-scheduler-card">
+                    <div class="sched-toolbar">
+                        <div>
+                            <h3 style="font-size:18px; font-weight:800; margin:0 0 4px; display:flex; align-items:center; gap:8px;">
+                                <span>🏸 Visual Drag &amp; Drop Bracket Scheduler</span>
+                                <span class="pending-pill" style="background:rgba(30,122,69,0.12); color:var(--court); border:1px solid rgba(30,122,69,0.25); font-size:11px; padding:2px 8px;">Auto-Scales 8 / 16 / 32 Teams</span>
+                            </h3>
+                            <p style="font-size:12px; color:#64748b; margin:0;">Drag and drop registered teams into tournament match slots. Teams are locked on placement with 0 duplicates guaranteed.</p>
+                        </div>
+
+                        <!-- Category Switcher Pills -->
+                        <div class="sched-cat-pills">
+                            <button type="button" class="sched-cat-pill active" id="btnSchedCatUnder35" onclick="switchSchedulerCategory('Below 35')">
+                                <span>Below 35</span>
+                                <span id="schedCountBadgeUnder35" style="font-size:11px; opacity:0.85;">(32 Teams)</span>
+                            </button>
+                            <button type="button" class="sched-cat-pill" id="btnSchedCatAbove35" onclick="switchSchedulerCategory('Above 35')">
+                                <span>Above 35</span>
+                                <span id="schedCountBadgeAbove35" style="font-size:11px; opacity:0.85;">(32 Teams)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Actions & Controls Toolbar -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px; background:#f8fafc; padding:10px 14px; border-radius:12px; border:1px solid #e2e8f0;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <label style="font-size:11.5px; font-weight:700; color:#475569; margin:0;">Bracket Size:</label>
+                            <select id="schedBracketSizeSelect" class="sched-size-select" onchange="changeSchedulerBracketSize(this.value)">
+                                <option value="auto">Auto-Detect from Registrations</option>
+                                <option value="32">32 Teams (Round of 32 · 16 Matches)</option>
+                                <option value="16">16 Teams (Round of 16 · 8 Matches)</option>
+                                <option value="8">8 Teams (Quarter-Finals · 4 Matches)</option>
+                            </select>
+                            <span id="schedSizeIndicator" style="font-size:11px; font-weight:700; color:var(--court); background:rgba(30,122,69,0.08); padding:3px 8px; border-radius:6px;">Auto (32 Teams)</span>
+                        </div>
+
+                        <div class="sched-actions-bar">
+                            <button type="button" class="btn-sched-action" onclick="autoSeedBracket(true)" title="Randomly shuffle and pair all available teams with zero duplicates">
+                                <span>🎲 Auto-Seed / Shuffle</span>
+                            </button>
+                            <button type="button" class="btn-sched-action" onclick="autoSequenceTimesAndCourts()" title="Sequentially assign match times and alternate Court 1 / Court 2">
+                                <span>⏱️ Auto-Schedule Times &amp; Courts</span>
+                            </button>
+                            <button type="button" class="btn-sched-action danger" onclick="clearBracketScheduler()" title="Remove all teams from slots back into pool">
+                                <span>🧹 Clear Bracket</span>
+                            </button>
+                            <button type="button" class="btn-sched-action primary" onclick="saveAndPublishBracketSchedule()" title="Save all bracket fixtures directly to server database">
+                                <span>💾 Save &amp; Publish Schedule</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Workspace: Unassigned Pool (Left) + Bracket Tree (Right) -->
+                    <div class="sched-workspace">
+                        <!-- LEFT COLUMN: UNASSIGNED TEAMS POOL -->
+                        <div class="sched-pool-pane">
+                            <div class="sched-pool-header">
+                                <div class="sched-pool-title">
+                                    <span>👥 Available Teams Pool</span>
+                                </div>
+                                <span id="schedPoolCountBadge" class="sched-pool-badge">32 Available</span>
+                            </div>
+                            <input type="text" id="schedPoolSearchInput" class="sched-pool-search" placeholder="🔍 Search team, player, seed..." oninput="renderSchedulerTeamPool()" />
+                            <div style="font-size:10.5px; color:#64748b; margin-top:-4px; display:flex; justify-content:space-between;">
+                                <span>💡 Drag card or click to place</span>
+                                <span id="schedSelectionHint" style="color:var(--court); font-weight:700; display:none;">Tap slot to assign</span>
+                            </div>
+                            <div id="schedPoolContainer" class="sched-pool-list">
+                                <!-- Dynamic Team Cards -->
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: INTERACTIVE BRACKET FIXTURES CANVAS -->
+                        <div class="sched-bracket-pane">
+                            <div id="schedBracketColumnsContainer" class="sched-bracket-columns">
+                                <!-- Dynamic Round Columns (Round of 32 / R16 / QF / SF / Finals) -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="two-col">
                     <!-- QUICK SCHEDULE MATCH FORM -->
                     <div class="card">
@@ -2942,6 +3496,8 @@
 
             if (viewName === 'schedule') {
                 fetchAdminMatchesReport();
+                try { initBracketScheduler(); } catch (e) {}
+                try { renderAdminBracketTree(); } catch (e) {}
             }
 
             // If switching to settings tab, ensure fields are populated immediately
@@ -3107,6 +3663,7 @@
                 updateDashboardStats(allRegistrations);
                 applyFilters();
                 populateMatchPairDropdowns();
+                try { initBracketScheduler(); } catch (e) {}
                 renderActivityLog(allRegistrations);
             };
 
@@ -3535,6 +4092,8 @@
                     }));
                 }
                 renderAdminScheduleList();
+                try { initBracketScheduler(); } catch (e) {}
+                try { renderAdminBracketTree(); } catch (e) {}
             };
 
             if (isGAS) {
@@ -3616,6 +4175,644 @@
                 .catch(err => {
                     console.error('Error saving match schedule:', err);
                 });
+            }
+        }
+
+        /* ================= INTERACTIVE DRAG & DROP BRACKET SCHEDULER ================= */
+        let currentSchedCat = 'Below 35';
+        let currentSchedSizeSetting = 'auto'; // 'auto', '8', '16', '32'
+        let activeSelectedTeamId = null;      // for click-to-place touch workflow
+        let schedBracketData = {
+            'Below 35': {
+                size: 32,
+                slots: {}, // { 'M01_T1': teamObj, 'M01_T2': teamObj, ... }
+                meta: {}   // { 'M01': { court: 'Court 1', time: '05:00 PM', round: 'Round of 32' } }
+            },
+            'Above 35': {
+                size: 32,
+                slots: {},
+                meta: {}
+            }
+        };
+
+        function getCategoryApprovedTeams(cat) {
+            const targetCat = cat || currentSchedCat;
+            return (allRegistrations || []).filter(r => {
+                const c = (r.category || '').trim();
+                const matchCat = (targetCat === 'Below 35') 
+                    ? (c === 'Below 35' || c === 'Under 35' || c.toLowerCase().includes('below') || c.toLowerCase().includes('under'))
+                    : (c === 'Above 35' || c.toLowerCase().includes('above'));
+                const statusOk = (r.status === 'APPROVED' || r.status === 'CONFIRMED' || r.paymentStatus === 'VERIFIED' || r.payment_status === 'VERIFIED');
+                return matchCat && statusOk;
+            });
+        }
+
+        function calculateEffectiveBracketSize(cat) {
+            if (currentSchedSizeSetting !== 'auto') {
+                return parseInt(currentSchedSizeSetting, 10);
+            }
+            const teams = getCategoryApprovedTeams(cat);
+            const count = teams.length;
+            if (count <= 8) return 8;
+            if (count <= 16) return 16;
+            return 32;
+        }
+
+        function initBracketScheduler() {
+            // Update badge counts for both categories
+            const b35Teams = getCategoryApprovedTeams('Below 35');
+            const a35Teams = getCategoryApprovedTeams('Above 35');
+            const b35Badge = document.getElementById('schedCountBadgeUnder35');
+            const a35Badge = document.getElementById('schedCountBadgeAbove35');
+            if (b35Badge) b35Badge.textContent = `(${b35Teams.length} Teams)`;
+            if (a35Badge) a35Badge.textContent = `(${a35Teams.length} Teams)`;
+
+            // If existing matches in allAdminSchedule, populate slots if not yet loaded
+            ['Below 35', 'Above 35'].forEach(cat => {
+                const catMatches = (allAdminSchedule || []).filter(m => {
+                    const c = (m.category || '').trim();
+                    return (cat === 'Below 35') ? (c === 'Below 35' || c === 'Under 35') : (c === 'Above 35');
+                });
+
+                if (catMatches.length > 0 && Object.keys(schedBracketData[cat].slots).length === 0) {
+                    const teams = getCategoryApprovedTeams(cat);
+                    catMatches.forEach((m, idx) => {
+                        const mId = m.matchId || ('M' + String(idx + 1).padStart(2, '0'));
+                        schedBracketData[cat].meta[mId] = {
+                            court: m.court || ((idx % 2 === 0) ? 'Court 1' : 'Court 2'),
+                            time: m.time || m.scheduledTime || '05:00 PM',
+                            round: m.round || (catMatches.length > 8 ? 'Round of 32' : (catMatches.length > 4 ? 'Round of 16' : 'Quarter-Final'))
+                        };
+
+                        // Match team 1
+                        const p1Name = m.pair1 || m.team1_name || m.team1Name || '';
+                        const p1Id = m.team1Id || m.team1_id;
+                        const t1 = teams.find(t => (p1Id && t.regId === p1Id) || (p1Name && `${t.player1Name} / ${t.player2Name}`.toLowerCase() === p1Name.toLowerCase()));
+                        if (t1) {
+                            schedBracketData[cat].slots[mId + '_T1'] = t1;
+                        } else if (p1Name && p1Name !== 'Team 1' && !p1Name.startsWith('Winner')) {
+                            schedBracketData[cat].slots[mId + '_T1'] = { regId: 'CUSTOM_' + idx + '_1', player1Name: p1Name.split('/')[0]?.trim() || p1Name, player2Name: p1Name.split('/')[1]?.trim() || '' };
+                        }
+
+                        // Match team 2
+                        const p2Name = m.pair2 || m.team2_name || m.team2Name || '';
+                        const p2Id = m.team2Id || m.team2_id;
+                        const t2 = teams.find(t => (p2Id && t.regId === p2Id) || (p2Name && `${t.player1Name} / ${t.player2Name}`.toLowerCase() === p2Name.toLowerCase()));
+                        if (t2) {
+                            schedBracketData[cat].slots[mId + '_T2'] = t2;
+                        } else if (p2Name && p2Name !== 'Team 2' && !p2Name.startsWith('Winner')) {
+                            schedBracketData[cat].slots[mId + '_T2'] = { regId: 'CUSTOM_' + idx + '_2', player1Name: p2Name.split('/')[0]?.trim() || p2Name, player2Name: p2Name.split('/')[1]?.trim() || '' };
+                        }
+                    });
+                }
+            });
+
+            renderSchedulerUI();
+        }
+
+        function switchSchedulerCategory(cat) {
+            currentSchedCat = cat;
+            activeSelectedTeamId = null;
+
+            const btnU = document.getElementById('btnSchedCatUnder35');
+            const btnA = document.getElementById('btnSchedCatAbove35');
+            if (btnU) btnU.classList.toggle('active', cat === 'Below 35');
+            if (btnA) btnA.classList.toggle('active', cat === 'Above 35');
+
+            renderSchedulerUI();
+        }
+
+        function changeSchedulerBracketSize(sizeVal) {
+            currentSchedSizeSetting = sizeVal;
+            renderSchedulerUI();
+        }
+
+        function renderSchedulerUI() {
+            const size = calculateEffectiveBracketSize(currentSchedCat);
+            schedBracketData[currentSchedCat].size = size;
+
+            const indicator = document.getElementById('schedSizeIndicator');
+            if (indicator) {
+                indicator.textContent = (currentSchedSizeSetting === 'auto' ? `Auto (${size} Teams)` : `${size} Teams Bracket`);
+            }
+
+            renderSchedulerTeamPool();
+            renderSchedulerBracketColumns();
+        }
+
+        function renderSchedulerTeamPool() {
+            const poolContainer = document.getElementById('schedPoolContainer');
+            const poolCountBadge = document.getElementById('schedPoolCountBadge');
+            const searchInput = document.getElementById('schedPoolSearchInput');
+            const selHint = document.getElementById('schedSelectionHint');
+            if (!poolContainer) return;
+
+            const allCatTeams = getCategoryApprovedTeams(currentSchedCat);
+            const size = schedBracketData[currentSchedCat].size;
+            const matchCount = Math.floor(size / 2);
+
+            // Find all assigned teams in Round 1
+            const assignedRegIds = new Set();
+            for (let i = 1; i <= matchCount; i++) {
+                const mId = 'M' + String(i).padStart(2, '0');
+                const t1 = schedBracketData[currentSchedCat].slots[mId + '_T1'];
+                const t2 = schedBracketData[currentSchedCat].slots[mId + '_T2'];
+                if (t1 && t1.regId) assignedRegIds.add(t1.regId);
+                if (t2 && t2.regId) assignedRegIds.add(t2.regId);
+            }
+
+            // Filter unassigned teams
+            let unassigned = allCatTeams.filter(t => !assignedRegIds.has(t.regId));
+            const totalAssigned = assignedRegIds.size;
+
+            if (poolCountBadge) {
+                poolCountBadge.textContent = `${unassigned.length} in Pool (${totalAssigned}/${size} Assigned)`;
+            }
+
+            if (selHint) {
+                selHint.style.display = activeSelectedTeamId ? 'inline' : 'none';
+            }
+
+            const query = (searchInput?.value || '').toLowerCase().trim();
+            if (query) {
+                unassigned = unassigned.filter(t => {
+                    const text = `${t.regId} ${t.player1Name} ${t.player2Name} ${t.player1Phone || ''}`.toLowerCase();
+                    return text.includes(query);
+                });
+            }
+
+            if (unassigned.length === 0) {
+                poolContainer.innerHTML = `
+                    <div style="padding:24px 12px; text-align:center; color:#64748b; font-size:12px; background:#fff; border-radius:10px; border:1px dashed var(--line);">
+                        ${allCatTeams.length === 0 ? 'No approved teams registered in this category yet.' : (query ? 'No matching teams in pool.' : '🎉 All registered teams have been assigned to bracket match slots!')}
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            unassigned.forEach((team) => {
+                const seedNum = allCatTeams.findIndex(t => t.regId === team.regId) + 1;
+                const isSelected = activeSelectedTeamId === team.regId;
+                const pairNames = `${team.player1Name || 'Player 1'} & ${team.player2Name || 'Player 2'}`;
+
+                html += `
+                    <div class="team-pool-item ${isSelected ? 'selected-for-place' : ''}" 
+                         id="pool_team_${team.regId}"
+                         draggable="true" 
+                         ondragstart="handleSchedTeamDragStart(event, '${team.regId}')"
+                         ondragend="handleSchedTeamDragEnd(event)"
+                         onclick="handleSchedTeamClickToSelect('${team.regId}')"
+                         title="Drag to match slot or click to assign">
+                        <span class="team-grip" title="Drag">⠿</span>
+                        <span class="team-seed-badge">#${seedNum}</span>
+                        <div class="team-item-info">
+                            <div class="team-item-names">${pairNames}</div>
+                            <div class="team-item-reg">${team.regId} · ${team.player1Phone ? team.player1Phone.slice(-4).padStart(10, '•') : ''}</div>
+                        </div>
+                        <span style="font-size:13px; opacity:0.6;">👉</span>
+                    </div>
+                `;
+            });
+
+            poolContainer.innerHTML = html;
+        }
+
+        function renderSchedulerBracketColumns() {
+            const container = document.getElementById('schedBracketColumnsContainer');
+            if (!container) return;
+
+            const size = schedBracketData[currentSchedCat].size;
+            const round1MatchCount = Math.floor(size / 2);
+
+            let round1Title = 'Quarter-Finals (QF)';
+            if (size === 32) round1Title = 'Round of 32 (16 Matches)';
+            else if (size === 16) round1Title = 'Round of 16 (8 Matches)';
+
+            // Round 1 matches cards HTML
+            let r1Html = '';
+            for (let i = 1; i <= round1MatchCount; i++) {
+                const mId = 'M' + String(i).padStart(2, '0');
+                const defaultCourt = (i % 2 === 1) ? 'Court 1' : 'Court 2';
+                const baseMin = (Math.floor((i - 1) / 2) * 40);
+                const hrs = 17 + Math.floor(baseMin / 60);
+                const mins = baseMin % 60;
+                const period = hrs >= 12 ? 'PM' : 'AM';
+                const dispHrs = (hrs % 12 === 0) ? 12 : (hrs % 12);
+                const defaultTime = `${String(dispHrs).padStart(2, '0')}:${String(mins).padStart(2, '0')} ${period}`;
+
+                const meta = schedBracketData[currentSchedCat].meta[mId] || { court: defaultCourt, time: defaultTime, round: round1Title.split('(')[0].trim() };
+                const slot1 = schedBracketData[currentSchedCat].slots[mId + '_T1'];
+                const slot2 = schedBracketData[currentSchedCat].slots[mId + '_T2'];
+
+                r1Html += createSchedulerMatchCardHtml(mId, meta, slot1, slot2);
+            }
+
+            let fullColsHtml = `
+                <!-- ROUND 1 -->
+                <div class="sched-round-column">
+                    <div class="sched-round-hdr">${round1Title}</div>
+                    <div class="sched-matches-stack">
+                        ${r1Html}
+                    </div>
+                </div>
+            `;
+
+            // Subsequent Rounds (Auto-Chained Preview)
+            if (size === 32) {
+                fullColsHtml += createSubsequentRoundHtml('Round of 16', 8, 17, 'M01', 2);
+                fullColsHtml += createSubsequentRoundHtml('Quarter-Finals', 4, 25, 'M17', 4);
+                fullColsHtml += createSubsequentRoundHtml('Semi-Finals', 2, 29, 'M25', 8);
+                fullColsHtml += createSubsequentRoundHtml('Grand Final 🏆', 1, 31, 'M29', 16);
+            } else if (size === 16) {
+                fullColsHtml += createSubsequentRoundHtml('Quarter-Finals', 4, 9, 'M01', 2);
+                fullColsHtml += createSubsequentRoundHtml('Semi-Finals', 2, 13, 'M09', 4);
+                fullColsHtml += createSubsequentRoundHtml('Grand Final 🏆', 1, 15, 'M13', 8);
+            } else {
+                fullColsHtml += createSubsequentRoundHtml('Semi-Finals', 2, 5, 'M01', 2);
+                fullColsHtml += createSubsequentRoundHtml('Grand Final 🏆', 1, 7, 'M05', 4);
+            }
+
+            container.innerHTML = fullColsHtml;
+        }
+
+        function createSchedulerMatchCardHtml(mId, meta, slot1, slot2) {
+            const slot1Html = slot1 ? `
+                <div class="sched-slot filled" draggable="true" 
+                     ondragstart="handleSchedSlotDragStart(event, '${mId}_T1')"
+                     ondragover="handleSchedSlotDragOver(event)"
+                     ondragleave="handleSchedSlotDragLeave(event)"
+                     ondrop="handleSchedSlotDrop(event, '${mId}_T1')">
+                    <div class="slot-team-title">
+                        <span class="team-seed-badge">🏸</span>
+                        <span>${slot1.player1Name || 'P1'} / ${slot1.player2Name || 'P2'}</span>
+                    </div>
+                    <button type="button" class="btn-unassign-slot" onclick="unassignSchedSlot('${mId}_T1')" title="Remove team back to pool">✕</button>
+                </div>
+            ` : `
+                <div class="sched-slot empty" 
+                     id="slot_${mId}_T1"
+                     ondragover="handleSchedSlotDragOver(event)"
+                     ondragleave="handleSchedSlotDragLeave(event)"
+                     ondrop="handleSchedSlotDrop(event, '${mId}_T1')"
+                     onclick="handleSchedSlotClick('${mId}_T1')">
+                    <span>📥 Drop Team 1 or Click</span>
+                </div>
+            `;
+
+            const slot2Html = slot2 ? `
+                <div class="sched-slot filled" draggable="true" 
+                     ondragstart="handleSchedSlotDragStart(event, '${mId}_T2')"
+                     ondragover="handleSchedSlotDragOver(event)"
+                     ondragleave="handleSchedSlotDragLeave(event)"
+                     ondrop="handleSchedSlotDrop(event, '${mId}_T2')">
+                    <div class="slot-team-title">
+                        <span class="team-seed-badge">🏸</span>
+                        <span>${slot2.player1Name || 'P1'} / ${slot2.player2Name || 'P2'}</span>
+                    </div>
+                    <button type="button" class="btn-unassign-slot" onclick="unassignSchedSlot('${mId}_T2')" title="Remove team back to pool">✕</button>
+                </div>
+            ` : `
+                <div class="sched-slot empty" 
+                     id="slot_${mId}_T2"
+                     ondragover="handleSchedSlotDragOver(event)"
+                     ondragleave="handleSchedSlotDragLeave(event)"
+                     ondrop="handleSchedSlotDrop(event, '${mId}_T2')"
+                     onclick="handleSchedSlotClick('${mId}_T2')">
+                    <span>📥 Drop Team 2 or Click</span>
+                </div>
+            `;
+
+            return `
+                <div class="sched-match-card" id="card_${mId}">
+                    <div class="sched-match-header">
+                        <span class="sched-match-id">${mId}</span>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <select class="sched-match-court-sel" onchange="updateSchedMatchMeta('${mId}', 'court', this.value)">
+                                <option value="Court 1" ${meta.court === 'Court 1' ? 'selected' : ''}>Court 1</option>
+                                <option value="Court 2" ${meta.court === 'Court 2' ? 'selected' : ''}>Court 2</option>
+                            </select>
+                            <input type="text" class="sched-match-time-inp" value="${meta.time || '05:00 PM'}" onchange="updateSchedMatchMeta('${mId}', 'time', this.value)" placeholder="Time" />
+                        </div>
+                    </div>
+                    ${slot1Html}
+                    <div class="sched-vs-badge">VS</div>
+                    ${slot2Html}
+                </div>
+            `;
+        }
+
+        function createSubsequentRoundHtml(roundTitle, matchCount, startMatchIdx, prevStartPrefix, prevStep) {
+            let matchesHtml = '';
+            for (let i = 0; i < matchCount; i++) {
+                const curMId = 'M' + String(startMatchIdx + i).padStart(2, '0');
+                const feeder1Idx = (i * 2) + 1;
+                const feeder2Idx = (i * 2) + 2;
+                const prevStartNum = parseInt(prevStartPrefix.replace('M', ''), 10);
+                const f1 = 'Winner M' + String(prevStartNum + feeder1Idx - 1).padStart(2, '0');
+                const f2 = 'Winner M' + String(prevStartNum + feeder2Idx - 1).padStart(2, '0');
+
+                matchesHtml += `
+                    <div class="sched-match-card" style="opacity:0.9; background:#fafafa;">
+                        <div class="sched-match-header">
+                            <span class="sched-match-id">${curMId}</span>
+                            <span style="font-size:10px; color:#64748b; font-weight:700;">${roundTitle}</span>
+                        </div>
+                        <div class="sched-slot" style="background:#f1f5f9; color:#475569; font-size:11px; border:1px solid #e2e8f0;">
+                            <span style="color:#94a3b8; font-weight:700;">#</span>
+                            <span style="font-weight:600; font-style:italic;">${f1}</span>
+                        </div>
+                        <div class="sched-vs-badge">VS</div>
+                        <div class="sched-slot" style="background:#f1f5f9; color:#475569; font-size:11px; border:1px solid #e2e8f0;">
+                            <span style="color:#94a3b8; font-weight:700;">#</span>
+                            <span style="font-weight:600; font-style:italic;">${f2}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="sched-round-column">
+                    <div class="sched-round-hdr">${roundTitle}</div>
+                    <div class="sched-matches-stack">
+                        ${matchesHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateSchedMatchMeta(mId, field, val) {
+            if (!schedBracketData[currentSchedCat].meta[mId]) {
+                schedBracketData[currentSchedCat].meta[mId] = { court: 'Court 1', time: '05:00 PM', round: 'Round 1' };
+            }
+            schedBracketData[currentSchedCat].meta[mId][field] = val;
+        }
+
+        /* DRAG AND DROP & SELECTION EVENT HANDLERS */
+        window._draggingSchedData = null;
+
+        function handleSchedTeamDragStart(e, regId) {
+            window._draggingSchedData = { source: 'pool', regId };
+            e.dataTransfer.setData('text/plain', JSON.stringify(window._draggingSchedData));
+            e.dataTransfer.effectAllowed = 'move';
+            const el = document.getElementById('pool_team_' + regId);
+            if (el) el.classList.add('is-dragging');
+        }
+
+        function handleSchedTeamDragEnd(e) {
+            window._draggingSchedData = null;
+            document.querySelectorAll('.team-pool-item.is-dragging').forEach(el => el.classList.remove('is-dragging'));
+        }
+
+        function handleSchedSlotDragStart(e, slotKey) {
+            window._draggingSchedData = { source: 'slot', slotKey };
+            e.dataTransfer.setData('text/plain', JSON.stringify(window._draggingSchedData));
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleSchedSlotDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleSchedSlotDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleSchedSlotDrop(e, targetSlotKey) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+
+            let data = window._draggingSchedData;
+            if (!data && e.dataTransfer) {
+                try { data = JSON.parse(e.dataTransfer.getData('text/plain')); } catch (err) {}
+            }
+            if (!data) return;
+
+            const slots = schedBracketData[currentSchedCat].slots;
+
+            if (data.source === 'pool') {
+                const team = (allRegistrations || []).find(r => r.regId === data.regId);
+                if (!team) return;
+
+                // Remove team from any other slot in this bracket to guarantee ZERO duplicates
+                for (const k in slots) {
+                    if (slots[k] && slots[k].regId === team.regId) {
+                        delete slots[k];
+                    }
+                }
+
+                // Place into target slot
+                slots[targetSlotKey] = team;
+                activeSelectedTeamId = null;
+            } else if (data.source === 'slot') {
+                const srcSlotKey = data.slotKey;
+                if (srcSlotKey === targetSlotKey) return;
+
+                // Swap the two slots cleanly
+                const srcTeam = slots[srcSlotKey];
+                const destTeam = slots[targetSlotKey];
+
+                if (srcTeam) slots[targetSlotKey] = srcTeam;
+                else delete slots[targetSlotKey];
+
+                if (destTeam) slots[srcSlotKey] = destTeam;
+                else delete slots[srcSlotKey];
+            }
+
+            renderSchedulerUI();
+        }
+
+        function handleSchedTeamClickToSelect(regId) {
+            if (activeSelectedTeamId === regId) {
+                activeSelectedTeamId = null;
+            } else {
+                activeSelectedTeamId = regId;
+                showToast("Team selected! Tap any empty match slot to place.", "info");
+            }
+            renderSchedulerTeamPool();
+        }
+
+        function handleSchedSlotClick(targetSlotKey) {
+            if (!activeSelectedTeamId) return;
+            const team = (allRegistrations || []).find(r => r.regId === activeSelectedTeamId);
+            if (!team) return;
+
+            const slots = schedBracketData[currentSchedCat].slots;
+
+            // Remove team from any previous slot
+            for (const k in slots) {
+                if (slots[k] && slots[k].regId === team.regId) {
+                    delete slots[k];
+                }
+            }
+
+            slots[targetSlotKey] = team;
+            activeSelectedTeamId = null;
+            renderSchedulerUI();
+        }
+
+        function unassignSchedSlot(slotKey) {
+            delete schedBracketData[currentSchedCat].slots[slotKey];
+            renderSchedulerUI();
+        }
+
+        /* POWER TOOLS: AUTO-SEED, AUTO-SEQUENCE, CLEAR, SAVE */
+        function autoSeedBracket(shuffle) {
+            const allCatTeams = getCategoryApprovedTeams(currentSchedCat);
+            if (allCatTeams.length === 0) {
+                alert('No approved registrations available to seed in ' + currentSchedCat + '.');
+                return;
+            }
+
+            const size = schedBracketData[currentSchedCat].size;
+            const matchCount = Math.floor(size / 2);
+
+            // Copy array of teams
+            let pool = [...allCatTeams];
+            if (shuffle) {
+                // Fisher-Yates shuffle
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+            }
+
+            // Clear current slots
+            schedBracketData[currentSchedCat].slots = {};
+
+            let teamIdx = 0;
+            for (let i = 1; i <= matchCount; i++) {
+                const mId = 'M' + String(i).padStart(2, '0');
+                if (teamIdx < pool.length) {
+                    schedBracketData[currentSchedCat].slots[mId + '_T1'] = pool[teamIdx++];
+                }
+                if (teamIdx < pool.length) {
+                    schedBracketData[currentSchedCat].slots[mId + '_T2'] = pool[teamIdx++];
+                }
+            }
+
+            activeSelectedTeamId = null;
+            renderSchedulerUI();
+            showToast(`🎲 ${Math.min(pool.length, size)} teams auto-seeded into bracket with 0 duplicates!`);
+        }
+
+        function autoSequenceTimesAndCourts() {
+            const size = schedBracketData[currentSchedCat].size;
+            const matchCount = Math.floor(size / 2);
+
+            for (let i = 1; i <= matchCount; i++) {
+                const mId = 'M' + String(i).padStart(2, '0');
+                const defaultCourt = (i % 2 === 1) ? 'Court 1' : 'Court 2';
+                const baseMin = (Math.floor((i - 1) / 2) * 40);
+                const hrs = 17 + Math.floor(baseMin / 60);
+                const mins = baseMin % 60;
+                const period = hrs >= 12 ? 'PM' : 'AM';
+                const dispHrs = (hrs % 12 === 0) ? 12 : (hrs % 12);
+                const formattedTime = `${String(dispHrs).padStart(2, '0')}:${String(mins).padStart(2, '0')} ${period}`;
+
+                if (!schedBracketData[currentSchedCat].meta[mId]) {
+                    schedBracketData[currentSchedCat].meta[mId] = {};
+                }
+                schedBracketData[currentSchedCat].meta[mId].court = defaultCourt;
+                schedBracketData[currentSchedCat].meta[mId].time = formattedTime;
+            }
+
+            renderSchedulerBracketColumns();
+            showToast("⏱️ Match times & courts sequenced automatically (40-min staggered slots)!");
+        }
+
+        function clearBracketScheduler() {
+            if (!confirm('Are you sure you want to clear all team assignments in ' + currentSchedCat + ' bracket? All teams will return to the pool.')) {
+                return;
+            }
+            schedBracketData[currentSchedCat].slots = {};
+            activeSelectedTeamId = null;
+            renderSchedulerUI();
+            showToast("🧹 Bracket cleared! All teams returned to unassigned pool.");
+        }
+
+        function saveAndPublishBracketSchedule() {
+            const currentPin = localStorage.getItem('sp3_admin_pin') || adminPin || "9903";
+            if (!currentPin) {
+                alert('Please authenticate as admin first.');
+                return;
+            }
+
+            const size = schedBracketData[currentSchedCat].size;
+            const matchCount = Math.floor(size / 2);
+            let round1Title = 'Quarter-Final';
+            if (size === 32) round1Title = 'Round of 32';
+            else if (size === 16) round1Title = 'Round of 16';
+
+            const newCatMatches = [];
+            for (let i = 1; i <= matchCount; i++) {
+                const mId = 'M' + String(i).padStart(2, '0');
+                const meta = schedBracketData[currentSchedCat].meta[mId] || {};
+                const t1 = schedBracketData[currentSchedCat].slots[mId + '_T1'];
+                const t2 = schedBracketData[currentSchedCat].slots[mId + '_T2'];
+
+                const p1Name = t1 ? `${t1.player1Name || 'Player 1'} / ${t1.player2Name || 'Player 2'}` : 'TBD';
+                const p2Name = t2 ? `${t2.player1Name || 'Player 1'} / ${t2.player2Name || 'Player 2'}` : 'TBD';
+
+                newCatMatches.push({
+                    matchId: (currentSchedCat === 'Below 35' ? 'B-' : 'A-') + mId,
+                    id: (currentSchedCat === 'Below 35' ? 'B-' : 'A-') + mId,
+                    category: currentSchedCat,
+                    round: round1Title,
+                    court: meta.court || ((i % 2 === 1) ? 'Court 1' : 'Court 2'),
+                    time: meta.time || '05:00 PM',
+                    scheduledTime: meta.time || '05:00 PM',
+                    pair1: p1Name,
+                    pair2: p2Name,
+                    team1Name: p1Name,
+                    team2Name: p2Name,
+                    team1Id: t1 ? t1.regId : '',
+                    team2Id: t2 ? t2.regId : '',
+                    status: 'UPCOMING',
+                    day: 'Day 1',
+                    date: '28 Oct 2026'
+                });
+            }
+
+            // Keep matches from other category intact
+            const otherCatMatches = (allAdminSchedule || []).filter(m => {
+                const c = (m.category || '').trim();
+                return (currentSchedCat === 'Below 35') ? (c === 'Above 35') : (c === 'Below 35' || c === 'Under 35');
+            });
+
+            const combinedSchedule = [...otherCatMatches, ...newCatMatches];
+
+            showToast("Publishing schedule to database...", "info");
+
+            if (SCRIPT_URL) {
+                fetch(SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "adminSaveMatchSchedule", pin: currentPin, schedule: combinedSchedule })
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res && res.success) {
+                        allAdminSchedule = combinedSchedule;
+                        try { localStorage.setItem('sp3_cache_admin_schedule', JSON.stringify(combinedSchedule)); } catch (e) {}
+                        renderAdminScheduleList();
+                        renderAdminBracketTree();
+                        showToast(`🎉 ${newCatMatches.length} fixtures for ${currentSchedCat} successfully published to database & live scoreboard!`);
+                    } else {
+                        alert(res?.error || 'Failed to save match schedule.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error saving match schedule:', err);
+                    alert('Error communicating with server: ' + err.message);
+                });
+            } else {
+                allAdminSchedule = combinedSchedule;
+                renderAdminScheduleList();
+                renderAdminBracketTree();
+                showToast("Schedule updated locally!");
             }
         }
 
@@ -4074,6 +5271,81 @@
             const container = document.getElementById('adminBracketTreeContainer');
             if (!container) return;
 
+            // Filter real schedule matches for selected category
+            const liveMatches = (allAdminSchedule || []).filter(m => {
+                const c = (m.category || '').trim();
+                return (adminBracketCat === 'Below 35') 
+                    ? (c === 'Below 35' || c === 'Under 35' || c.toLowerCase().includes('below') || c.toLowerCase().includes('under'))
+                    : (c === 'Above 35' || c.toLowerCase().includes('above'));
+            });
+
+            function createMatchCard(m) {
+                const isLive = m.status === 'LIVE';
+                const isDone = m.status === 'DONE' || m.status === 'COMPLETED';
+                const statusClass = isLive ? 'live' : (isDone ? 'done' : 'upcoming');
+                const statusText = isLive ? '⚡ Live' : (isDone ? 'Finished' : 'Upcoming');
+                const mid = m.matchId || m.id || 'Match';
+                const crt = m.court || 'Court 1';
+                const p1 = m.pair1 || m.team1_name || m.team1Name || m.p1 || 'TBD';
+                const p2 = m.pair2 || m.team2_name || m.team2Name || m.p2 || 'TBD';
+                const s1 = m.score1 || (m.scores && m.scores[0] ? m.scores[0][0] : '—');
+                const s2 = m.score2 || (m.scores && m.scores[0] ? m.scores[0][1] : '—');
+
+                return `
+                <div class="bracket-card">
+                    <div class="bracket-card-header">
+                        <span>${mid} · ${crt}</span>
+                        <span class="status-pill ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="bracket-team-row ${m.winner === 1 ? 'winner' : ''}">
+                        <div class="bracket-team-name">
+                            <span style="color:#999; font-size:9.5px; font-family:'Space Mono',monospace;">${m.seed1 || ''}</span>
+                            <span>${p1}</span>
+                        </div>
+                        <div class="bracket-team-score">${s1}</div>
+                    </div>
+                    <div class="bracket-team-row ${m.winner === 2 ? 'winner' : ''}">
+                        <div class="bracket-team-name">
+                            <span style="color:#999; font-size:9.5px; font-family:'Space Mono',monospace;">${m.seed2 || ''}</span>
+                            <span>${p2}</span>
+                        </div>
+                        <div class="bracket-team-score">${s2}</div>
+                    </div>
+                </div>`;
+            }
+
+            if (liveMatches.length > 0) {
+                // Group by round
+                const r32 = liveMatches.filter(m => (m.round || '').toLowerCase().includes('32'));
+                const r16 = liveMatches.filter(m => (m.round || '').toLowerCase().includes('16'));
+                const qf = liveMatches.filter(m => (m.round || '').toLowerCase().includes('quarter') || (m.round || '').includes('QF'));
+                const sf = liveMatches.filter(m => (m.round || '').toLowerCase().includes('semi') || (m.round || '').includes('SF'));
+                const finals = liveMatches.filter(m => (m.round || '').toLowerCase().includes('final') && !(m.round || '').toLowerCase().includes('semi') && !(m.round || '').toLowerCase().includes('quarter'));
+
+                let roundsHtml = '';
+                if (r32.length > 0) {
+                    roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Round of 32</div><div class="bracket-matches">${r32.map(createMatchCard).join('')}</div></div>`;
+                }
+                if (r16.length > 0) {
+                    roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Round of 16</div><div class="bracket-matches">${r16.map(createMatchCard).join('')}</div></div>`;
+                }
+                if (qf.length > 0) {
+                    roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Quarter-Finals (QF)</div><div class="bracket-matches">${qf.map(createMatchCard).join('')}</div></div>`;
+                }
+                if (sf.length > 0) {
+                    roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Semi-Finals (SF)</div><div class="bracket-matches">${sf.map(createMatchCard).join('')}</div></div>`;
+                }
+                if (finals.length > 0) {
+                    roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Final</div><div class="bracket-matches">${finals.map(createMatchCard).join('')}</div></div>`;
+                }
+
+                if (roundsHtml) {
+                    container.innerHTML = roundsHtml;
+                    return;
+                }
+            }
+
+            // Fallback default sample preview
             const data = {
                 'Below 35': {
                     qf: [
@@ -4088,8 +5360,7 @@
                     ],
                     finals: [
                         { id: 'FINAL', court: 'Court 1', p1: 'Sharma / Verma', seed1: '#1', p2: 'Singh / Gill', seed2: '#2', score1: '21, 18, 22', score2: '17, 21, 20', winner: 1, status: 'LIVE' }
-                    ],
-                    champion: { pair: 'Sharma / Verma', subtitle: 'S.P. Tourney 3 Champions' }
+                    ]
                 },
                 'Above 35': {
                     qf: [
@@ -4104,21 +5375,23 @@
                     ],
                     finals: [
                         { id: 'FINAL', court: 'Court 1', p1: 'Bose / Roy', seed1: '#1', p2: 'Deshmukh / Patil', seed2: '#2', score1: '—', score2: '—', winner: null, status: 'UPCOMING' }
-                    ],
-                    champion: { pair: 'Awaiting Final', subtitle: 'Scheduled on Center Court' }
+                    ]
                 }
             }[adminBracketCat];
 
-            function createMatchCard(m) {
-                const isLive = m.status === 'LIVE';
-                const isDone = m.status === 'DONE';
-                const statusClass = isLive ? 'live' : (isDone ? 'done' : 'upcoming');
-                const statusText = isLive ? '⚡ Live' : (isDone ? 'Finished' : 'Upcoming');
-
-                return "\n                <div class=\"bracket-card\">\n                    <div class=\"bracket-card-header\">\n                        <span>" + (m.id) + " · " + (m.court) + "</span>\n                        <span class=\"status-pill " + (statusClass) + "\">" + (statusText) + "</span>\n                    </div>\n                    <div class=\"bracket-team-row " + (m.winner === 1 ? 'winner' : '') + "\">\n                        <div class=\"bracket-team-name\">\n                            <span style=\"color:#999; font-size:9.5px; font-family:'Space Mono',monospace;\">" + (m.seed1 || '') + "</span>\n                            <span>" + (m.p1 || 'TBD') + "</span>\n                        </div>\n                        <div class=\"bracket-team-score\">" + (m.score1 || '—') + "</div>\n                    </div>\n                    <div class=\"bracket-team-row " + (m.winner === 2 ? 'winner' : '') + "\">\n                        <div class=\"bracket-team-name\">\n                            <span style=\"color:#999; font-size:9.5px; font-family:'Space Mono',monospace;\">" + (m.seed2 || '') + "</span>\n                            <span>" + (m.p2 || 'TBD') + "</span>\n                        </div>\n                        <div class=\"bracket-team-score\">" + (m.score2 || '—') + "</div>\n                    </div>\n                </div>\n            ";
-            }
-
-            container.innerHTML = "\n            <div class=\"bracket-round\">\n                <div class=\"bracket-round-title\">Quarter-Finals (QF)</div>\n                <div class=\"bracket-matches\">" + (data.qf.map(createMatchCard).join('')) + "</div>\n            </div>\n            <div class=\"bracket-round\">\n                <div class=\"bracket-round-title\">Semi-Finals (SF)</div>\n                <div class=\"bracket-matches\">" + (data.sf.map(createMatchCard).join('')) + "</div>\n            </div>\n            <div class=\"bracket-round\">\n                <div class=\"bracket-round-title\">Final</div>\n                <div class=\"bracket-matches\">" + (data.finals.map(createMatchCard).join('')) + "</div>\n            </div>\n        ";
+            container.innerHTML = `
+            <div class="bracket-round">
+                <div class="bracket-round-title">Quarter-Finals (QF)</div>
+                <div class="bracket-matches">${data.qf.map(createMatchCard).join('')}</div>
+            </div>
+            <div class="bracket-round">
+                <div class="bracket-round-title">Semi-Finals (SF)</div>
+                <div class="bracket-matches">${data.sf.map(createMatchCard).join('')}</div>
+            </div>
+            <div class="bracket-round">
+                <div class="bracket-round-title">Final</div>
+                <div class="bracket-matches">${data.finals.map(createMatchCard).join('')}</div>
+            </div>`;
         }
 
         function switchAdminBracketCat(cat) {
@@ -5043,8 +6316,26 @@
         window.fetchPushStats = fetchPushStats;
         window.handleSendPushNotification = handleSendPushNotification;
         window.sendTestPushToSelf = sendTestPushToSelf;
-        window.handleToggleAdminPushSubscription = handleToggleAdminPushSubscription;
         window.checkAdminPushSubscriptionStatus = checkAdminPushSubscriptionStatus;
+        window.initBracketScheduler = initBracketScheduler;
+        window.switchSchedulerCategory = switchSchedulerCategory;
+        window.changeSchedulerBracketSize = changeSchedulerBracketSize;
+        window.renderSchedulerTeamPool = renderSchedulerTeamPool;
+        window.renderSchedulerBracketColumns = renderSchedulerBracketColumns;
+        window.handleSchedTeamDragStart = handleSchedTeamDragStart;
+        window.handleSchedTeamDragEnd = handleSchedTeamDragEnd;
+        window.handleSchedSlotDragStart = handleSchedSlotDragStart;
+        window.handleSchedSlotDragOver = handleSchedSlotDragOver;
+        window.handleSchedSlotDragLeave = handleSchedSlotDragLeave;
+        window.handleSchedSlotDrop = handleSchedSlotDrop;
+        window.handleSchedTeamClickToSelect = handleSchedTeamClickToSelect;
+        window.handleSchedSlotClick = handleSchedSlotClick;
+        window.unassignSchedSlot = unassignSchedSlot;
+        window.autoSeedBracket = autoSeedBracket;
+        window.autoSequenceTimesAndCourts = autoSequenceTimesAndCourts;
+        window.clearBracketScheduler = clearBracketScheduler;
+        window.saveAndPublishBracketSchedule = saveAndPublishBracketSchedule;
+        window.updateSchedMatchMeta = updateSchedMatchMeta;
 
         window.exportAllTournamentMatchesCsv = function () {
             const baseUrl = (typeof SCRIPT_URL !== 'undefined' && SCRIPT_URL)

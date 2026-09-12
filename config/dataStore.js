@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS = {
   dates: "28–30 Aug 2026",
   flash_message: "Registrations are OPEN! Limited team slots available.",
   flash_active: "NO",
-  registration_status: "OPEN",
+  registration_status: "CLOSED",
   admin_pin: "9903",
   upi_id: "blistedx@okhdfcbank",
   upi_name: "S.P. Badminton Club",
@@ -23,8 +23,8 @@ const DEFAULT_SETTINGS = {
   stat_players: "50+",
   stat_days: "03",
   categories: [
-    { name: "Below 35", status: "ACTIVE", fee: "1000", maxPairs: "32" },
-    { name: "Above 35", status: "ACTIVE", fee: "1000", maxPairs: "32" }
+    { name: "Below 35", status: "INACTIVE", fee: "1000", maxPairs: "32" },
+    { name: "Above 35", status: "INACTIVE", fee: "1000", maxPairs: "32" }
   ]
 };
 
@@ -210,6 +210,8 @@ async function syncFromDb() {
       updated_at: p.updated_at ? p.updated_at.toISOString() : new Date().toISOString()
     }));
 
+    dataStore.isSynced = true;
+    dataStore.lastSyncTime = Date.now();
     console.log(`[PostgreSQL DataStore] Synced from Neon DB: ${registrationsCache.length} regs, ${matchesCache.length} matches, ${financialsCache.expenses.length} expenses, ${pushSubscriptionsCache.length} push subs.`);
   } catch (err) {
     console.warn('[PostgreSQL DataStore] Sync warning:', err.message);
@@ -220,10 +222,18 @@ async function syncFromDb() {
 syncFromDb().catch(() => {});
 
 const dataStore = {
+  isSynced: false,
+  lastSyncTime: 0,
   syncFromDb,
 
   // SETTINGS
   getSettings() {
+    return { ...settingsCache };
+  },
+  async getSettingsAsync() {
+    try {
+      await syncFromDb();
+    } catch(e) {}
     return { ...settingsCache };
   },
   saveSettings(newSettings) {
@@ -398,10 +408,11 @@ const dataStore = {
   addOrUpdateMatch(match) {
     const matchId = match.matchId || match.id || `M-${100 + matchesCache.length + 1}`;
     const idx = matchesCache.findIndex(m => (m.matchId === matchId || m.id === matchId));
+    let updatedObj;
     if (idx >= 0) {
       const existing = matchesCache[idx];
       const preserveCompleted = existing.status === 'COMPLETED' && (match.status === 'UPCOMING' || !match.status);
-      matchesCache[idx] = {
+      updatedObj = {
         ...existing,
         ...match,
         status: preserveCompleted ? existing.status : (match.status || existing.status),
@@ -412,8 +423,15 @@ const dataStore = {
         id: matchId,
         updatedAt: new Date().toISOString()
       };
+      matchesCache[idx] = updatedObj;
     } else {
-      matchesCache.push({ ...match, matchId, id: matchId, updatedAt: new Date().toISOString() });
+      updatedObj = { ...match, matchId, id: matchId, updatedAt: new Date().toISOString() };
+      matchesCache.push(updatedObj);
+    }
+
+    // Auto-advance tournament winner to next knockout match slot when completed!
+    if (updatedObj.status === 'COMPLETED' && updatedObj.winner) {
+      this.advanceMatchWinner(updatedObj);
     }
 
     query(`
@@ -460,7 +478,103 @@ const dataStore = {
       JSON.stringify(match)
     ]).catch(e => console.error('[PostgreSQL] addOrUpdateMatch error:', e.message));
 
-    return match;
+    return updatedObj;
+  },
+  advanceMatchWinner(completedMatch) {
+    if (!completedMatch) return null;
+    const matchId = completedMatch.matchId || completedMatch.id;
+    const category = completedMatch.category || 'Below 35';
+    const rawWinner = completedMatch.winner || '';
+    if (!matchId || !rawWinner) return null;
+
+    // Resolve full winning team string
+    let winnerTeam = String(rawWinner).trim();
+    if (winnerTeam === '1' || winnerTeam === 'team1') {
+      winnerTeam = completedMatch.pair1 || completedMatch.team1Name || completedMatch.p1Name || '';
+    } else if (winnerTeam === '2' || winnerTeam === 'team2') {
+      winnerTeam = completedMatch.pair2 || completedMatch.team2Name || completedMatch.p2Name || '';
+    }
+    if (!winnerTeam) return null;
+
+    // Determine target next match and slot
+    let nextMatchId = completedMatch.nextMatchId;
+    let nextMatchSlot = completedMatch.nextMatchSlot ? Number(completedMatch.nextMatchSlot) : 0;
+
+    if (!nextMatchId) {
+      const isBelow = category.toLowerCase().includes('below') || matchId.startsWith('B-');
+      const prefix = isBelow ? 'B-' : 'A-';
+      const numMatch = matchId.match(/\d+$/);
+      const matchNum = numMatch ? parseInt(numMatch[0], 10) : 0;
+      const roundStr = (completedMatch.round || '').toLowerCase();
+
+      if (roundStr.includes('32') || matchId.includes('R32') || matchId.startsWith('B-M') || matchId.startsWith('A-M')) {
+        if (matchNum >= 1 && matchNum <= 16) {
+          const nextNum = Math.ceil(matchNum / 2);
+          nextMatchId = `${prefix}R16-M${String(nextNum).padStart(2, '0')}`;
+          nextMatchSlot = (matchNum % 2 === 1) ? 1 : 2;
+        }
+      } else if (roundStr.includes('16') || matchId.includes('R16')) {
+        if (matchNum >= 1 && matchNum <= 8) {
+          const nextNum = Math.ceil(matchNum / 2);
+          nextMatchId = `${prefix}QF-M${String(nextNum).padStart(2, '0')}`;
+          nextMatchSlot = (matchNum % 2 === 1) ? 1 : 2;
+        }
+      } else if (roundStr.includes('quarter') || matchId.includes('QF')) {
+        if (matchNum >= 1 && matchNum <= 4) {
+          const nextNum = Math.ceil(matchNum / 2);
+          nextMatchId = `${prefix}SF-M${String(nextNum).padStart(2, '0')}`;
+          nextMatchSlot = (matchNum % 2 === 1) ? 1 : 2;
+        }
+      } else if (roundStr.includes('semi') || matchId.includes('SF')) {
+        if (matchNum >= 1 && matchNum <= 2) {
+          nextMatchId = `${prefix}FN-M01`;
+          nextMatchSlot = (matchNum % 2 === 1) ? 1 : 2;
+        }
+      }
+    }
+
+    if (!nextMatchId || !nextMatchSlot) {
+      return null;
+    }
+
+    const targetIdx = matchesCache.findIndex(m => (m.matchId === nextMatchId || m.id === nextMatchId));
+    if (targetIdx >= 0) {
+      const target = { ...matchesCache[targetIdx] };
+      if (nextMatchSlot === 1) {
+        target.pair1 = winnerTeam;
+        target.team1Name = winnerTeam;
+        target.team1P1 = winnerTeam;
+        target.p1Name = winnerTeam;
+      } else {
+        target.pair2 = winnerTeam;
+        target.team2Name = winnerTeam;
+        target.team2P1 = winnerTeam;
+        target.p2Name = winnerTeam;
+      }
+      target.updatedAt = new Date().toISOString();
+      matchesCache[targetIdx] = target;
+
+      // Update in PostgreSQL
+      query(`
+        UPDATE matches SET
+          team1_p1 = $1, team1_name = $2,
+          team2_p1 = $3, team2_name = $4,
+          raw_payload = raw_payload || $5::jsonb,
+          updated_at = NOW()
+        WHERE match_id = $6
+      `, [
+        target.team1P1 || target.pair1 || '',
+        target.team1Name || target.pair1 || '',
+        target.team2P1 || target.pair2 || '',
+        target.team2Name || target.pair2 || '',
+        JSON.stringify({ pair1: target.pair1, pair2: target.pair2, team1Name: target.team1Name, team2Name: target.team2Name }),
+        nextMatchId
+      ]).catch(e => console.error('[PostgreSQL] advanceMatchWinner DB error:', e.message));
+
+      console.log(`🏆 [Tournament Engine] Advanced winner '${winnerTeam}' to ${nextMatchId} (Slot ${nextMatchSlot})!`);
+      return target;
+    }
+    return null;
   },
   deleteMatch(matchId) {
     matchesCache = matchesCache.filter(m => m.matchId !== matchId && m.id !== matchId);

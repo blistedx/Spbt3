@@ -141,6 +141,11 @@ let globalSettingsState = dataStore.getSettings();
 let globalLiveMatchState = dataStore.getLiveMatch();
 
 async function getMergedSettings() {
+  try {
+    if (!dataStore.isSynced || Date.now() - (dataStore.lastSyncTime || 0) > 10000) {
+      await dataStore.syncFromDb();
+    }
+  } catch (e) {}
   return dataStore.getSettings();
 }
 
@@ -897,6 +902,7 @@ async function handleActionBridge(req, res, next) {
               io.emit('match_state', updatedLive);
               io.emit('court:update', updatedLive);
               io.emit('score_updated', { matchId: mid, match: updatedLive });
+              io.emit('schedule_updated', { schedule: dataStore.getMatches() });
             }
           } catch (e) {}
         }

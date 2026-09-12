@@ -12,10 +12,10 @@ const DEFAULT_CONFIG = {
   dates: '28–30 Aug 2026',
   venue: 'Suryodaya Park Court',
   courtMapsUrl: 'https://maps.app.goo.gl/QnaBgoVEJa7tdQfx7',
-  registrationStatus: 'OPEN',
+  registrationStatus: 'CLOSED',
   registrationCloseDate: '27th Aug 2026, 11:59 PM',
-  flashAnnouncement: '🏸 Registrations are OPEN! Limited team slots available. Instant confirmation via UPI.',
-  flashActive: true,
+  flashAnnouncement: '🏸 Registrations are CLOSED. Limited team slots filled.',
+  flashActive: false,
   upiId: 'blistedx@okhdfcbank',
   upiPayeeName: 'S.P. Badminton Club',
   upiQrUrl: '/qr_code.png',
@@ -32,8 +32,8 @@ const DEFAULT_CONFIG = {
     'Referees and Tournament Committee decisions are final and binding.'
   ],
   categories: [
-    { code: 'BELOW_35', name: "Below 35", type: 'Doubles', entryFee: 500, maxAge: 35, minAge: 15, maxSlots: 32, active: true },
-    { code: 'ABOVE_35', name: "Above 35", type: 'Doubles', entryFee: 500, maxAge: 100, minAge: 35, maxSlots: 32, active: true }
+    { code: 'BELOW_35', name: "Below 35", type: 'Doubles', entryFee: 1000, maxAge: 35, minAge: 15, maxSlots: 32, active: false },
+    { code: 'ABOVE_35', name: "Above 35", type: 'Doubles', entryFee: 1000, maxAge: 100, minAge: 35, maxSlots: 32, active: false }
   ]
 };
 

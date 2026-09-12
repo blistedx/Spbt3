@@ -1,12 +1,14 @@
 const app = require('../server');
 const { initPostgres } = require('../config/postgres');
+const dataStore = require('../config/dataStore');
 
 // Warm up Neon connection asynchronously on container boot
-initPostgres().catch(() => {});
+initPostgres().then(() => dataStore.syncFromDb()).catch(() => {});
 
 module.exports = async (req, res) => {
   try {
     await initPostgres();
+    await dataStore.syncFromDb();
   } catch (e) {
     console.warn('Vercel Serverless PostgreSQL connection notice:', e.message);
   }

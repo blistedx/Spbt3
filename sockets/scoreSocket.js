@@ -101,6 +101,7 @@ function setupScoreSocket(io) {
           io.emit('match_state', updatedLive);
           io.emit('court:update', updatedLive);
           io.emit('score_updated', { matchId, match: updatedLive });
+          io.emit('schedule_updated', { schedule: dataStore.getMatches() });
           return;
         }
 
