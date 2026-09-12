@@ -688,16 +688,18 @@ const dataStore = {
   },
 
   async savePushSubscription({ endpoint, keys, audienceType, userIdentifier, userAgent }) {
-    if (!endpoint || !keys || !keys.p256dh || !keys.auth) return null;
+    if (!endpoint) return null;
+    const p256dh = (keys && keys.p256dh) || 'missing_p256dh';
+    const auth = (keys && keys.auth) || 'missing_auth';
     const aud = (audienceType || 'ALL').toUpperCase();
     const ident = userIdentifier || '';
     const ua = userAgent || '';
 
     const newSub = {
       endpoint,
-      keys: { p256dh: keys.p256dh, auth: keys.auth },
-      p256dh: keys.p256dh,
-      auth: keys.auth,
+      keys: { p256dh, auth },
+      p256dh,
+      auth,
       audience_type: aud,
       user_identifier: ident,
       user_agent: ua,
@@ -711,31 +713,60 @@ const dataStore = {
       pushSubscriptionsCache.push(newSub);
     }
 
-    query(`
-      INSERT INTO push_subscriptions (endpoint, p256dh, auth, audience_type, user_identifier, user_agent, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, NOW())
-      ON CONFLICT (endpoint) DO UPDATE SET
-        p256dh = EXCLUDED.p256dh,
-        auth = EXCLUDED.auth,
-        audience_type = EXCLUDED.audience_type,
-        user_identifier = EXCLUDED.user_identifier,
-        user_agent = EXCLUDED.user_agent,
-        updated_at = NOW()
-    `, [endpoint, keys.p256dh, keys.auth, aud, ident, ua])
-      .catch(e => console.error('[PostgreSQL] savePushSubscription error:', e.message));
+    try {
+      await query(`
+        INSERT INTO push_subscriptions (endpoint, p256dh, auth, audience_type, user_identifier, user_agent, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, NOW())
+        ON CONFLICT (endpoint) DO UPDATE SET
+          p256dh = EXCLUDED.p256dh,
+          auth = EXCLUDED.auth,
+          audience_type = EXCLUDED.audience_type,
+          user_identifier = EXCLUDED.user_identifier,
+          user_agent = EXCLUDED.user_agent,
+          updated_at = NOW()
+      `, [endpoint, p256dh, auth, aud, ident, ua]);
+      console.log(`[PostgreSQL] Push subscription written to Neon DB (${aud}): ${endpoint.slice(-25)}`);
+    } catch (e) {
+      console.error('[PostgreSQL] savePushSubscription error:', e.message);
+    }
 
     return newSub;
   },
 
-  deletePushSubscription(endpoint) {
+  async deletePushSubscription(endpoint) {
     if (!endpoint) return false;
     pushSubscriptionsCache = pushSubscriptionsCache.filter(s => s.endpoint !== endpoint);
-    query("DELETE FROM push_subscriptions WHERE endpoint = $1", [endpoint])
-      .catch(e => console.error('[PostgreSQL] deletePushSubscription error:', e.message));
+    try {
+      await query("DELETE FROM push_subscriptions WHERE endpoint = $1", [endpoint]);
+    } catch (e) {
+      console.error('[PostgreSQL] deletePushSubscription error:', e.message);
+    }
     return true;
   },
 
-  getPushStats() {
+  async getPushStats() {
+    try {
+      const res = await query(`
+        SELECT 
+          COUNT(*) as total,
+          COUNT(*) FILTER (WHERE UPPER(audience_type) = 'PLAYERS') as players,
+          COUNT(*) FILTER (WHERE UPPER(audience_type) = 'ADMINS') as admins,
+          COUNT(*) FILTER (WHERE UPPER(audience_type) NOT IN ('PLAYERS', 'ADMINS') OR audience_type IS NULL) as general
+        FROM push_subscriptions
+      `);
+      if (res && res.rows && res.rows[0]) {
+        const row = res.rows[0];
+        return {
+          total: Number(row.total) || 0,
+          players: Number(row.players) || 0,
+          admins: Number(row.admins) || 0,
+          general: Number(row.general) || 0
+        };
+      }
+    } catch (e) {
+      console.warn('[PostgreSQL] getPushStats direct query error:', e.message);
+    }
+
     let total = pushSubscriptionsCache.length;
     let players = 0;
     let admins = 0;

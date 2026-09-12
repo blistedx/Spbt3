@@ -46,6 +46,7 @@ const pushNotificationService = {
 
   async sendPushNotification({ title, message, url, icon, badge, audience, adminPin }) {
     const targetAudience = (audience || 'ALL').toUpperCase();
+    try { await dataStore.syncFromDb(); } catch (e) {}
     const subs = dataStore.getPushSubscriptions(targetAudience);
 
     const payload = JSON.stringify({
@@ -126,8 +127,8 @@ const pushNotificationService = {
     return [...notificationLog];
   },
 
-  getStats() {
-    const storeStats = dataStore.getPushStats();
+  async getStats() {
+    const storeStats = await dataStore.getPushStats();
     return {
       ...storeStats,
       totalSentCampaigns: notificationLog.length

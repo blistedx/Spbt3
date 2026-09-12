@@ -54,8 +54,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first for dynamic API endpoints
-  if (url.pathname.startsWith('/api/')) {
+  // Network-first for dynamic API endpoints and exec bridge
+  if (url.pathname.startsWith('/api/') || url.pathname === '/exec') {
     event.respondWith(
       fetch(request).catch(() => {
         return caches.match(request);

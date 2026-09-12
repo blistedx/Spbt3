@@ -4870,12 +4870,31 @@
                     });
                 }
 
+                let subJson = {};
+                try { if (typeof sub.toJSON === 'function') subJson = sub.toJSON(); } catch(e) {}
+                const rawP256dh = sub.getKey ? sub.getKey('p256dh') : null;
+                const rawAuth = sub.getKey ? sub.getKey('auth') : null;
+                function bufToBase64(b) {
+                    if (!b) return '';
+                    let binary = '';
+                    const bytes = new Uint8Array(b);
+                    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+                    return window.btoa(binary);
+                }
+                const p256dh = (subJson.keys && subJson.keys.p256dh) || bufToBase64(rawP256dh) || 'missing_p256dh';
+                const auth = (subJson.keys && subJson.keys.auth) || bufToBase64(rawAuth) || 'missing_auth';
+                const endpoint = sub.endpoint || subJson.endpoint;
+
                 // Register subscription on backend with audience ADMINS
                 await fetch('/api/push/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        subscription: sub,
+                        endpoint,
+                        keys: { p256dh, auth },
+                        p256dh,
+                        auth,
+                        subscription: { endpoint, keys: { p256dh, auth } },
                         audienceType: 'ADMINS',
                         userIdentifier: 'admin_' + (localStorage.getItem('sp3_admin_pin') || '9903')
                     })

@@ -3795,6 +3795,9 @@
     </ul>
 
     <div class="sidebar-footer">
+      <button id="btnSidebarPushAlerts" class="theme-toggle-btn full-width" onclick="requestPublicPushSubscription('ALL')" style="justify-content:center; margin-bottom:10px; display:inline-flex; align-items:center; gap:8px;" title="Enable Live Push Alerts">
+        <span style="font-size:15px;">🔔</span> <span id="sidebarPushText">Enable Match Alerts</span>
+      </button>
       <button class="theme-toggle-btn full-width" onclick="toggleDarkTheme()" style="justify-content:center; margin-bottom:10px;" title="Toggle Dark/Light Mode">
         <span class="theme-icon">🌙</span> <span class="theme-text">Dark Theme</span>
       </button>
@@ -6477,27 +6480,79 @@
       return null;
     }
 
+    function arrayBufferToBase64(buffer) {
+      if (!buffer) return '';
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return window.btoa(binary);
+    }
+
+    function extractPushSubscriptionData(sub) {
+      if (!sub) return null;
+      let subJson = {};
+      try {
+        if (typeof sub.toJSON === 'function') {
+          subJson = sub.toJSON();
+        }
+      } catch (e) {}
+
+      const rawP256dh = sub.getKey ? sub.getKey('p256dh') : null;
+      const rawAuth = sub.getKey ? sub.getKey('auth') : null;
+
+      const p256dh = (subJson.keys && subJson.keys.p256dh) || arrayBufferToBase64(rawP256dh) || 'missing_p256dh';
+      const auth = (subJson.keys && subJson.keys.auth) || arrayBufferToBase64(rawAuth) || 'missing_auth';
+      const endpoint = sub.endpoint || subJson.endpoint;
+
+      return {
+        endpoint,
+        keys: { p256dh, auth },
+        p256dh,
+        auth
+      };
+    }
+
     function updateHeaderPushUI(active) {
       const hBtn = document.getElementById('btnHeaderPushAlerts');
       const hText = document.getElementById('headerPushText');
-      if (!hBtn) return;
-      if (active) {
-        hBtn.style.background = 'rgba(34, 197, 94, 0.2)';
-        hBtn.style.borderColor = '#22c55e';
-        hBtn.style.color = '#15803d';
-        if (hText) hText.innerText = 'Alerts ON';
-        hBtn.setAttribute('title', 'Live Alerts are ON: you will receive match updates even when browser is closed');
-      } else {
-        hBtn.style.background = '';
-        hBtn.style.borderColor = '';
-        hBtn.style.color = '';
-        if (hText) hText.innerText = 'Alerts';
-        hBtn.setAttribute('title', 'Enable Live Push Alerts');
+      const sBtn = document.getElementById('btnSidebarPushAlerts');
+      const sText = document.getElementById('sidebarPushText');
+
+      if (hBtn) {
+        if (active) {
+          hBtn.style.background = 'rgba(34, 197, 94, 0.2)';
+          hBtn.style.borderColor = '#22c55e';
+          hBtn.style.color = '#15803d';
+          if (hText) hText.innerText = 'Alerts ON';
+          hBtn.setAttribute('title', 'Live Alerts are ON: you will receive match updates even when app is closed');
+        } else {
+          hBtn.style.background = '';
+          hBtn.style.borderColor = '';
+          hBtn.style.color = '';
+          if (hText) hText.innerText = 'Alerts';
+          hBtn.setAttribute('title', 'Enable Live Push Alerts');
+        }
+      }
+
+      if (sBtn) {
+        if (active) {
+          sBtn.style.background = 'rgba(34, 197, 94, 0.2)';
+          sBtn.style.borderColor = '#22c55e';
+          sBtn.style.color = '#15803d';
+          if (sText) sText.innerText = '✓ Match Alerts Active (ON)';
+        } else {
+          sBtn.style.background = '';
+          sBtn.style.borderColor = '';
+          sBtn.style.color = '';
+          if (sText) sText.innerText = '🔔 Enable Match Alerts';
+        }
       }
     }
 
     async function initPublicPushAlertState() {
-      // 1. Instant check from localStorage
+      // 1. Instant check from localStorage so UI never flickers to OFF
       if (localStorage.getItem('sp3_player_push_subscribed') === 'true') {
         updateHeaderPushUI(true);
       }
@@ -6506,28 +6561,38 @@
 
       try {
         const reg = await navigator.serviceWorker.register('/sw.js');
+        const readyReg = await navigator.serviceWorker.ready;
+
         if (Notification.permission === 'granted') {
-          const sub = await reg.pushManager.getSubscription();
+          let sub = await readyReg.pushManager.getSubscription();
           if (sub) {
             localStorage.setItem('sp3_player_push_subscribed', 'true');
             updateHeaderPushUI(true);
           } else if (localStorage.getItem('sp3_player_push_subscribed') === 'true') {
+            // Already granted permission, re-subscribe in background seamlessly
             const vapidKey = await getPublicVapidKey();
             if (vapidKey) {
               const convertedKey = urlBase64ToUint8Array(vapidKey);
-              const newSub = await reg.pushManager.subscribe({
+              sub = await readyReg.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: convertedKey
               });
-              await fetch('/api/push/subscribe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  subscription: newSub,
-                  audienceType: 'ALL',
-                  userIdentifier: localStorage.getItem('sp3_player_ident') || ('user_' + Math.random().toString(36).substring(2, 9))
-                })
-              });
+              const subData = extractPushSubscriptionData(sub);
+              if (subData && subData.endpoint) {
+                await fetch('/api/push/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    endpoint: subData.endpoint,
+                    keys: subData.keys,
+                    p256dh: subData.p256dh,
+                    auth: subData.auth,
+                    subscription: subData,
+                    audienceType: 'ALL',
+                    userIdentifier: localStorage.getItem('sp3_player_ident') || ('user_' + Math.random().toString(36).substring(2, 9))
+                  })
+                });
+              }
               localStorage.setItem('sp3_player_push_subscribed', 'true');
               updateHeaderPushUI(true);
             }
@@ -6554,7 +6619,7 @@
         return false;
       }
 
-      // If already active, notify user
+      // If already active, inform user
       if (localStorage.getItem('sp3_player_push_subscribed') === 'true' && Notification.permission === 'granted') {
         showToast("🔔 Live Match Alerts are already ON for this device!");
         updateHeaderPushUI(true);
@@ -6574,14 +6639,22 @@
           return false;
         }
 
-        const reg = await navigator.serviceWorker.ready;
-        let sub = await reg.pushManager.getSubscription();
+        const reg = await navigator.serviceWorker.register('/sw.js');
+        const readyReg = await navigator.serviceWorker.ready;
+        let sub = await readyReg.pushManager.getSubscription();
+
         if (!sub) {
           const convertedKey = urlBase64ToUint8Array(vapidKey);
-          sub = await reg.pushManager.subscribe({
+          sub = await readyReg.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: convertedKey
           });
+        }
+
+        const subData = extractPushSubscriptionData(sub);
+        if (!subData || !subData.endpoint) {
+          showToast("Failed to serialize push subscription token.");
+          return false;
         }
 
         const aud = audienceType || 'ALL';
@@ -6591,19 +6664,25 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            subscription: sub,
+            endpoint: subData.endpoint,
+            keys: subData.keys,
+            p256dh: subData.p256dh,
+            auth: subData.auth,
+            subscription: subData,
             audienceType: aud,
             userIdentifier: ident
           })
         });
 
-        const data = await res.json();
-        if (data && data.success) {
+        const data = await res.json().catch(() => null);
+        if (res.ok && data && data.success) {
           localStorage.setItem('sp3_player_push_subscribed', 'true');
           localStorage.setItem('sp3_player_ident', ident);
           showToast("🔔 Live Match & Score Alerts Enabled!");
           updateHeaderPushUI(true);
           return true;
+        } else {
+          showToast("⚠️ Could not sync alert token with server: " + ((data && data.error) || res.statusText));
         }
       } catch (err) {
         console.warn('Push registration error:', err);

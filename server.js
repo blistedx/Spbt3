@@ -1066,23 +1066,26 @@ async function handleActionBridge(req, res, next) {
 
       case 'subscribePush': {
         const subData = body.subscription || body;
+        const endpoint = subData.endpoint || body.endpoint;
+        const p256dh = (subData.keys && subData.keys.p256dh) || subData.p256dh || body.p256dh || '';
+        const auth = (subData.keys && subData.keys.auth) || subData.auth || body.auth || '';
         const audienceType = body.audienceType || body.audience || 'ALL';
         const userIdentifier = body.userIdentifier || body.user || '';
         const userAgent = req.headers['user-agent'] || '';
 
-        if (!subData || !subData.endpoint) {
-          return res.status(400).json({ success: false, error: 'Invalid push subscription data' });
+        if (!endpoint) {
+          return res.status(400).json({ success: false, error: 'Valid push subscription endpoint required' });
         }
 
-        await pushNotificationService.subscribeClient({
-          endpoint: subData.endpoint,
-          keys: subData.keys || {},
+        const saved = await pushNotificationService.subscribeClient({
+          endpoint,
+          keys: { p256dh, auth },
           audienceType,
           userIdentifier,
           userAgent
         });
 
-        return res.json({ success: true, message: 'Push notification subscription saved.' });
+        return res.json({ success: true, message: 'Push notification subscription saved.', subscription: saved });
       }
 
       case 'adminGetPushStats': {
@@ -1093,7 +1096,7 @@ async function handleActionBridge(req, res, next) {
           return res.status(401).json({ success: false, error: 'Unauthorized PIN' });
         }
 
-        const stats = pushNotificationService.getStats();
+        const stats = await pushNotificationService.getStats();
         const logs = pushNotificationService.getNotificationLogs();
         return res.json({
           success: true,
@@ -1349,36 +1352,48 @@ app.get('/api/push/vapid-public-key', (req, res) => {
 
 app.post('/api/push/subscribe', async (req, res) => {
   try {
-    const { subscription, audienceType, userIdentifier } = req.body;
-    if (!subscription || !subscription.endpoint) {
-      return res.status(400).json({ success: false, error: 'Valid subscription object required' });
+    const body = req.body || {};
+    const sub = body.subscription || body;
+    const endpoint = sub.endpoint || body.endpoint;
+    const p256dh = (sub.keys && sub.keys.p256dh) || sub.p256dh || body.p256dh || '';
+    const auth = (sub.keys && sub.keys.auth) || sub.auth || body.auth || '';
+
+    if (!endpoint) {
+      return res.status(400).json({ success: false, error: 'Valid subscription endpoint required' });
     }
-    await pushNotificationService.subscribeClient({
-      endpoint: subscription.endpoint,
-      keys: subscription.keys || {},
-      audienceType: audienceType || 'ALL',
-      userIdentifier: userIdentifier || '',
+
+    const saved = await pushNotificationService.subscribeClient({
+      endpoint,
+      keys: { p256dh, auth },
+      audienceType: body.audienceType || body.audience || 'ALL',
+      userIdentifier: body.userIdentifier || body.user || '',
       userAgent: req.headers['user-agent'] || ''
     });
-    return res.json({ success: true, message: 'Subscription successfully saved' });
+
+    return res.json({ success: true, message: 'Subscription successfully saved', subscription: saved });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
 });
 
-app.get('/api/admin/push/stats', (req, res) => {
-  const pin = String(req.query.pin || req.headers['x-admin-pin'] || '');
-  const currentSettings = dataStore.getSettings();
-  const storedPin = String(currentSettings.admin_pin || process.env.DEFAULT_ADMIN_PIN || '9903');
-  if (pin !== storedPin && pin !== '9903') {
-    return res.status(401).json({ success: false, error: 'Unauthorized PIN' });
+app.get('/api/admin/push/stats', async (req, res) => {
+  try {
+    const pin = String(req.query.pin || req.headers['x-admin-pin'] || '');
+    const currentSettings = dataStore.getSettings();
+    const storedPin = String(currentSettings.admin_pin || process.env.DEFAULT_ADMIN_PIN || '9903');
+    if (pin !== storedPin && pin !== '9903') {
+      return res.status(401).json({ success: false, error: 'Unauthorized PIN' });
+    }
+    const stats = await pushNotificationService.getStats();
+    return res.json({
+      success: true,
+      stats,
+      logs: pushNotificationService.getNotificationLogs(),
+      publicKey: pushNotificationService.getPublicKey()
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
   }
-  return res.json({
-    success: true,
-    stats: pushNotificationService.getStats(),
-    logs: pushNotificationService.getNotificationLogs(),
-    publicKey: pushNotificationService.getPublicKey()
-  });
 });
 
 app.post('/api/admin/push/send', async (req, res) => {
