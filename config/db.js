@@ -40,14 +40,23 @@ async function connectDB() {
     console.log('ℹ️ No local MongoDB daemon active. Starting embedded in-memory MongoDB engine...');
   }
 
-  // Fallback: Use mongodb-memory-server
+  // Fallback: Use mongodb-memory-server if available
   try {
-    const { MongoMemoryServer } = require('mongodb-memory-server');
-    memoryServer = await MongoMemoryServer.create();
-    const uri = memoryServer.getUri();
-    cachedDb = await mongoose.connect(uri);
-    console.log(`✅ Embedded In-Memory MongoDB running & connected at: ${uri}`);
-    return cachedDb;
+    let MongoMemoryServer;
+    try {
+      MongoMemoryServer = require('mongodb-memory-server').MongoMemoryServer;
+    } catch {
+      // mongodb-memory-server not installed
+    }
+    if (MongoMemoryServer) {
+      memoryServer = await MongoMemoryServer.create();
+      const uri = memoryServer.getUri();
+      cachedDb = await mongoose.connect(uri);
+      console.log(`✅ Embedded In-Memory MongoDB running & connected at: ${uri}`);
+      return cachedDb;
+    }
+    console.log('ℹ️ Operating without MongoDB daemon (PostgreSQL / in-memory store active).');
+    return null;
   } catch (memErr) {
     console.error('❌ Could not start MongoDB connection:', memErr.message);
     return null;
