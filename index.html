@@ -6690,6 +6690,8 @@
       }
       return false;
     }
+    window.requestPublicPushSubscription = requestPublicPushSubscription;
+    window.updateHeaderPushUI = updateHeaderPushUI;
 
     async function subscribeCurrentPlayerToPush() {
       const btn = document.getElementById('btnSubscribePlayerPush');
