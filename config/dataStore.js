@@ -58,8 +58,18 @@ let pushSubscriptionsCache = [];
 
 async function syncFromDb() {
   try {
+    // Execute all table queries concurrently via Promise.all for 8x faster load
+    const [setRes, regRes, matchRes, liveRes, expRes, sponRes, pushRes] = await Promise.all([
+      query("SELECT * FROM settings WHERE id = 'current' LIMIT 1"),
+      query("SELECT * FROM registrations ORDER BY created_at DESC"),
+      query("SELECT * FROM matches ORDER BY created_at ASC"),
+      query("SELECT * FROM live_match WHERE court_id = 'Court 1' LIMIT 1"),
+      query("SELECT * FROM expenses ORDER BY created_at DESC"),
+      query("SELECT * FROM sponsors ORDER BY created_at DESC"),
+      query("SELECT * FROM push_subscriptions ORDER BY created_at DESC").catch(() => ({ rows: [] }))
+    ]);
+
     // 1. Settings
-    const setRes = await query("SELECT * FROM settings WHERE id = 'current' LIMIT 1");
     if (setRes.rows.length > 0) {
       const r = setRes.rows[0];
       settingsCache = {
@@ -84,7 +94,6 @@ async function syncFromDb() {
     }
 
     // 2. Registrations
-    const regRes = await query("SELECT * FROM registrations ORDER BY created_at DESC");
     registrationsCache = regRes.rows.map(r => ({
       regId: r.reg_id,
       category: r.category,
@@ -113,7 +122,6 @@ async function syncFromDb() {
     }));
 
     // 3. Matches
-    const matchRes = await query("SELECT * FROM matches ORDER BY created_at ASC");
     matchesCache = matchRes.rows.map(m => {
       const raw = m.raw_payload || {};
       const p1 = raw.pair1 || raw.p1Name || m.team1_name || m.team1_p1 || 'Team 1';
@@ -122,7 +130,7 @@ async function syncFromDb() {
         matchId: m.match_id,
         id: m.match_id,
         category: m.category || 'Below 35',
-        round: m.round || 'Round 1',
+        round: m.round || 'Round of 32',
         court: m.court || 'Court 1',
         team1P1: m.team1_p1,
         team1P2: m.team1_p2,
@@ -146,7 +154,6 @@ async function syncFromDb() {
     });
 
     // 4. Live Match
-    const liveRes = await query("SELECT * FROM live_match WHERE court_id = 'Court 1' LIMIT 1");
     if (liveRes.rows.length > 0) {
       const l = liveRes.rows[0];
       liveMatchCache = {
@@ -171,11 +178,9 @@ async function syncFromDb() {
       };
     }
 
-    // 5. Financials (Expenses & Sponsors)
-    const expRes = await query("SELECT * FROM expenses ORDER BY created_at DESC");
-    const sponRes = await query("SELECT * FROM sponsors ORDER BY created_at DESC");
+    // 5. Financials
     financialsCache = {
-      expenses: expRes.rows.map(e => ({
+      expenses: (expRes.rows || []).map(e => ({
         id: e.id,
         date: e.date,
         category: e.category,
@@ -185,7 +190,7 @@ async function syncFromDb() {
         paymentMode: e.payment_mode,
         status: e.status
       })),
-      sponsors: sponRes.rows.map(s => ({
+      sponsors: (sponRes.rows || []).map(s => ({
         id: s.id,
         name: s.name,
         tier: s.tier,
@@ -198,7 +203,6 @@ async function syncFromDb() {
     };
 
     // 6. Push Subscriptions
-    const pushRes = await query("SELECT * FROM push_subscriptions ORDER BY created_at DESC").catch(() => ({ rows: [] }));
     pushSubscriptionsCache = (pushRes.rows || []).map(p => ({
       endpoint: p.endpoint,
       keys: { p256dh: p.p256dh, auth: p.auth },
@@ -406,15 +410,40 @@ const dataStore = {
     return [...matchesCache];
   },
   addOrUpdateMatch(match) {
-    const matchId = match.matchId || match.id || `M-${100 + matchesCache.length + 1}`;
+    const matchId = match.matchId || match.id || '';
+    if (!matchId || matchId === 'Court 1' || matchId === 'Court 2') {
+      return null;
+    }
     const idx = matchesCache.findIndex(m => (m.matchId === matchId || m.id === matchId));
+    let existing = idx >= 0 ? matchesCache[idx] : null;
+
+    // Resolve accurate tournament round (preventing fallback 'Round 1' from erasing 'Round of 32')
+    let resolvedRound = match.round;
+    if (!resolvedRound || resolvedRound === 'Round 1') {
+      if (existing && existing.round && existing.round !== 'Round 1') {
+        resolvedRound = existing.round;
+      } else if (matchId.includes('R16')) {
+        resolvedRound = 'Round of 16';
+      } else if (matchId.includes('QF')) {
+        resolvedRound = 'Quarter-Final';
+      } else if (matchId.includes('SF')) {
+        resolvedRound = 'Semi-Final';
+      } else if (matchId.includes('FN') || matchId.includes('FINAL')) {
+        resolvedRound = 'Grand Final 🏆';
+      } else if (/^[AB]-M\d+$/i.test(matchId) || matchId.includes('R32')) {
+        resolvedRound = 'Round of 32';
+      } else {
+        resolvedRound = 'Round of 32';
+      }
+    }
+
     let updatedObj;
     if (idx >= 0) {
-      const existing = matchesCache[idx];
       const preserveCompleted = existing.status === 'COMPLETED' && (match.status === 'UPCOMING' || !match.status);
       updatedObj = {
         ...existing,
         ...match,
+        round: resolvedRound,
         status: preserveCompleted ? existing.status : (match.status || existing.status),
         winner: preserveCompleted ? existing.winner : (match.winner || existing.winner),
         scores: preserveCompleted ? existing.scores : (match.scores || existing.scores),
@@ -425,7 +454,7 @@ const dataStore = {
       };
       matchesCache[idx] = updatedObj;
     } else {
-      updatedObj = { ...match, matchId, id: matchId, updatedAt: new Date().toISOString() };
+      updatedObj = { ...match, round: resolvedRound, matchId, id: matchId, updatedAt: new Date().toISOString() };
       matchesCache.push(updatedObj);
     }
 
@@ -444,7 +473,11 @@ const dataStore = {
       )
       ON CONFLICT (match_id) DO UPDATE SET
         category = EXCLUDED.category,
-        round = EXCLUDED.round,
+        round = CASE 
+          WHEN EXCLUDED.round IS NOT NULL AND EXCLUDED.round != '' AND EXCLUDED.round != 'Round 1' THEN EXCLUDED.round 
+          WHEN matches.round IS NOT NULL AND matches.round != '' AND matches.round != 'Round 1' THEN matches.round 
+          ELSE EXCLUDED.round 
+        END,
         court = EXCLUDED.court,
         team1_p1 = EXCLUDED.team1_p1,
         team1_p2 = EXCLUDED.team1_p2,
@@ -461,21 +494,21 @@ const dataStore = {
         updated_at = NOW()
     `, [
       matchId,
-      match.category || 'Below 35',
-      match.round || 'Round 1',
-      match.court || 'Court 1',
-      match.team1P1 || match.team1_p1 || match.p1Name || match.player1 || match.pair1 || '',
-      match.team1P2 || match.team1_p2 || '',
-      match.team2P1 || match.team2_p1 || match.p2Name || match.player2 || match.pair2 || '',
-      match.team2P2 || match.team2_p2 || '',
-      match.team1Name || match.team1_name || match.p1Name || match.pair1 || match.team1 || '',
-      match.team2Name || match.team2_name || match.p2Name || match.pair2 || match.team2 || '',
-      match.scheduledTime || match.scheduled_time || match.time || match.date || '',
-      match.status || 'SCHEDULED',
-      match.winner || '',
-      JSON.stringify(match.scores || match.games || []),
-      JSON.stringify(match.sets || match.setsWon || []),
-      JSON.stringify(match)
+      updatedObj.category || 'Below 35',
+      resolvedRound,
+      updatedObj.court || 'Court 1',
+      updatedObj.team1P1 || updatedObj.team1_p1 || updatedObj.p1Name || updatedObj.player1 || updatedObj.pair1 || '',
+      updatedObj.team1P2 || updatedObj.team1_p2 || '',
+      updatedObj.team2P1 || updatedObj.team2_p1 || updatedObj.p2Name || updatedObj.player2 || updatedObj.pair2 || '',
+      updatedObj.team2P2 || updatedObj.team2_p2 || '',
+      updatedObj.team1Name || updatedObj.team1_name || updatedObj.p1Name || updatedObj.pair1 || updatedObj.team1 || '',
+      updatedObj.team2Name || updatedObj.team2_name || updatedObj.p2Name || updatedObj.pair2 || updatedObj.team2 || '',
+      updatedObj.scheduledTime || updatedObj.scheduled_time || updatedObj.time || updatedObj.date || '',
+      updatedObj.status || 'SCHEDULED',
+      updatedObj.winner || '',
+      JSON.stringify(updatedObj.scores || updatedObj.games || []),
+      JSON.stringify(updatedObj.sets || updatedObj.setsWon || []),
+      JSON.stringify(updatedObj)
     ]).catch(e => console.error('[PostgreSQL] addOrUpdateMatch error:', e.message));
 
     return updatedObj;

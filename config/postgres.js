@@ -9,35 +9,53 @@ try {
 
 const { Pool } = require('pg');
 
-const CONNECTION_STRING = (process.env.DATABASE_URL && process.env.DATABASE_URL.trim()) || '';
+let rawConn = (process.env.DATABASE_URL && process.env.DATABASE_URL.trim()) || '';
+if (rawConn && !rawConn.includes('uselibpqcompat=true') && rawConn.includes('sslmode=require')) {
+  rawConn = rawConn.replace('sslmode=require', 'sslmode=require&uselibpqcompat=true');
+}
+
+const CONNECTION_STRING = rawConn;
 
 const pool = CONNECTION_STRING ? new Pool({
   connectionString: CONNECTION_STRING,
   ssl: { rejectUnauthorized: false },
-  max: 20,
+  max: 10,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000
+  connectionTimeoutMillis: 25000,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10000
 }) : null;
 
 if (pool) {
   pool.on('error', (err) => {
-    console.error('[PostgreSQL] Unexpected client error:', err.message);
+    // Only log if not an idle socket closure by PgBouncer
+    if (!err.message.includes('Connection terminated') && !err.message.includes('closed')) {
+      console.error('[PostgreSQL] Unexpected client error:', err.message);
+    }
   });
 } else {
   console.warn('[PostgreSQL] DATABASE_URL environment variable is not configured.');
 }
 
-async function query(text, params) {
+async function query(text, params, retries = 2) {
   if (!pool) {
     return { rows: [] };
   }
-  const start = Date.now();
-  try {
-    const res = await pool.query(text, params);
-    return res;
-  } catch (err) {
-    console.error('[PostgreSQL Error] Query:', text, 'Params:', params, 'Message:', err.message);
-    throw err;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await pool.query(text, params);
+      return res;
+    } catch (err) {
+      const isTransient = /connection terminated|timeout|econnreset|57p01|closed|08006|08001/i.test(err.message || '');
+      if (isTransient && attempt < retries) {
+        const delay = (attempt + 1) * 600;
+        console.warn(`[PostgreSQL Notice] Transient connection issue on attempt ${attempt + 1}. Retrying in ${delay}ms...`);
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      console.error('[PostgreSQL Error] Query:', text, 'Params:', params, 'Message:', err.message);
+      throw err;
+    }
   }
 }
 
@@ -55,6 +73,16 @@ async function initPostgres() {
   initPromise = (async () => {
     try {
       console.log('📡 Connecting to Neon PostgreSQL online database...');
+
+      // Fast-check: if settings table already exists, skip full DDL recreation
+      try {
+        const check = await query("SELECT to_regclass('public.matches') AS tbl_exists");
+        if (check.rows[0] && check.rows[0].tbl_exists) {
+          isInitialized = true;
+          console.log('✅ PostgreSQL Schema verified (Tables active in Neon)!');
+          return pool;
+        }
+      } catch (e) {}
 
   const schemaSql = `
     -- 1. Tournament Settings Table

@@ -78,22 +78,26 @@ function setupScoreSocket(io) {
             updatedAt: data.updatedAt || Date.now()
           });
 
-          // Sync to Neon matches table as well
-          const p1 = updatedLive.p1Name || 'Player 1';
-          const p2 = updatedLive.p2Name || 'Player 2';
-          dataStore.addOrUpdateMatch({
-            matchId: matchId,
-            p1Name: p1,
-            p2Name: p2,
-            team1_name: p1,
-            team2_name: p2,
-            category: updatedLive.category || 'Below 35',
-            court: updatedLive.court || 'Court 1',
-            status: updatedLive.status || (updatedLive.isLive ? 'LIVE' : 'UPCOMING'),
-            winner: updatedLive.winner || '',
-            scores: updatedLive.games || [],
-            sets: updatedLive.setsWon || [0, 0]
-          });
+          // Sync to Neon matches table as well if valid tournament match
+          if (matchId && matchId !== 'Court 1' && matchId !== 'Court 2') {
+            const existingMatch = dataStore.getMatches().find(m => (m.matchId === matchId || m.id === matchId));
+            const p1 = updatedLive.p1Name || existingMatch?.team1Name || 'Player 1';
+            const p2 = updatedLive.p2Name || existingMatch?.team2Name || 'Player 2';
+            dataStore.addOrUpdateMatch({
+              matchId: matchId,
+              p1Name: p1,
+              p2Name: p2,
+              team1_name: p1,
+              team2_name: p2,
+              round: existingMatch?.round || data.round,
+              category: updatedLive.category || existingMatch?.category || 'Below 35',
+              court: updatedLive.court || existingMatch?.court || 'Court 1',
+              status: updatedLive.status || (updatedLive.isLive ? 'LIVE' : 'UPCOMING'),
+              winner: updatedLive.winner || existingMatch?.winner || '',
+              scores: updatedLive.games || [],
+              sets: updatedLive.setsWon || [0, 0]
+            });
+          }
 
           // ⚡ INSTANT 0MS BROADCAST TO ALL CONNECTED CLIENTS & HOSTS
           io.emit('score_update', updatedLive);
@@ -127,27 +131,33 @@ function setupScoreSocket(io) {
 
         const updated = await dataStore.saveLiveMatch(currentMatch);
 
-        // Sync to Neon matches table
-        dataStore.addOrUpdateMatch({
-          matchId: matchId,
-          p1Name: updated.p1Name,
-          p2Name: updated.p2Name,
-          team1_name: updated.p1Name,
-          team2_name: updated.p2Name,
-          category: updated.category || 'Below 35',
-          court: updated.court || 'Court 1',
-          status: 'LIVE',
-          winner: updated.winner || '',
-          scores: updated.games || [],
-          sets: updated.setsWon || [0, 0]
-        });
+        // Sync to Neon matches table if valid tournament match
+        const activeMatchId = updated.matchId || matchId;
+        if (activeMatchId && activeMatchId !== 'Court 1' && activeMatchId !== 'Court 2') {
+          const existingMatch = dataStore.getMatches().find(m => (m.matchId === activeMatchId || m.id === activeMatchId));
+          dataStore.addOrUpdateMatch({
+            matchId: activeMatchId,
+            p1Name: updated.p1Name,
+            p2Name: updated.p2Name,
+            team1_name: updated.p1Name,
+            team2_name: updated.p2Name,
+            round: existingMatch?.round,
+            category: updated.category || existingMatch?.category || 'Below 35',
+            court: updated.court || existingMatch?.court || 'Court 1',
+            status: 'LIVE',
+            winner: updated.winner || '',
+            scores: updated.games || [],
+            sets: updated.setsWon || [0, 0]
+          });
+        }
 
         // ⚡ INSTANT 0MS BROADCAST
         io.emit('score_update', updated);
         io.emit('tv_score_update', updated);
         io.emit('match_state', updated);
         io.emit('court:update', updated);
-        io.emit('score_updated', { matchId, match: updated });
+        io.emit('score_updated', { matchId: activeMatchId, match: updated });
+        io.emit('schedule_updated', { schedule: dataStore.getMatches() });
       } catch (err) {
         console.error('[ScoreSocket] Error handling score_point:', err.message);
       }

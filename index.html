@@ -7214,9 +7214,44 @@
           : (c === 'Above 35' || c.toLowerCase().includes('above'));
       });
 
+      function getMatchNumber(m) {
+        const id = String(m.matchId || m.id || m.match_id || '');
+        const match = id.match(/(\d+)$/);
+        return match ? parseInt(match[1], 10) : 0;
+      }
+      function sortByMatchNum(a, b) {
+        return getMatchNumber(a) - getMatchNumber(b);
+      }
+
+      function isR32(m) {
+        const rnd = (m.round || '').toLowerCase();
+        const mid = String(m.matchId || m.id || m.match_id || '').toUpperCase();
+        return rnd.includes('32') || rnd === 'round 1' || (/^[AB]-M\d+$/.test(mid) && !mid.includes('R16') && !mid.includes('QF') && !mid.includes('SF') && !mid.includes('FN'));
+      }
+      function isR16(m) {
+        const rnd = (m.round || '').toLowerCase();
+        const mid = String(m.matchId || m.id || m.match_id || '').toUpperCase();
+        return rnd.includes('16') || mid.includes('R16');
+      }
+      function isQF(m) {
+        const rnd = (m.round || '').toLowerCase();
+        const mid = String(m.matchId || m.id || m.match_id || '').toUpperCase();
+        return rnd.includes('quarter') || rnd.includes('qf') || mid.includes('QF');
+      }
+      function isSF(m) {
+        const rnd = (m.round || '').toLowerCase();
+        const mid = String(m.matchId || m.id || m.match_id || '').toUpperCase();
+        return rnd.includes('semi') || rnd.includes('sf') || mid.includes('SF');
+      }
+      function isFinal(m) {
+        const rnd = (m.round || '').toLowerCase();
+        const mid = String(m.matchId || m.id || m.match_id || '').toUpperCase();
+        return (rnd.includes('final') || mid.includes('FN') || mid.includes('FINAL')) && !isSF(m) && !isQF(m);
+      }
+
       function createMatchCard(m) {
         const statusUpper = (m.status || 'UPCOMING').toUpperCase();
-        const isLive = statusUpper === 'LIVE' || statusUpper === 'IN PROGRESS';
+        const isLive = statusUpper === 'LIVE' || statusUpper === 'IN PROGRESS' || m.isLive;
         const isDone = statusUpper === 'COMPLETED' || statusUpper === 'DONE' || m.isComplete;
         const statusClass = isLive ? 'live' : (isDone ? 'done' : 'upcoming');
         const statusText = isLive ? '⚡ Live Now' : (isDone ? 'Completed' : 'Upcoming');
@@ -7224,14 +7259,27 @@
         const crt = m.court || 'Court 1';
         const p1 = m.pair1 || m.team1_name || m.team1Name || m.p1 || 'TBD';
         const p2 = m.pair2 || m.team2_name || m.team2Name || m.p2 || 'TBD';
-        const s1 = m.score1 || (m.scores && m.scores[0] ? m.scores[0][0] : (m.score ? m.score.split(',')[0] : '—'));
-        const s2 = m.score2 || (m.scores && m.scores[0] ? m.scores[0][1] : '—');
+        
+        let s1 = m.score1;
+        let s2 = m.score2;
+        if (!s1 && !s2) {
+          if (Array.isArray(m.scores) && m.scores.length > 0) {
+            s1 = m.scores.map(s => (Array.isArray(s) ? s[0] : 0)).join(', ');
+            s2 = m.scores.map(s => (Array.isArray(s) ? s[1] : 0)).join(', ');
+          } else if (m.score && m.score !== '-') {
+            const parts = String(m.score).split('-');
+            s1 = (parts[0] || '').trim();
+            s2 = (parts[1] || '').trim();
+          }
+        }
+        if (!s1) s1 = isDone ? '21' : (isLive ? '0' : '—');
+        if (!s2) s2 = isDone ? '11' : (isLive ? '0' : '—');
 
         const winStr = String(m.winner || '').trim().toLowerCase();
         const p1Str = String(p1).trim().toLowerCase();
         const p2Str = String(p2).trim().toLowerCase();
-        const isP1Win = isDone && winStr && (winStr === '1' || winStr === 'team1' || winStr === p1Str);
-        const isP2Win = isDone && winStr && (winStr === '2' || winStr === 'team2' || winStr === p2Str);
+        const isP1Win = isDone && winStr && (winStr === '1' || winStr === 'team1' || winStr === p1Str || p1Str.includes(winStr) || (winStr.length > 3 && winStr.includes(p1Str.slice(0, 5))));
+        const isP2Win = isDone && winStr && (winStr === '2' || winStr === 'team2' || winStr === p2Str || p2Str.includes(winStr) || (winStr.length > 3 && winStr.includes(p2Str.slice(0, 5))));
 
         return `
         <div class="bracket-card ${isLive ? 'is-live' : ''}">
@@ -7257,11 +7305,11 @@
       }
 
       if (liveMatches.length > 0) {
-        const r32 = liveMatches.filter(m => (m.round || '').toLowerCase().includes('32'));
-        const r16 = liveMatches.filter(m => (m.round || '').toLowerCase().includes('16'));
-        const qf = liveMatches.filter(m => (m.round || '').toLowerCase().includes('quarter') || (m.round || '').includes('QF'));
-        const sf = liveMatches.filter(m => (m.round || '').toLowerCase().includes('semi') || (m.round || '').includes('SF'));
-        const finals = liveMatches.filter(m => (m.round || '').toLowerCase().includes('final') && !(m.round || '').toLowerCase().includes('semi') && !(m.round || '').toLowerCase().includes('quarter'));
+        const r32 = liveMatches.filter(isR32).sort(sortByMatchNum);
+        const r16 = liveMatches.filter(isR16).sort(sortByMatchNum);
+        const qf = liveMatches.filter(isQF).sort(sortByMatchNum);
+        const sf = liveMatches.filter(isSF).sort(sortByMatchNum);
+        const finals = liveMatches.filter(isFinal).sort(sortByMatchNum);
 
         let roundsHtml = '';
         if (r32.length > 0) {
@@ -7329,12 +7377,22 @@
     /* ================= DAILY MATCH SCHEDULE & FIXTURES ENGINE ================= */
     let currentScheduleDay = 'Day 1';
     let currentScheduleCat = 'ALL';
-    let allMatchesSchedule = [];
+    let allMatchesSchedule = (function () {
+      try {
+        const cached = localStorage.getItem('sp3_cached_schedule');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+      return [];
+    })();
 
     function fetchAndRenderSchedule() {
       const onSuccess = function (res) {
         if (res && res.success && res.schedule && res.schedule.length > 0) {
           allMatchesSchedule = res.schedule;
+          try { localStorage.setItem('sp3_cached_schedule', JSON.stringify(res.schedule)); } catch (e) {}
         }
         renderScheduleGrid();
         renderBracketTree();
@@ -7672,13 +7730,35 @@
       try {
         if (typeof io !== 'undefined') {
           const webSocket = io({ reconnection: true, reconnectionDelay: 500 });
-          webSocket.on('score_update', renderTickerData);
-          webSocket.on('tv_score_update', renderTickerData);
-          webSocket.on('match_state', renderTickerData);
-          webSocket.on('court:update', renderTickerData);
+          
+          function syncLiveMatchToSchedule(liveData) {
+            if (!liveData) return;
+            const mid = liveData.matchId || liveData.id;
+            if (!mid) return;
+            const idx = allMatchesSchedule.findIndex(m => (m.matchId === mid || m.id === mid));
+            if (idx >= 0) {
+              const current = allMatchesSchedule[idx];
+              allMatchesSchedule[idx] = Object.assign({}, current, {
+                status: liveData.status || (liveData.isLive ? 'LIVE' : current.status),
+                score: liveData.score || current.score,
+                scores: liveData.games || current.scores,
+                winner: liveData.winner || current.winner
+              });
+              renderScheduleGrid();
+              renderBracketTree();
+            }
+          }
+
+          webSocket.on('score_update', function (d) { renderTickerData(d); syncLiveMatchToSchedule(d); });
+          webSocket.on('tv_score_update', function (d) { renderTickerData(d); syncLiveMatchToSchedule(d); });
+          webSocket.on('match_state', function (d) { renderTickerData(d); syncLiveMatchToSchedule(d); });
+          webSocket.on('court:update', function (d) { renderTickerData(d); syncLiveMatchToSchedule(d); });
           webSocket.on('score_updated', function (d) {
-            if (d && d.match) renderTickerData(d.match);
-            else if (d) renderTickerData(d);
+            const m = (d && d.match) ? d.match : d;
+            if (m) {
+              renderTickerData(m);
+              syncLiveMatchToSchedule(m);
+            }
           });
           webSocket.on('schedule_updated', function (d) {
             if (d && d.schedule && d.schedule.length > 0) {
@@ -7709,6 +7789,7 @@
       // 1-Second Continuous Live Score Sync Polling across every client and host machine
       fetchLiveMatchFromSheet();
       setInterval(fetchLiveMatchFromSheet, 1000);
+      setInterval(fetchAndRenderSchedule, 8000);
     }
 
     /* ================= JUMBLED NUMBER SCRAMBLE ANIMATION ================= */

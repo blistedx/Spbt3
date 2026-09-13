@@ -1,3 +1,5 @@
+const dns = require('dns');
+try { dns.setDefaultResultOrder('ipv4first'); } catch (e) {}
 require('dotenv').config();
 const http = require('http');
 const express = require('express');
@@ -85,6 +87,7 @@ app.use(express.static(path.join(__dirname), {
 }));
 
 // Direct Page Routes
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/tv', (req, res) => res.sendFile(path.join(__dirname, 'tv.html')));
 app.get('/scorer', (req, res) => res.sendFile(path.join(__dirname, 'scorer.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));

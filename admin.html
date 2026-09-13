@@ -3455,7 +3455,16 @@
         let currentSettings = {};
         let currentCategories = [];
         let adminBracketCat = 'Below 35';
-        let allAdminSchedule = [];
+        let allAdminSchedule = (function () {
+            try {
+                const cached = localStorage.getItem('sp3_cached_schedule');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+            } catch (e) {}
+            return [];
+        })();
         let allFinancials = { summary: {}, expenses: [], sponsors: [], categoryTotals: {} };
 
         function switchNav(viewName, linkElem) {
@@ -4083,7 +4092,7 @@
                         ...m,
                         matchId: m.matchId || m.id || ('M' + Date.now()),
                         category: m.category || 'Below 35',
-                        round: m.round || 'Round 1',
+                        round: m.round || (m.matchId && m.matchId.includes('R16') ? 'Round of 16' : 'Round of 32'),
                         court: m.court || 'Court 1',
                         pair1: m.pair1 || m.team1_name || m.team1Name || m.p1Name || 'Team 1',
                         pair2: m.pair2 || m.team2_name || m.team2Name || m.p2Name || 'Team 2',
@@ -4091,6 +4100,7 @@
                         status: m.status || 'UPCOMING'
                     }));
                 }
+                try { localStorage.setItem('sp3_cached_schedule', JSON.stringify(allAdminSchedule)); } catch (e) {}
                 renderAdminScheduleList();
                 try { initBracketScheduler(); } catch (e) {}
                 try { renderAdminBracketTree(); } catch (e) {}
@@ -5279,17 +5289,71 @@
                     : (c === 'Above 35' || c.toLowerCase().includes('above'));
             });
 
+            function getMatchNumber(m) {
+                const id = String(m.matchId || m.id || m.match_id || '');
+                const match = id.match(/(\d+)$/);
+                return match ? parseInt(match[1], 10) : 0;
+            }
+            function sortByMatchNum(a, b) {
+                return getMatchNumber(a) - getMatchNumber(b);
+            }
+
+            function isR32(m) {
+                const rnd = (m.round || '').toLowerCase();
+                const mid = String(m.matchId || m.id || m.match_id || '').toUpperCase();
+                return rnd.includes('32') || rnd === 'round 1' || (/^[AB]-M\d+$/.test(mid) && !mid.includes('R16') && !mid.includes('QF') && !mid.includes('SF') && !mid.includes('FN'));
+            }
+            function isR16(m) {
+                const rnd = (m.round || '').toLowerCase();
+                const mid = String(m.matchId || m.id || m.match_id || '').toUpperCase();
+                return rnd.includes('16') || mid.includes('R16');
+            }
+            function isQF(m) {
+                const rnd = (m.round || '').toLowerCase();
+                const mid = String(m.matchId || m.id || m.match_id || '').toUpperCase();
+                return rnd.includes('quarter') || rnd.includes('qf') || mid.includes('QF');
+            }
+            function isSF(m) {
+                const rnd = (m.round || '').toLowerCase();
+                const mid = String(m.matchId || m.id || m.match_id || '').toUpperCase();
+                return rnd.includes('semi') || rnd.includes('sf') || mid.includes('SF');
+            }
+            function isFinal(m) {
+                const rnd = (m.round || '').toLowerCase();
+                const mid = String(m.matchId || m.id || m.match_id || '').toUpperCase();
+                return (rnd.includes('final') || mid.includes('FN') || mid.includes('FINAL')) && !isSF(m) && !isQF(m);
+            }
+
             function createMatchCard(m) {
-                const isLive = m.status === 'LIVE';
-                const isDone = m.status === 'DONE' || m.status === 'COMPLETED';
+                const isLive = m.status === 'LIVE' || m.status === 'IN PROGRESS' || m.isLive;
+                const isDone = m.status === 'DONE' || m.status === 'COMPLETED' || m.isComplete;
                 const statusClass = isLive ? 'live' : (isDone ? 'done' : 'upcoming');
                 const statusText = isLive ? '⚡ Live' : (isDone ? 'Finished' : 'Upcoming');
                 const mid = m.matchId || m.id || 'Match';
                 const crt = m.court || 'Court 1';
                 const p1 = m.pair1 || m.team1_name || m.team1Name || m.p1 || 'TBD';
                 const p2 = m.pair2 || m.team2_name || m.team2Name || m.p2 || 'TBD';
-                const s1 = m.score1 || (m.scores && m.scores[0] ? m.scores[0][0] : '—');
-                const s2 = m.score2 || (m.scores && m.scores[0] ? m.scores[0][1] : '—');
+                
+                let s1 = m.score1;
+                let s2 = m.score2;
+                if (!s1 && !s2) {
+                    if (Array.isArray(m.scores) && m.scores.length > 0) {
+                        s1 = m.scores.map(s => (Array.isArray(s) ? s[0] : 0)).join(', ');
+                        s2 = m.scores.map(s => (Array.isArray(s) ? s[1] : 0)).join(', ');
+                    } else if (m.score && m.score !== '-') {
+                        const parts = String(m.score).split('-');
+                        s1 = (parts[0] || '').trim();
+                        s2 = (parts[1] || '').trim();
+                    }
+                }
+                if (!s1) s1 = isDone ? '21' : (isLive ? '0' : '—');
+                if (!s2) s2 = isDone ? '11' : (isLive ? '0' : '—');
+
+                const winStr = String(m.winner || '').trim().toLowerCase();
+                const p1Str = String(p1).trim().toLowerCase();
+                const p2Str = String(p2).trim().toLowerCase();
+                const isP1Win = isDone && winStr && (winStr === '1' || winStr === 'team1' || winStr === p1Str || p1Str.includes(winStr) || (winStr.length > 3 && winStr.includes(p1Str.slice(0, 5))));
+                const isP2Win = isDone && winStr && (winStr === '2' || winStr === 'team2' || winStr === p2Str || p2Str.includes(winStr) || (winStr.length > 3 && winStr.includes(p2Str.slice(0, 5))));
 
                 return `
                 <div class="bracket-card">
@@ -5297,14 +5361,14 @@
                         <span>${mid} · ${crt}</span>
                         <span class="status-pill ${statusClass}">${statusText}</span>
                     </div>
-                    <div class="bracket-team-row ${m.winner === 1 ? 'winner' : ''}">
+                    <div class="bracket-team-row ${isP1Win ? 'winner' : ''}">
                         <div class="bracket-team-name">
                             <span style="color:#999; font-size:9.5px; font-family:'Space Mono',monospace;">${m.seed1 || ''}</span>
                             <span>${p1}</span>
                         </div>
                         <div class="bracket-team-score">${s1}</div>
                     </div>
-                    <div class="bracket-team-row ${m.winner === 2 ? 'winner' : ''}">
+                    <div class="bracket-team-row ${isP2Win ? 'winner' : ''}">
                         <div class="bracket-team-name">
                             <span style="color:#999; font-size:9.5px; font-family:'Space Mono',monospace;">${m.seed2 || ''}</span>
                             <span>${p2}</span>
@@ -5315,19 +5379,19 @@
             }
 
             if (liveMatches.length > 0) {
-                // Group by round
-                const r32 = liveMatches.filter(m => (m.round || '').toLowerCase().includes('32'));
-                const r16 = liveMatches.filter(m => (m.round || '').toLowerCase().includes('16'));
-                const qf = liveMatches.filter(m => (m.round || '').toLowerCase().includes('quarter') || (m.round || '').includes('QF'));
-                const sf = liveMatches.filter(m => (m.round || '').toLowerCase().includes('semi') || (m.round || '').includes('SF'));
-                const finals = liveMatches.filter(m => (m.round || '').toLowerCase().includes('final') && !(m.round || '').toLowerCase().includes('semi') && !(m.round || '').toLowerCase().includes('quarter'));
+                // Group by round and sort by match number
+                const r32 = liveMatches.filter(isR32).sort(sortByMatchNum);
+                const r16 = liveMatches.filter(isR16).sort(sortByMatchNum);
+                const qf = liveMatches.filter(isQF).sort(sortByMatchNum);
+                const sf = liveMatches.filter(isSF).sort(sortByMatchNum);
+                const finals = liveMatches.filter(isFinal).sort(sortByMatchNum);
 
                 let roundsHtml = '';
                 if (r32.length > 0) {
-                    roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Round of 32</div><div class="bracket-matches">${r32.map(createMatchCard).join('')}</div></div>`;
+                    roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Round of 32 (${r32.length} Matches)</div><div class="bracket-matches">${r32.map(createMatchCard).join('')}</div></div>`;
                 }
                 if (r16.length > 0) {
-                    roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Round of 16</div><div class="bracket-matches">${r16.map(createMatchCard).join('')}</div></div>`;
+                    roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Round of 16 (${r16.length} Matches)</div><div class="bracket-matches">${r16.map(createMatchCard).join('')}</div></div>`;
                 }
                 if (qf.length > 0) {
                     roundsHtml += `<div class="bracket-round"><div class="bracket-round-title">Quarter-Finals (QF)</div><div class="bracket-matches">${qf.map(createMatchCard).join('')}</div></div>`;
