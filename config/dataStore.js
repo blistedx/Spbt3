@@ -615,6 +615,15 @@ const dataStore = {
       .catch(e => console.error('[PostgreSQL] deleteMatch error:', e.message));
     return true;
   },
+  clearAllMatches() {
+    matchesCache = [];
+    liveMatchCache = { ...DEFAULT_LIVE_MATCH };
+    query("DELETE FROM matches")
+      .catch(e => console.error('[PostgreSQL] clearAllMatches error:', e.message));
+    query("DELETE FROM live_match")
+      .catch(e => console.error('[PostgreSQL] clearLiveMatch error:', e.message));
+    return true;
+  },
 
   // LIVE MATCH (REALTIME)
   getLiveMatch() {

@@ -3454,6 +3454,286 @@
     background: rgba(255, 255, 255, 0.25);
   }
 
+  /* ================= FULLSCREEN FLASH ANNOUNCEMENT OVERLAY MODAL ================= */
+  .flash-banner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    pointer-events: auto;
+  }
+
+  .flash-banner-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(3, 15, 9, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    animation: flashBackdropFadeIn 0.35s ease forwards;
+  }
+
+  .flash-banner-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 540px;
+    margin: auto;
+    animation: flashCardPopIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .flash-banner-card {
+    background: linear-gradient(145deg, #0d281a 0%, #06180f 100%);
+    border: 1.5px solid rgba(74, 222, 128, 0.35);
+    border-radius: 24px;
+    box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), 0 0 45px rgba(34, 197, 94, 0.18);
+    padding: 30px 28px 26px 28px;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .flash-banner-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 50% 15%, rgba(74, 222, 128, 0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .flash-banner-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 10;
+  }
+
+  .flash-banner-close-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+  }
+
+  .flash-banner-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .flash-banner-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    padding: 5px 13px;
+    border-radius: 999px;
+    width: fit-content;
+  }
+
+  .flash-pill-pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #f59e0b;
+    box-shadow: 0 0 10px #f59e0b;
+    animation: flashPillBlink 1.4s infinite ease-in-out;
+  }
+
+  @keyframes flashPillBlink {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.4; }
+  }
+
+  .flash-banner-pill .flash-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #fde047;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .flash-banner-branding {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .flash-banner-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .flash-banner-tourney {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+
+  .flash-banner-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #4ade80;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+
+  .flash-banner-body {
+    position: relative;
+    z-index: 2;
+  }
+
+  .flash-text-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(74, 222, 128, 0.22);
+    border-radius: 18px;
+    padding: 20px 22px;
+    margin-bottom: 24px;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.25);
+  }
+
+  .flash-text {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 600;
+    color: #f0fdf4;
+    margin: 0;
+    word-break: break-word;
+  }
+
+  .flash-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .flash-btn-primary {
+    flex: 1 1 200px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 14.5px;
+    font-weight: 700;
+    padding: 13px 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .flash-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    color: #ffffff;
+  }
+
+  .flash-btn-secondary {
+    flex: 1 1 150px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #e2e8f0;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 13px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    text-align: center;
+  }
+
+  .flash-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  .flash-banner-overlay.closing {
+    animation: flashBackdropFadeOut 0.22s ease forwards;
+  }
+
+  .flash-banner-overlay.closing .flash-banner-container {
+    animation: flashCardPopOut 0.22s ease forwards;
+  }
+
+  @keyframes flashBackdropFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes flashBackdropFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes flashCardPopIn {
+    from { opacity: 0; transform: scale(0.92) translateY(18px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes flashCardPopOut {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to { opacity: 0; transform: scale(0.92) translateY(18px); }
+  }
+
+  @media (max-width: 480px) {
+    .flash-banner-card {
+      padding: 22px 18px 20px 18px;
+      border-radius: 20px;
+    }
+    .flash-text {
+      font-size: 15px;
+    }
+    .flash-btn-primary, .flash-btn-secondary {
+      flex: 1 1 100%;
+    }
+  }
+
     /* ================= SITE-WIDE SCROLL & INTERACTION ANIMATIONS ================= */
     .reveal-on-scroll {
       opacity: 0;
@@ -3872,14 +4152,90 @@
     </div>
   </div>
 
-  <!-- FLASH ANNOUNCEMENT BANNER -->
-  <div class="flash-banner" id="flashBanner" style="display:none;">
-    <div class="flash-marquee">
-      <span class="flash-tag">⚡ LIVE UPDATE</span>
-      <span class="flash-text" id="flashBannerText">Registrations are OPEN! Limited team slots available. Register now
-        before slots close.</span>
+  <!-- ================= FULLSCREEN FLASH ANNOUNCEMENT OVERLAY MODAL ================= -->
+  <div class="flash-banner-overlay" id="flashBanner" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="flashBannerTitle">
+    <div class="flash-banner-backdrop" onclick="closeFlashBanner()"></div>
+    <div class="flash-banner-container">
+      <div class="flash-banner-card">
+        <!-- Close / Cut Button -->
+        <button type="button" class="flash-banner-close-btn" onclick="closeFlashBanner()" aria-label="Close Announcement" title="Close (Esc)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- Header Pill & Branding -->
+        <div class="flash-banner-header">
+          <div class="flash-banner-pill">
+            <span class="flash-pill-pulse"></span>
+            <span class="flash-tag">⚡ IMPORTANT ANNOUNCEMENT</span>
+          </div>
+          <div class="flash-banner-branding">
+            <img src="logo.png" alt="Tournament Logo" class="flash-banner-logo dyn-tourney-logo" onerror="this.style.display='none'">
+            <div>
+              <div class="flash-banner-tourney dyn-tourney-name">S.P. BADMINTON TOURNEY 3</div>
+              <div class="flash-banner-sub dyn-tourney-sub">OFFICIAL TOURNAMENT UPDATE</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Announcement Content Body -->
+        <div class="flash-banner-body">
+          <div class="flash-text-box">
+            <p class="flash-text" id="flashBannerText">Registrations are OPEN! Limited team slots available. Register now before slots close.</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flash-banner-actions">
+          <button type="button" class="flash-btn-primary" onclick="closeFlashBanner(); openRegister();">
+            <span>🏸 Register Team Now</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+          <button type="button" class="flash-btn-secondary" onclick="closeFlashBanner()">
+            <span>Continue to Website &rarr;</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
+  <script>
+    // Instant 0ms Flash Banner Initializer (Shows immediately before any slow scripts or background fetches)
+    (function () {
+      try {
+        const fb = document.getElementById('flashBanner');
+        const txt = document.getElementById('flashBannerText');
+        if (!fb) return;
+        let isFlashActive = true;
+        let flashMsg = "Registrations are OPEN! Limited team slots available.";
+        const cached = localStorage.getItem('sp3_public_config');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const st = (parsed && parsed.settings) ? parsed.settings : (parsed && parsed.config ? parsed.config : parsed);
+          if (st) {
+            const act = st.flash_active ?? st.flashActive;
+            if (act === 'NO' || act === false || act === 'no' || act === '0' || act === 0) {
+              isFlashActive = false;
+            } else if (act === 'YES' || act === true || act === 'yes' || act === '1' || act === 1) {
+              isFlashActive = true;
+            }
+            if (st.flash_message || st.flashAnnouncement) {
+              flashMsg = st.flash_message || st.flashAnnouncement;
+            }
+          }
+        }
+        if (isFlashActive && flashMsg && flashMsg.trim().length > 0) {
+          if (txt) txt.textContent = flashMsg;
+          fb.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <!-- ================= MOBILE OFF-CANVAS SIDEBAR ================= -->
   <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
@@ -5699,9 +6055,10 @@
 
     let publicConfigCache = null;
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadTournamentConfig();
-    });
+    loadTournamentConfig();
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', loadTournamentConfig);
+    }
 
     function loadTournamentConfig() {
       // 1. Instant Cache Load (0ms)
@@ -5876,7 +6233,7 @@
       const categories = cfg.categories || [];
       window._cachedCategories = categories;
 
-      // 1. Flash announcement bar visibility & content
+      // 1. Flash announcement overlay modal visibility & content
       const flashText = document.getElementById('flashBannerText');
       const flashBanner = document.getElementById('flashBanner');
       
@@ -5896,10 +6253,14 @@
       
       if (flashBanner) {
         if (isFlashActive && flashMsg && flashMsg.trim().length > 0) {
-          if (flashText) flashText.innerText = flashMsg;
-          flashBanner.style.display = 'block';
+          if (flashText) flashText.textContent = flashMsg;
+          if (!flashBanner.dataset.manuallyClosed) {
+            flashBanner.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+          }
         } else {
           flashBanner.style.display = 'none';
+          document.body.style.overflow = '';
         }
       }
 
@@ -6698,6 +7059,29 @@
       document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
     }
 
+    function closeFlashBanner() {
+      const fb = document.getElementById('flashBanner');
+      if (!fb) return;
+      fb.dataset.manuallyClosed = 'true';
+      fb.classList.add('closing');
+      setTimeout(() => {
+        fb.style.display = 'none';
+        fb.classList.remove('closing');
+        document.body.style.overflow = '';
+      }, 220);
+    }
+    window.closeFlashBanner = closeFlashBanner;
+
+    // Support Escape key to close flash banner modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const fb = document.getElementById('flashBanner');
+        if (fb && fb.style.display !== 'none') {
+          closeFlashBanner();
+        }
+      }
+    });
+
     function openMobileSidebar() {
       const sidebar = document.getElementById('mobileSidebar');
       const backdrop = document.getElementById('sidebarBackdrop');
@@ -7334,34 +7718,12 @@
         }
       }
 
-      const data = defaultBracketData[currentBracketCat] || defaultBracketData['Below 35'];
-      let qfHtml = data.qf.map(createMatchCard).join('');
-      let sfHtml = data.sf.map(createMatchCard).join('');
-      let finalHtml = data.finals.map(createMatchCard).join('');
-
+      // Clean empty state when no matches/draws are scheduled for this category
       container.innerHTML = `
-      <!-- ROUND 1: QUARTER FINALS -->
-      <div class="bracket-round">
-        <div class="bracket-round-title">Quarter-Finals (QF)</div>
-        <div class="bracket-matches">
-          ${qfHtml}
-        </div>
-      </div>
-
-      <!-- ROUND 2: SEMI FINALS -->
-      <div class="bracket-round">
-        <div class="bracket-round-title">Semi-Finals (SF)</div>
-        <div class="bracket-matches">
-          ${sfHtml}
-        </div>
-      </div>
-
-      <!-- ROUND 3: CHAMPIONSHIP FINAL -->
-      <div class="bracket-round">
-        <div class="bracket-round-title">Final</div>
-        <div class="bracket-matches">
-          ${finalHtml}
-        </div>
+      <div style="grid-column: 1/-1; text-align:center; padding: 48px 24px; background:var(--paper); border-radius:20px; border:1px solid var(--line); color:var(--text-muted); max-width:540px; margin:20px auto;">
+        <div style="font-size:38px; margin-bottom:12px;">🏸</div>
+        <strong style="font-size:16px; color:var(--ink); display:block; margin-bottom:6px;">No Knockout Draws Published Yet</strong>
+        <div style="font-size:13px; line-height:1.5; color:var(--text-secondary);">Fixtures and tournament tree will appear once teams are scheduled by the tournament admin.</div>
       </div>`;
     }
 
@@ -7390,7 +7752,7 @@
 
     function fetchAndRenderSchedule() {
       const onSuccess = function (res) {
-        if (res && res.success && res.schedule && res.schedule.length > 0) {
+        if (res && res.success && Array.isArray(res.schedule)) {
           allMatchesSchedule = res.schedule;
           try { localStorage.setItem('sp3_cached_schedule', JSON.stringify(res.schedule)); } catch (e) {}
         }

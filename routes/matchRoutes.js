@@ -152,6 +152,45 @@ router.post('/admin/save-schedule', requireAdmin, async (req, res) => {
   }
 });
 
+// 4b. Admin: Clear All Matches & Schedule
+router.post('/admin/clear-schedule', requireAdmin, async (req, res) => {
+  try {
+    dataStore.clearAllMatches();
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        await Match.deleteMany({});
+      }
+    } catch (e) {}
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('schedule_update', { schedule: [] });
+      io.emit('score_update', dataStore.getLiveMatch());
+    }
+    return res.json({ success: true, message: 'All matches and schedule cleared successfully', schedule: [] });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete('/admin/clear-schedule', requireAdmin, async (req, res) => {
+  try {
+    dataStore.clearAllMatches();
+    try {
+      if (mongoose.connection && mongoose.connection.readyState === 1) {
+        await Match.deleteMany({});
+      }
+    } catch (e) {}
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('schedule_update', { schedule: [] });
+      io.emit('score_update', dataStore.getLiveMatch());
+    }
+    return res.json({ success: true, message: 'All matches and schedule cleared successfully', schedule: [] });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 5. Scorer / Admin: Update Match Score & State
 router.post('/update-score', requireScorerOrAdmin, async (req, res) => {
   try {

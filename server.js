@@ -709,6 +709,27 @@ async function handleActionBridge(req, res, next) {
         return res.json({ success: true, message: 'Match deleted successfully', schedule: dataStore.getMatches() });
       }
 
+      case 'adminClearSchedule':
+      case 'clearSchedule':
+      case 'clearAllMatches': {
+        if (!pin || pin.toString() !== validAdminPin.toString()) {
+          return res.status(401).json({ success: false, error: 'Unauthorized: Invalid Admin PIN' });
+        }
+        dataStore.clearAllMatches();
+        try {
+          if (mongoose.connection.readyState === 1) {
+            await Match.deleteMany({});
+          }
+        } catch (e) {}
+        try {
+          if (io) {
+            io.emit('schedule_update', { schedule: [] });
+            io.emit('score_update', dataStore.getLiveMatch());
+          }
+        } catch (e) {}
+        return res.json({ success: true, message: 'All match schedules & fixtures cleared successfully', schedule: [] });
+      }
+
       case 'getSponsors': {
         let sponsorsList = [];
         try {

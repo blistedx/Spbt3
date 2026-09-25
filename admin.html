@@ -4087,7 +4087,7 @@
 
         function fetchAdminSchedule() {
             const onSuccess = function (res) {
-                if (res && res.success && res.schedule && Array.isArray(res.schedule)) {
+                if (res && res.success && Array.isArray(res.schedule)) {
                     allAdminSchedule = res.schedule.map(m => ({
                         ...m,
                         matchId: m.matchId || m.id || ('M' + Date.now()),
@@ -4099,6 +4099,8 @@
                         time: m.time || m.scheduledTime || m.scheduled_time || '05:00 PM',
                         status: m.status || 'UPCOMING'
                     }));
+                } else if (res && res.success && (!res.schedule || res.schedule.length === 0)) {
+                    allAdminSchedule = [];
                 }
                 try { localStorage.setItem('sp3_cached_schedule', JSON.stringify(allAdminSchedule)); } catch (e) {}
                 renderAdminScheduleList();
