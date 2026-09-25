@@ -18,6 +18,8 @@ module.exports = async (req, res) => {
   const isPageOrAsset = req.method === 'GET' && (
     req.url === '/' || 
     req.url.startsWith('/?') ||
+    req.url === '/categories' ||
+    req.url === '/register' ||
     req.url === '/admin' || 
     req.url === '/tv' || 
     req.url === '/scorer' || 

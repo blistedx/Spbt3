@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register Pair | S.P. Badminton Tourney Season 3</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+<style>
+  :root {
+    --bg-dark: #09090B; 
+    --bg-surface: #141417;
+    --bg-card: #18181B;
+    --bg-card-sub: #111114;
+    --bg-input: #121216;
+    --border-color: rgba(255, 255, 255, 0.12);
+    --border-gold: rgba(251, 191, 36, 0.35);
+    --text-primary: #FFFFFF; 
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+    --gold-primary: #FBBF24; 
+    --gold-hover: #F59E0B;
+    --gold-glow: rgba(251, 191, 36, 0.45);
+    --cyan-accent: #22D3EE; 
+    --cyan-glow: rgba(34, 211, 238, 0.4);
+    --green-accent: #22C55E;
+    --red-accent: #EF4444;
+    --font-display: 'Oswald', sans-serif; 
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body); 
+    background-color: var(--bg-dark); 
+    color: var(--text-primary);
+    min-height: 100vh; 
+    overflow-x: hidden;
+    background-image: radial-gradient(circle at 80% 15%, rgba(251,191,36,0.09) 0%, transparent 60%),
+                      radial-gradient(circle at 15% 85%, rgba(34,211,238,0.06) 0%, transparent 55%);
+    opacity: 0; 
+    animation: pageFadeIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  @keyframes pageFadeIn { to { opacity: 1; } }
+
+  /* ============ COURT 3D LINES BACKGROUND ============ */
+  .court-bg { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    pointer-events: none; z-index: 0; opacity: 0.07; perspective: 1200px; 
+  }
+  .court-lines { 
+    position: absolute; top: 50%; left: 50%; 
+    transform: translate(-50%,-50%) rotateX(60deg); 
+    width: 94%; height: 94%; 
+    border: 2px solid var(--gold-primary); 
+    box-shadow: 0 0 20px var(--gold-glow); 
+  }
+  .court-lines::before, .court-lines::after { content: ''; position: absolute; background: var(--gold-primary); }
+  .court-lines::before { top: 0; left: 50%; width: 2px; height: 100%; transform: translateX(-50%); }
+  .court-lines::after { top: 50%; left: 0; width: 100%; height: 2px; transform: translateY(-50%); }
+  .court-inner { position: absolute; top: 15%; left: 15%; width: 70%; height: 70%; border: 2px solid var(--gold-primary); }
+
+  /* ============ PARTICLES ============ */
+  .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+  .particle { 
+    position: absolute; width: 3px; height: 3px; 
+    background: var(--gold-primary); border-radius: 50%; 
+    opacity: 0.4; box-shadow: 0 0 8px var(--gold-glow); 
+    animation: floatUp linear infinite; 
+  }
+  @keyframes floatUp { 
+    0% { transform: translateY(100vh) scale(0); opacity: 0; } 
+    10% { opacity: 0.7; } 
+    90% { opacity: 0.7; } 
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; } 
+  }
+
+  /* ============ CURSOR SPARKLE ============ */
+  .cursor-sparkle { 
+    position: fixed; width: 6px; height: 6px; 
+    background: var(--cyan-accent); border-radius: 50%; 
+    pointer-events: none; z-index: 9999; 
+    box-shadow: 0 0 10px var(--cyan-accent); 
+    transition: transform 0.12s ease-out; 
+  }
+
+  /* ============ HEADER ============ */
+  header { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 1.1rem 5%; position: fixed; width: 100%; top: 0; z-index: 1000; 
+    background: rgba(9,9,11,0.92); backdrop-filter: blur(16px); 
+    border-bottom: 1px solid rgba(255,255,255,0.06); 
+    transform: translateY(-100%); 
+    animation: slideDown 0.8s cubic-bezier(0.16,1,0.3,1) 0.1s forwards; 
+  }
+  @keyframes slideDown { to { transform: translateY(0); } }
+  
+  .logo { 
+    display: flex; align-items: center; gap: 12px; 
+    font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; 
+    letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; 
+    color: var(--text-primary); transition: transform 0.3s; 
+    flex-shrink: 0;
+  }
+  .logo:hover { transform: scale(1.04); }
+  .logo-icon { 
+    width: 38px; height: 38px; border: 2px solid var(--gold-primary); 
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+    font-size: 1.05rem; color: var(--gold-primary); font-weight: 700; 
+    animation: pulseRing 2.5s ease-in-out infinite; 
+    background: rgba(251,191,36,0.08);
+  }
+  @keyframes pulseRing { 
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.6); } 
+    50% { box-shadow: 0 0 0 10px rgba(251,191,36,0); } 
+  }
+  .logo-sub { font-size: 0.65rem; color: var(--gold-primary); letter-spacing: 2px; display: block; }
+
+  .nav-links { 
+    display: flex; gap: 1.8rem; font-size: 0.88rem; font-weight: 600; 
+    text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-secondary); 
+  }
+  .nav-links a { color: inherit; text-decoration: none; transition: color 0.2s; position: relative; padding-bottom: 4px; }
+  .nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: var(--gold-primary); transition: width 0.3s; }
+  .nav-links a:hover { color: var(--gold-primary); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-links a.active { color: var(--gold-primary); }
+  .nav-links a.active::after { width: 100%; }
+
+  .header-actions { display: flex; align-items: center; gap: 1.2rem; flex-shrink: 0; }
+  
+  .sound-btn { 
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(251,191,36,0.35); 
+    color: var(--gold-primary); padding: 0.6rem 1.05rem; border-radius: 6px; 
+    cursor: pointer; display: flex; align-items: center; gap: 0.5rem; 
+    font-family: var(--font-body); font-size: 0.78rem; font-weight: 700; 
+    text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; 
+  }
+  .sound-btn:hover { background: rgba(251,191,36,0.15); border-color: var(--gold-primary); transform: translateY(-2px); }
+  .sound-wave { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+  .sound-wave span { width: 2px; background: var(--gold-primary); border-radius: 1px; animation: quiet 1s ease-in-out infinite; }
+  .sound-wave.active span:nth-child(1) { animation: soundBar 0.4s ease-in-out infinite alternate; }
+  .sound-wave.active span:nth-child(2) { animation: soundBar 0.6s ease-in-out 0.1s infinite alternate; }
+  .sound-wave.active span:nth-child(3) { animation: soundBar 0.5s ease-in-out 0.2s infinite alternate; }
+  @keyframes soundBar { 0% { height: 3px; } 100% { height: 12px; } }
+  @keyframes quiet { 0%, 100% { height: 3px; } }
+
+  .menu-toggle { display: none; flex-direction: column; gap: 5px; background: transparent; border: none; cursor: pointer; padding: 5px; }
+  .menu-toggle span { width: 22px; height: 2px; background: var(--text-primary); transition: all 0.3s; }
+  
+  .mobile-nav { 
+    display: none; position: fixed; top: 68px; left: 0; width: 100%; 
+    background: rgba(9,9,11,0.98); backdrop-filter: blur(20px); 
+    border-bottom: 1px solid rgba(251,191,36,0.2); 
+    padding: 1.5rem 6%; flex-direction: column; gap: 1.2rem; z-index: 999; 
+  }
+  .mobile-nav.open { display: flex; }
+  .mobile-nav a { color: var(--text-primary); text-decoration: none; font-family: var(--font-display); font-size: 1.25rem; letter-spacing: 1.5px; text-transform: uppercase; }
+
+  /* ============ PAGE CONTAINER (WIDE DESKTOP LAYOUT) ============ */
+  .page-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 7.8rem 4% 4rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .page-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.2rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .page-tag {
+    font-family: var(--font-display);
+    font-size: 0.95rem; font-style: italic;
+    color: var(--gold-primary);
+    letter-spacing: 3px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 0.6rem;
+    opacity: 0; animation: slideRight 0.8s ease 0.2s forwards;
+  }
+  .page-tag::before { content: ''; width: 45px; height: 2.5px; background: var(--gold-primary); }
+  @keyframes slideRight { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 4.5vw, 4.2rem);
+    font-style: italic; text-transform: uppercase;
+    font-weight: 700; letter-spacing: -0.5px;
+    line-height: 1.05; margin-bottom: 0.5rem;
+    opacity: 0; animation: fadeUp 0.9s ease 0.4s forwards;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  .page-title .gold {
+    background: linear-gradient(90deg, #FBBF24, #F59E0B, #FDE68A, #FBBF24);
+    background-size: 200% auto;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    animation: shimmer 3.5s linear infinite;
+    filter: drop-shadow(0 0 25px var(--gold-glow));
+  }
+  @keyframes shimmer { to { background-position: 200% center; } }
+
+  .page-desc {
+    color: var(--text-secondary);
+    font-size: 1.05rem; line-height: 1.6;
+    max-width: 680px;
+    opacity: 0; animation: fadeUp 0.9s ease 0.5s forwards;
+  }
+  .page-desc strong { color: var(--gold-primary); }
+
+  /* ============ FORM CARD CONTAINER ============ */
+  .form-card {
+    background: linear-gradient(155deg, #18181C 0%, #0F0F12 100%);
+    border: 1.5px solid var(--border-gold);
+    border-radius: 24px;
+    padding: 3rem 2.8rem;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(251,191,36,0.1);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: cardIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.6s forwards;
+  }
+  @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+
+  .form-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 4px;
+    background: linear-gradient(90deg, var(--gold-primary), var(--cyan-accent), var(--gold-primary));
+  }
+
+  /* ============ CATEGORY SELECTION CARDS ============ */
+  .category-picker-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--gold-primary);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .category-picker-title .step-badge {
+    background: var(--gold-primary);
+    color: #000;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    font-size: 0.85rem; font-weight: 900;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  .category-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .category-option-card {
+    background: var(--bg-card-sub);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem 1.6rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .category-option-card:hover {
+    border-color: rgba(251,191,36,0.6);
+    transform: translateY(-2px);
+    background: rgba(251,191,36,0.05);
+  }
+  .category-option-card.active {
+    border-color: var(--gold-primary);
+    background: rgba(251,191,36,0.12);
+    box-shadow: 0 0 25px rgba(251,191,36,0.25);
+  }
+
+  .cat-opt-name {
+    font-family: var(--font-display);
+    font-size: 1.7rem; font-style: italic; font-weight: 700;
+    color: #fff; line-height: 1.1;
+  }
+  .category-option-card.active .cat-opt-name { color: var(--gold-primary); }
+  .cat-opt-sub { font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px; }
+  .cat-opt-fee {
+    font-family: var(--font-display);
+    font-size: 1.25rem; font-weight: 700;
+    color: var(--gold-primary);
+    text-align: right;
+  }
+  .cat-opt-radio {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    display: flex; align-items: center; justify-content: center;
+    margin-left: 1rem;
+    flex-shrink: 0;
+  }
+  .category-option-card.active .cat-opt-radio {
+    border-color: var(--gold-primary);
+    background: var(--gold-primary);
+  }
+  .category-option-card.active .cat-opt-radio::after {
+    content: '✓'; color: #000; font-size: 0.75rem; font-weight: 900;
+  }
+
+  /* ============ DUAL-COLUMN DESKTOP GRID ============ */
+  .form-body-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 2.8rem;
+    align-items: start;
+  }
+
+  .form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+
+  .player-box {
+    background: var(--bg-card-sub);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 1.8rem 1.6rem;
+    transition: border-color 0.3s;
+  }
+  .player-box:hover { border-color: rgba(251,191,36,0.3); }
+
+  .form-section-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--gold-primary);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .form-section-title .step-num {
+    background: var(--gold-primary);
+    color: #000;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    font-size: 0.82rem; font-weight: 900;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  .form-group {
+    margin-bottom: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .form-group:last-child { margin-bottom: 0; }
+
+  .form-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    padding: 0.95rem 1.2rem;
+    transition: all 0.3s;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 18px var(--gold-glow);
+    background: #16161b;
+  }
+  .form-input::placeholder { color: var(--text-muted); }
+
+  /* ============ PAYMENT QR CARD ============ */
+  .payment-card {
+    background: linear-gradient(145deg, #1e1e23, #111114);
+    border: 1.5px solid rgba(251,191,36,0.35);
+    border-radius: 18px;
+    padding: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 1.8rem;
+    position: relative;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  }
+
+  .qr-frame {
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .qr-img {
+    width: 145px; height: 145px;
+    border-radius: 12px;
+    background: #fff;
+    padding: 8px;
+    object-fit: contain;
+    border: 2px solid var(--gold-primary);
+    box-shadow: 0 0 25px rgba(251,191,36,0.25);
+    display: block;
+    margin: 0 auto 6px;
+  }
+  .qr-badge {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--gold-primary);
+    text-transform: uppercase;
+  }
+
+  .payment-info { flex: 1; }
+  .payee-tag {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--gold-primary);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .payee-name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .upi-id-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(251,191,36,0.45);
+    padding: 0.55rem 0.95rem;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    color: var(--gold-primary);
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+  }
+  .upi-id-box:hover {
+    background: rgba(251,191,36,0.18);
+    border-color: var(--gold-primary);
+    transform: translateY(-2px);
+  }
+  .copy-btn {
+    background: var(--gold-primary);
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .fee-banner {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+  }
+  .fee-banner strong { color: var(--gold-primary); font-size: 1.15rem; }
+
+  /* ============ RECEIPT UPLOAD ============ */
+  .upload-box {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px dashed rgba(251,191,36,0.4);
+    border-radius: 14px;
+    padding: 1.6rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .upload-box:hover {
+    background: rgba(251,191,36,0.08);
+    border-color: var(--gold-primary);
+  }
+  .upload-prompt svg { margin-bottom: 8px; }
+  .upload-title { font-size: 0.98rem; font-weight: 700; color: var(--gold-primary); }
+  .upload-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; }
+
+  .upload-preview {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  .upload-preview img {
+    max-height: 90px;
+    border-radius: 10px;
+    border: 1.5px solid var(--gold-primary);
+    object-fit: contain;
+  }
+  .preview-info { text-align: left; }
+  .preview-name { font-size: 0.92rem; font-weight: 700; color: #fff; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .preview-status { font-size: 0.8rem; color: var(--green-accent); font-weight: 700; }
+
+  /* ============ TERMS & SUBMIT ============ */
+  .terms-box {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .terms-box:hover { border-color: var(--gold-primary); }
+  .terms-box input[type="checkbox"] {
+    width: 20px; height: 20px;
+    accent-color: var(--gold-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .terms-label { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; line-height: 1.45; }
+  .terms-label a { color: var(--gold-primary); text-decoration: underline; font-weight: 700; }
+
+  .btn-submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, var(--gold-primary) 0%, #f59e0b 100%);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 12px 30px var(--gold-glow);
+    margin-top: 0.5rem;
+  }
+  .btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px var(--gold-glow);
+    background: linear-gradient(135deg, #fde68a 0%, var(--gold-primary) 100%);
+  }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* ============ SUCCESS MODAL ============ */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(14px);
+    z-index: 2000;
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .success-card {
+    background: linear-gradient(150deg, #18181B, #0e0e11);
+    border: 1.5px solid var(--gold-primary);
+    border-radius: 22px;
+    width: 100%; max-width: 550px;
+    padding: 2.5rem;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 40px rgba(251,191,36,0.25);
+    animation: modalScale 0.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes modalScale { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+
+  .success-icon {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.15);
+    border: 2px solid var(--green-accent);
+    color: var(--green-accent);
+    font-size: 2.2rem;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.4rem;
+  }
+  .success-title {
+    font-family: var(--font-display);
+    font-size: 2rem; font-style: italic;
+    color: #fff; text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .success-sub { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.8rem; }
+
+  .reg-id-display {
+    background: rgba(251,191,36,0.1);
+    border: 1.5px dashed var(--gold-primary);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.8rem;
+  }
+  .reg-id-val { font-family: var(--font-mono); font-size: 1.65rem; font-weight: 700; color: var(--gold-primary); letter-spacing: 1px; }
+
+  .modal-actions {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .btn-modal-action {
+    padding: 0.95rem; border-radius: 10px; font-weight: 700; font-size: 0.92rem;
+    text-transform: uppercase; letter-spacing: 1px; text-decoration: none;
+    cursor: pointer; border: none; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-share-wa { background: #25D366; color: #fff; }
+  .btn-share-wa:hover { background: #20BA5A; }
+  .btn-close-modal { background: rgba(255,255,255,0.08); color: var(--text-secondary); border: 1px solid rgba(255,255,255,0.1); }
+  .btn-close-modal:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+  /* ============ FLOATING WHATSAPP ============ */
+  .whatsapp-float { 
+    position: fixed; bottom: 25px; right: 25px; 
+    width: 60px; height: 60px; background: #25D366; 
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+    font-size: 1.9rem; text-decoration: none; 
+    box-shadow: 0 6px 28px rgba(37,211,102,0.5); 
+    z-index: 999; transition: transform 0.3s; 
+    animation: whatsappPulse 2s ease-in-out infinite; 
+  }
+  @keyframes whatsappPulse { 
+    0%, 100% { box-shadow: 0 5px 25px rgba(37,211,102,0.5); } 
+    50% { box-shadow: 0 5px 40px rgba(37,211,102,0.9); } 
+  }
+  .whatsapp-float:hover { transform: scale(1.15) rotate(10deg); }
+
+  @media (max-width: 1024px) {
+    .form-body-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .category-options-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .page-container { padding-top: 7rem; }
+    .form-card { padding: 2.2rem 1.8rem; }
+  }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .menu-toggle { display: flex; }
+    .payment-card { flex-direction: column; text-align: center; }
+    .sound-btn span:last-child { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor-sparkle" id="cursorSparkle"></div>
+
+<div class="court-bg">
+  <div class="court-lines">
+    <div class="court-inner"></div>
+  </div>
+</div>
+
+<div class="particles" id="particles"></div>
+
+<header>
+  <a href="/" class="logo" data-sound="hover">
+    <div class="logo-icon">🏸</div>
+    <div>
+      SURYODAYA
+      <span class="logo-sub">BADMINTON TOURNEY 3</span>
+    </div>
+  </a>
+  <nav class="nav-links">
+    <a href="/" data-sound="hover">Home</a>
+    <a href="/categories" data-sound="hover">Categories</a>
+    <a href="/register" class="active" data-sound="hover">Register</a>
+    <a href="/#schedule" data-sound="hover">Schedule</a>
+    <a href="/#draws" data-sound="hover">Fixtures</a>
+    <a href="/#rules-faq" data-sound="hover">Rules</a>
+  </nav>
+  <div class="header-actions">
+    <button class="sound-btn" id="soundToggleBtn" title="Toggle Sound">
+      <div class="sound-wave active" id="soundWaveIcon"><span></span><span></span><span></span></div>
+      <span id="soundBtnText">Sound On</span>
+    </button>
+    <button class="menu-toggle" id="menuToggleBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="mobile-nav" id="mobileNav">
+  <a href="/" data-sound="click">Home</a>
+  <a href="/categories" data-sound="click">Categories</a>
+  <a href="/register" data-sound="click">Register</a>
+  <a href="/#schedule" data-sound="click">Schedule</a>
+  <a href="/#draws" data-sound="click">Fixtures</a>
+  <a href="/#rules-faq" data-sound="click">Rules</a>
+</div>
+
+<div class="page-container">
+  <div class="page-header-row">
+    <div>
+      <div class="page-tag">Official Registration Portal</div>
+      <h1 class="page-title">Register <span class="gold">Men's Doubles</span> Pair</h1>
+      <p class="page-desc">
+        Select category, enter team player names &amp; mobile numbers, and complete payment verification.
+      </p>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <form id="registrationForm" onsubmit="handleFormSubmit(event)">
+      <!-- STEP 1: SELECT CATEGORY -->
+      <div class="category-picker-title">
+        <span class="step-badge">1</span>
+        Select Age Category
+      </div>
+
+      <div class="category-options-grid">
+        <div class="category-option-card active" id="catCardBelow35" onclick="selectCategory('Below 35')" data-sound="click">
+          <div>
+            <div class="cat-opt-name">BELOW 35</div>
+            <div class="cat-opt-sub">Under 35 Years • Men's Doubles Knockout</div>
+          </div>
+          <div style="display:flex; align-items:center;">
+            <div class="cat-opt-fee" id="feeOptBelow35">₹1000 / Team</div>
+            <div class="cat-opt-radio"></div>
+          </div>
+        </div>
+
+        <div class="category-option-card" id="catCardAbove35" onclick="selectCategory('Above 35')" data-sound="click">
+          <div>
+            <div class="cat-opt-name">ABOVE 35</div>
+            <div class="cat-opt-sub">35 Years &amp; Above • Men's Doubles Knockout</div>
+          </div>
+          <div style="display:flex; align-items:center;">
+            <div class="cat-opt-fee" id="feeOptAbove35">₹1000 / Team</div>
+            <div class="cat-opt-radio"></div>
+          </div>
+        </div>
+      </div>
+
+      <input type="hidden" id="selectedCategory" value="Below 35">
+
+      <div class="form-body-grid">
+        <!-- LEFT COLUMN: PLAYER DETAILS -->
+        <div class="form-column">
+          <!-- PLAYER 1 (LEAD REGISTRANT) -->
+          <div class="player-box">
+            <div class="form-section-title">
+              <span class="step-num">2</span>
+              Player 1 (Lead Registrant)
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Player 1 Full Name *</label>
+              <input type="text" class="form-input" id="p1Name" placeholder="e.g. Rahul Sharma" required data-sound="hover">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">WhatsApp / Mobile Number *</label>
+              <input type="tel" class="form-input" id="p1Phone" placeholder="10-digit mobile (e.g. 9876543210)" maxlength="10" inputmode="numeric" oninput="sanitizePhone(this)" required data-sound="hover">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Email Address *</label>
+              <input type="email" class="form-input" id="p1Email" placeholder="For tournament schedule & match pass updates" required data-sound="hover">
+            </div>
+          </div>
+
+          <!-- PLAYER 2 (PARTNER) -->
+          <div class="player-box">
+            <div class="form-section-title">
+              <span class="step-num">3</span>
+              Player 2 (Partner)
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Partner Full Name *</label>
+              <input type="text" class="form-input" id="p2Name" placeholder="e.g. Amit Verma" required data-sound="hover">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Partner WhatsApp / Mobile Number *</label>
+              <input type="tel" class="form-input" id="p2Phone" placeholder="10-digit mobile (e.g. 9876543210)" maxlength="10" inputmode="numeric" oninput="sanitizePhone(this)" required data-sound="hover">
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: PAYMENT & SUBMISSION -->
+        <div class="form-column">
+          <div class="player-box">
+            <div class="form-section-title">
+              <span class="step-num">4</span>
+              Payment &amp; Verification
+            </div>
+
+            <!-- OFFICIAL PHONEPE / UPI QR CODE CARD -->
+            <div class="payment-card">
+              <div class="qr-frame">
+                <img src="/qr_code.png" id="officialUpiQrImg" alt="Official Tournament UPI QR" class="qr-img" onerror="if(!this._hasRetried){this._hasRetried=true; this.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='+encodeURIComponent('upi://pay?pa=blistedx@okhdfcbank&pn=ABHISHEK%20SHUKLA&am=1000&cu=INR');}">
+                <div class="qr-badge">PhonePe · GPay · Paytm · UPI</div>
+              </div>
+              <div class="payment-info">
+                <div class="payee-tag">OFFICIAL TOURNAMENT ACCOUNT</div>
+                <div class="payee-name" id="displayPayeeName">ABHISHEK SHUKLA</div>
+                <div class="upi-id-box" id="upiCopyBox" onclick="copyUpiId()" title="Click to Copy UPI ID" data-sound="click">
+                  <span id="displayUpiId">blistedx@okhdfcbank</span>
+                  <button type="button" class="copy-btn">Copy</button>
+                </div>
+                <div class="fee-banner">
+                  Entry Fee: <strong id="displayEntryFee">₹1000 / Team</strong><br>
+                  <span style="color:var(--text-muted); font-size:0.78rem;">Scan QR with any UPI app to transfer entry fee</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top:1.2rem;">
+              <label class="form-label">UPI UTR / Reference No. (12 Digits) *</label>
+              <input type="text" class="form-input" id="upiUtr" placeholder="12-digit UTR from PhonePe / GPay / Paytm receipt" required data-sound="hover">
+            </div>
+
+            <div class="form-group" style="margin-top:1.2rem;">
+              <label class="form-label">Upload Payment Receipt Screenshot</label>
+              <div class="upload-box" onclick="document.getElementById('receiptFile').click()" data-sound="click">
+                <input type="file" id="receiptFile" accept="image/*" style="display:none;" onchange="handleReceiptFile(event)">
+                <div id="uploadPrompt" class="upload-prompt">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="#FBBF24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  <div class="upload-title">Click to upload payment screenshot</div>
+                  <div class="upload-sub">JPG, PNG, JPEG up to 5MB</div>
+                </div>
+                <div id="uploadPreview" class="upload-preview">
+                  <img id="previewImg" src="" alt="Receipt Preview">
+                  <div class="preview-info">
+                    <div id="previewFileName" class="preview-name">receipt.png</div>
+                    <div class="preview-status">✓ Screenshot Loaded</div>
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" id="receiptBase64" value="">
+              <input type="hidden" id="receiptFileName" value="">
+            </div>
+
+            <!-- RULES CHECKBOX -->
+            <div class="terms-box" id="termsBox" onclick="document.getElementById('termsCheckbox').click()" data-sound="click" style="margin-top:1.2rem;">
+              <input type="checkbox" id="termsCheckbox" required onclick="event.stopPropagation()">
+              <label for="termsCheckbox" class="terms-label" onclick="event.stopPropagation()">
+                I agree to the <a href="/terms" target="_blank" onclick="event.stopPropagation()">Tournament Rules &amp; Regulations</a>.
+              </label>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn" data-sound="smash">
+              Submit Registration &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ SUCCESS MODAL ============ -->
+<div class="modal-overlay" id="successModal">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <h3 class="success-title">Registration Submitted!</h3>
+    <p class="success-sub">
+      Your Men's Doubles pair registration has been recorded successfully. Please save your official <strong>Registration ID</strong>.
+    </p>
+
+    <div class="reg-id-display">
+      <div style="text-align:left;">
+        <div style="font-size:0.78rem; color:var(--text-secondary); text-transform:uppercase;">Registration ID</div>
+        <div class="reg-id-val" id="successRegId">SP3-XXXX</div>
+      </div>
+      <button type="button" class="copy-btn" onclick="copyRegId()" style="padding:7px 16px; font-size:0.85rem;">Copy ID</button>
+    </div>
+
+    <div style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1.8rem; text-align:left; background:rgba(255,255,255,0.04); padding:12px 16px; border-radius:10px;">
+      <div><strong>Category:</strong> <span id="successCategory">Below 35</span></div>
+      <div><strong>Players:</strong> <span id="successPairNames">Player 1 &amp; Player 2</span></div>
+      <div style="margin-top:6px; font-size:0.8rem; color:var(--gold-primary);">Verification typically completes within 2–4 hours.</div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-action btn-share-wa" onclick="shareOnWhatsApp()" data-sound="click">
+        💬 Share Registration on WhatsApp
+      </button>
+      <button type="button" class="btn-modal-action btn-close-modal" onclick="closeSuccessModal()" data-sound="click">
+        Close &amp; Return Home
+      </button>
+    </div>
+  </div>
+</div>
+
+<a href="https://wa.me/919903000000" class="whatsapp-float" target="_blank" data-sound="click" title="Chat on WhatsApp">💬</a>
+
+<script>
+  // ============ SOUND ENGINE (Web Audio API) ============
+  class SoundEngine {
+    constructor() { this.ctx = null; this.enabled = true; }
+    init() {
+      if (!this.ctx) { 
+        const AC = window.AudioContext || window.webkitAudioContext; 
+        if (AC) this.ctx = new AC(); 
+      }
+      if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+    }
+    playHover() {
+      if (!this.enabled) return; this.init(); if (!this.ctx) return;
+      try {
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(600, this.ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.05);
+        g.gain.setValueAtTime(0.02, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.05);
+        o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + 0.05);
+      } catch (e) {}
+    }
+    playClick() {
+      if (!this.enabled) return; this.init(); if (!this.ctx) return;
+      try {
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = 'triangle'; o.frequency.setValueAtTime(220, this.ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 0.08);
+        g.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+        o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + 0.08);
+      } catch (e) {}
+    }
+    playSmash() {
+      if (!this.enabled) return; this.init(); if (!this.ctx) return;
+      try {
+        const t = this.ctx.currentTime;
+        const bufSize = this.ctx.sampleRate * 0.15;
+        const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = this.ctx.createBufferSource(); noise.buffer = buf;
+        const filt = this.ctx.createBiquadFilter(); filt.type = 'bandpass';
+        filt.frequency.setValueAtTime(800, t); filt.frequency.exponentialRampToValueAtTime(3000, t + 0.08); filt.Q.value = 3;
+        const ng = this.ctx.createGain(); ng.gain.setValueAtTime(0.15, t); ng.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        noise.connect(filt); filt.connect(ng); ng.connect(this.ctx.destination);
+        const o = this.ctx.createOscillator(), og = this.ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(1800, t); o.frequency.exponentialRampToValueAtTime(200, t + 0.12);
+        og.gain.setValueAtTime(0.3, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        o.connect(og); og.connect(this.ctx.destination);
+        noise.start(t); o.start(t); noise.stop(t + 0.15); o.stop(t + 0.12);
+      } catch (e) {}
+    }
+  }
+  const audioFX = new SoundEngine();
+  const soundToggleBtn = document.getElementById('soundToggleBtn');
+  const soundWaveIcon = document.getElementById('soundWaveIcon');
+  const soundBtnText = document.getElementById('soundBtnText');
+  soundToggleBtn.addEventListener('click', () => {
+    audioFX.enabled = !audioFX.enabled;
+    if (audioFX.enabled) { soundWaveIcon.classList.add('active'); soundBtnText.innerText = 'Sound On'; audioFX.playClick(); }
+    else { soundWaveIcon.classList.remove('active'); soundBtnText.innerText = 'Muted'; }
+  });
+  document.querySelectorAll('[data-sound="hover"]').forEach(el => el.addEventListener('mouseenter', () => audioFX.playHover()));
+  document.querySelectorAll('[data-sound="click"]').forEach(el => el.addEventListener('click', () => audioFX.playClick()));
+  document.querySelectorAll('[data-sound="smash"]').forEach(el => el.addEventListener('click', () => audioFX.playSmash()));
+
+  // ============ CURSOR SPARKLE ============
+  const cs = document.getElementById('cursorSparkle');
+  window.addEventListener('mousemove', (e) => { 
+    if (cs) cs.style.transform = `translate3d(${e.clientX - 3}px, ${e.clientY - 3}px, 0)`; 
+  });
+
+  // ============ MOBILE MENU ============
+  document.getElementById('menuToggleBtn').addEventListener('click', () => {
+    document.getElementById('mobileNav').classList.toggle('open');
+  });
+
+  // ============ PARTICLES ============
+  const particles = document.getElementById('particles');
+  for (let i = 0; i < 35; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (7 + Math.random() * 10) + 's';
+    p.style.animationDelay = Math.random() * 6 + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 3.5) + 'px';
+    particles.appendChild(p);
+  }
+
+  // ============ CATEGORY SELECTION ============
+  function selectCategory(cat) {
+    document.getElementById('selectedCategory').value = cat;
+    document.querySelectorAll('.category-option-card').forEach(el => el.classList.remove('active'));
+    if (cat === 'Below 35') {
+      document.getElementById('catCardBelow35')?.classList.add('active');
+    } else {
+      document.getElementById('catCardAbove35')?.classList.add('active');
+    }
+  }
+
+  // Preset category from URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const requestedCat = urlParams.get('cat');
+  if (requestedCat && requestedCat.toLowerCase().includes('above')) {
+    selectCategory('Above 35');
+  } else {
+    selectCategory('Below 35');
+  }
+
+  function sanitizePhone(el) {
+    if (!el) return;
+    let v = el.value.replace(/\D/g, '');
+    if (v.startsWith('91') && v.length === 12) v = v.slice(2);
+    else if (v.startsWith('0') && v.length === 11) v = v.slice(1);
+    if (v.length > 10) v = v.slice(0, 10);
+    el.value = v;
+  }
+
+  // ============ UPI COPY HELPER ============
+  function copyUpiId() {
+    const upi = document.getElementById('displayUpiId').innerText.trim();
+    navigator.clipboard.writeText(upi).then(() => {
+      const box = document.getElementById('upiCopyBox');
+      const btn = box.querySelector('.copy-btn');
+      const oldTxt = btn.innerText;
+      btn.innerText = "Copied!";
+      btn.style.background = "#22c55e";
+      setTimeout(() => {
+        btn.innerText = oldTxt;
+        btn.style.background = "";
+      }, 2000);
+    }).catch(() => {});
+  }
+
+  // ============ RECEIPT FILE SELECT ============
+  function handleReceiptFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Payment receipt image size must be under 5MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      document.getElementById('receiptBase64').value = evt.target.result;
+      document.getElementById('receiptFileName').value = file.name;
+      document.getElementById('previewImg').src = evt.target.result;
+      document.getElementById('previewFileName').innerText = file.name;
+      document.getElementById('uploadPrompt').style.display = "none";
+      document.getElementById('uploadPreview').style.display = "flex";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ============ FORM SUBMIT HANDLER ============
+  function handleFormSubmit(e) {
+    e.preventDefault();
+
+    const p1Phone = (document.getElementById('p1Phone')?.value || '').replace(/\D/g, '').slice(-10);
+    const p2Phone = (document.getElementById('p2Phone')?.value || '').replace(/\D/g, '').slice(-10);
+
+    if (p1Phone.length !== 10) {
+      alert("Please enter a valid 10-digit mobile number for Player 1.");
+      document.getElementById('p1Phone').focus();
+      return;
+    }
+    if (p2Phone.length !== 10) {
+      alert("Please enter a valid 10-digit mobile number for Player 2.");
+      document.getElementById('p2Phone').focus();
+      return;
+    }
+
+    const agree = document.getElementById('termsCheckbox');
+    if (!agree || !agree.checked) {
+      alert("Please accept the tournament rules to proceed.");
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerText = "Submitting Registration...";
+
+    const payload = {
+      action: "register",
+      category: document.getElementById('selectedCategory').value || "Below 35",
+      player1Name: (document.getElementById('p1Name')?.value || '').trim(),
+      player1Phone: p1Phone,
+      player1Email: (document.getElementById('p1Email')?.value || '').trim(),
+      player2Name: (document.getElementById('p2Name')?.value || '').trim(),
+      player2Phone: p2Phone,
+      upiUtr: (document.getElementById('upiUtr')?.value || '').trim(),
+      receiptBase64: document.getElementById('receiptBase64')?.value || '',
+      receiptFileName: document.getElementById('receiptFileName')?.value || ''
+    };
+
+    fetch('/api?action=register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+      btn.disabled = false;
+      btn.innerText = "Submit Registration →";
+      if (res && res.success) {
+        const regId = res.regId || (res.registration && res.registration.regId) || ("SP3-" + Math.floor(1000 + Math.random() * 9000));
+        document.getElementById('successRegId').innerText = regId;
+        document.getElementById('successCategory').innerText = payload.category;
+        document.getElementById('successPairNames').innerText = payload.player1Name + " & " + payload.player2Name;
+        
+        document.getElementById('successModal').classList.add('open');
+        try {
+          confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
+        } catch(e) {}
+        document.getElementById('registrationForm').reset();
+      } else {
+        alert("Registration failed: " + (res.error || "Please check details and try again."));
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerText = "Submit Registration →";
+      alert("Error submitting registration: " + err.message);
+    });
+  }
+
+  // ============ SUCCESS MODAL HELPERS ============
+  function copyRegId() {
+    const regId = document.getElementById('successRegId').innerText.trim();
+    navigator.clipboard.writeText(regId).then(() => {
+      alert("Registration ID copied: " + regId);
+    }).catch(() => {});
+  }
+
+  function shareOnWhatsApp() {
+    const regId = document.getElementById('successRegId').innerText.trim();
+    const cat = document.getElementById('successCategory').innerText.trim();
+    const pair = document.getElementById('successPairNames').innerText.trim();
+    const msg = `🏸 *Suryodaya Badminton Tourney Season 3*\n\nOur pair has successfully registered!\n• *Reg ID:* ${regId}\n• *Category:* ${cat}\n• *Pair:* ${pair}\n\nTrack fixtures & live scores: ${window.location.origin}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  function closeSuccessModal() {
+    document.getElementById('successModal').classList.remove('open');
+    window.location.href = '/';
+  }
+</script>
+
+</body>
+</html>

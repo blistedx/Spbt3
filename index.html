@@ -982,35 +982,36 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 24px;
-    gap: 16px;
+    padding: 7px clamp(10px, 1.5vw, 24px);
+    gap: clamp(6px, 1vw, 14px);
     max-width: 1440px;
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
   }
-  .logo{ display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; flex: 1 1 0; min-width: 0; justify-content: flex-start; }
-  .logo .mark{width:36px;height:36px;flex-shrink:0; border-radius:50%;}
-  .logo b{font-family:'Outfit','Inter', -apple-system, sans-serif; font-weight:800; font-size:14px; letter-spacing:0.04em; color:var(--ink); line-height:1.15; text-transform:uppercase; display:block; white-space:nowrap;}
-  .logo span{font-family:'Space Mono', monospace; color:var(--court); font-size:10px; display:block; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; margin-top:1px; white-space:nowrap;}
+  .logo{ display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit; flex-shrink: 0; min-width: max-content; }
+  .logo .mark{width:34px;height:34px;flex-shrink:0; border-radius:50%;}
+  .logo b{font-family:'Outfit','Inter', -apple-system, sans-serif; font-weight:800; font-size:13px; letter-spacing:0.03em; color:var(--ink); line-height:1.15; text-transform:uppercase; display:block; white-space:nowrap;}
+  .logo span{font-family:'Space Mono', monospace; color:var(--court); font-size:9px; display:block; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-top:1px; white-space:nowrap;}
   .navlinks {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 2px;
     list-style: none;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     border: 1.5px solid rgba(255, 255, 255, 0.95);
-    padding: 4px 6px;
+    padding: 3px 6px;
     border-radius: 999px;
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 600;
     box-shadow: 0 10px 30px -4px rgba(20, 24, 15, 0.07), 0 4px 12px rgba(20, 24, 15, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.9);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     max-width: 100%;
     margin: 0 auto;
-    flex: 0 0 auto;
+    flex-shrink: 1;
+    min-width: 0;
   }
   .navlinks:hover {
     box-shadow: 0 16px 40px -4px rgba(30, 122, 69, 0.12), 0 6px 16px rgba(20, 24, 15, 0.04);
@@ -1023,21 +1024,23 @@
   .navlinks a {
     color: var(--ink);
     text-decoration: none;
-    opacity: 0.78;
-    width: 38px;
-    height: 38px;
-    padding: 0 !important;
-    border-radius: 50% !important;
+    opacity: 0.85;
+    padding: 5px 9px !important;
+    border-radius: 999px !important;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    gap: 4.5px !important;
     white-space: nowrap;
     position: relative;
+    font-size: 12px;
+    font-weight: 600;
   }
   .navlinks a .nav-text {
-    display: none !important;
+    display: inline-block !important;
+    letter-spacing: 0.01em;
   }
   .navlinks a .nav-icon {
     display: inline-flex;
@@ -1047,16 +1050,16 @@
     transition: transform 0.2s ease;
   }
   .navlinks a .nav-icon svg {
-    width: 17px;
-    height: 17px;
+    width: 15px;
+    height: 15px;
   }
   .navlinks a:hover .nav-icon {
-    transform: scale(1.15);
+    transform: scale(1.1);
   }
   .navlinks a:hover {
     opacity: 1;
     color: var(--court-deep);
-    background: rgba(30, 122, 69, 0.12);
+    background: rgba(30, 122, 69, 0.1);
     transform: translateY(-1px);
   }
   .navlinks a.active {
@@ -1075,10 +1078,8 @@
     border: 1px solid rgba(217, 114, 44, 0.3) !important;
     opacity: 1;
     position: relative;
-    width: 38px;
-    height: 38px;
-    padding: 0 !important;
-    border-radius: 50% !important;
+    padding: 7px 13px !important;
+    border-radius: 999px !important;
   }
   .navlinks a.nav-pill-live:hover {
     background: rgba(217, 114, 44, 0.22) !important;
@@ -1090,10 +1091,8 @@
     background: rgba(30, 122, 69, 0.08) !important;
     border: 1px solid rgba(30, 122, 69, 0.25) !important;
     opacity: 1;
-    width: 38px;
-    height: 38px;
-    padding: 0 !important;
-    border-radius: 50% !important;
+    padding: 7px 13px !important;
+    border-radius: 999px !important;
   }
   .navlinks a.nav-pill-admin:hover {
     background: var(--court) !important;
@@ -1102,16 +1101,15 @@
     transform: translateY(-1px);
   }
   .nav-live-dot {
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: #ea580c;
     display: inline-block;
     animation: blinkDot 1.2s infinite;
-    position: absolute;
-    top: 5px;
-    right: 5px;
+    position: relative;
     flex-shrink: 0;
+    margin-right: -1px;
   }
   .navlinks a[data-tooltip],
   .nav-right-actions button[data-tooltip],
@@ -1161,12 +1159,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    flex: 1;
-    justify-content: flex-end;
+    flex-shrink: 0;
+    margin-left: auto;
   }
   .nav-right-actions .theme-toggle-btn {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     padding: 0 !important;
     border-radius: 50% !important;
     display: inline-flex !important;
@@ -1174,24 +1172,37 @@
     justify-content: center !important;
     gap: 0 !important;
     cursor: pointer;
+    flex-shrink: 0;
   }
   .nav-right-actions .theme-toggle-btn .theme-text {
     display: none !important;
   }
-  .header-reg-btn.icon-only-reg {
-    width: 38px;
-    height: 38px;
-    padding: 0 !important;
-    border-radius: 50% !important;
+  .header-reg-btn {
+    padding: 7px 16px !important;
+    border-radius: 999px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-width: 38px !important;
+    gap: 6px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+    background: var(--court) !important;
+    border-color: var(--court) !important;
+    color: #ffffff !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: transform 0.2s, box-shadow 0.2s;
   }
-  .header-reg-btn.icon-only-reg .reg-btn-text {
-    display: none !important;
+  .header-reg-btn:hover {
+    background: var(--court-deep) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(30, 122, 69, 0.35);
   }
-  .header-reg-btn.icon-only-reg .reg-icon {
+  .header-reg-btn .reg-btn-text {
+    display: inline-block !important;
+  }
+  .header-reg-btn .reg-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1593,6 +1604,18 @@
     flex-direction:column;
     overflow:hidden;
     margin:auto;
+  }
+  #regModal .modal-card {
+    max-width: 980px !important;
+    width: 95% !important;
+  }
+  @media (min-width: 769px) {
+    #regModal .reg-modal-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
   }
   .modal-head{
     padding:18px 24px;
@@ -2823,15 +2846,6 @@
     }
   }
 
-  .nav-right-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1 1 0;
-    min-width: 0;
-    justify-content: flex-end;
-  }
-
   .btn.btn-closed-pill {
     background: rgba(239, 68, 68, 0.08) !important;
     border: 1.5px solid rgba(239, 68, 68, 0.35) !important;
@@ -3025,90 +3039,63 @@
 
   /* ================= RESOLUTION ADAPTATION & RESPONSIVE BREAKPOINTS ================= */
   
-  /* Laptops & Standard Displays (1200px to 1440px) */
-  @media (max-width: 1440px) and (min-width: 1200px) {
-    .site-header nav {
-      padding: 8px 18px;
-      gap: 12px;
-    }
-    .logo .mark { width: 34px; height: 34px; }
-    .logo b { font-size: 13px; }
-    .logo span { font-size: 9px; }
-    .navlinks {
-      gap: 4px;
-      padding: 3px 6px;
-    }
-    .navlinks a {
-      width: 38px;
-      height: 38px;
-      padding: 0 !important;
-      border-radius: 50% !important;
-    }
-    .navlinks a .nav-text,
-    .navlinks a.nav-pill-live .nav-text {
-      display: none !important;
-    }
-    .nav-right-actions .theme-toggle-btn,
-    .header-reg-btn.icon-only-reg {
-      width: 38px;
-      height: 38px;
-      padding: 0 !important;
-      border-radius: 50% !important;
-    }
+  /* Ultra-wide & Desktop (>= 1380px) */
+  @media (min-width: 1380px) {
+    .site-header nav { padding: 8px 20px; gap: 14px; }
+    .navlinks { gap: 3px; padding: 4px 7px; }
+    .navlinks a { padding: 6px 11px !important; font-size: 12.5px; }
+    .header-reg-btn { padding: 7px 16px !important; font-size: 12px !important; }
   }
 
-  /* Compact Laptops & Scaled Displays (1025px to 1199px) */
-  @media (max-width: 1199px) and (min-width: 1025px) {
+  /* Standard Laptops & 1080p Scaled (1200px to 1379px) */
+  @media (max-width: 1379px) and (min-width: 1200px) {
     .site-header nav {
-      padding: 8px 14px;
-      gap: 8px;
+      padding: 7px 14px;
+      gap: 10px;
     }
     .logo .mark { width: 32px; height: 32px; }
     .logo b { font-size: 12.5px; }
     .logo span { font-size: 8.5px; }
     .navlinks {
-      gap: 3px;
+      gap: 2px;
       padding: 3px 5px;
     }
-    .navlinks a .nav-text,
-    .navlinks a.nav-pill-live .nav-text {
+    .navlinks a {
+      padding: 5px 8px !important;
+      font-size: 11.5px;
+      gap: 4px !important;
+    }
+    /* Hide text on secondary items so nav fits perfectly without any overflow */
+    .navlinks a[href="#rules-faq"] .nav-text,
+    .navlinks a[href="#team"] .nav-text,
+    .navlinks a[onclick*="openStatusModal"] .nav-text,
+    .navlinks a#adminNavLink .nav-text {
       display: none !important;
     }
-    .navlinks a {
-      width: 36px;
-      height: 36px;
-      padding: 0 !important;
-      border-radius: 50% !important;
-    }
-    .navlinks a.nav-pill-live {
-      width: 36px;
-      height: 36px;
-      padding: 0 !important;
-    }
-    .navlinks a .nav-icon svg {
-      width: 16px;
-      height: 16px;
-    }
-    .nav-right-actions .theme-toggle-btn,
-    .header-reg-btn.icon-only-reg {
-      width: 36px;
-      height: 36px;
-      padding: 0 !important;
-      border-radius: 50% !important;
+    .header-reg-btn {
+      padding: 6px 13px !important;
+      font-size: 11.5px !important;
     }
   }
 
-  /* Tablets & Small Laptops (<= 1024px) */
-  @media (max-width: 1024px) {
+  /* Compact Laptops, Tablets & Scaled Displays (<= 1199px) */
+  @media (max-width: 1199px) {
     .site-header nav {
-      padding: 10px 16px;
+      padding: 8px 14px;
     }
     .main { grid-template-columns: 1fr; gap: 28px; }
     .visual { order: -1; margin-bottom: 8px; margin-top: 4px; display: flex; justify-content: center; }
     .eyebrow { margin-bottom: 12px; }
     .navlinks { display: none !important; }
-    .mobile-hamburger-btn { display: flex; }
-    .header-reg-btn { display: none; }
+    .mobile-hamburger-btn { display: flex !important; }
+    .header-reg-btn {
+      display: inline-flex !important;
+      padding: 6px 12px !important;
+      font-size: 11px !important;
+    }
+    .header-reg-btn .reg-btn-text {
+      font-size: 11px;
+    }
     .lede { max-width: 100%; }
     .stats { max-width: 100%; }
     .medallion { width: 360px; height: 360px; max-width: 90vw; }
@@ -4473,9 +4460,9 @@
         <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleDarkTheme()" title="Toggle Dark/Light Mode" data-tooltip="Theme" aria-label="Toggle Theme">
           <span class="theme-icon" style="font-size:15px; line-height:1;">🌙</span> <span class="theme-text" style="display:none;">Dark</span>
         </button>
-        <a href="javascript:void(0)" id="headerRegBtn" class="btn solid header-reg-btn icon-only-reg" onclick="openRegister()" title="Register Pair" data-tooltip="Register Pair">
-          <span class="reg-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg></span>
-          <span class="reg-btn-text" style="display:none;">Register</span>
+        <a href="javascript:void(0)" id="headerRegBtn" class="btn solid header-reg-btn" onclick="openRegister()" title="Register Pair">
+          <span class="reg-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg></span>
+          <span class="reg-btn-text">Register Pair</span>
         </a>
         <button class="mobile-hamburger-btn" id="btnOpenSidebar" onclick="openMobileSidebar()"
           aria-label="Open Navigation Menu">
@@ -5428,143 +5415,144 @@
         </div>
 
         <!-- Auto-Assigned Category Box -->
-        <div class="category-auto-box">
-          <div>
-            <div class="cat-auto-title">Auto-Calculated Category</div>
-            <div style="font-size:11px; color:#666; margin-top:2px;">Determined automatically via player DOBs</div>
-          </div>
-          <div class="cat-auto-value" id="autoCatDisplay">PENDING DOB</div>
-        </div>
-
         <form id="pairForm" onsubmit="submitForm(event)">
-          <input type="hidden" id="finalCategory" value="">
-
-          <!-- PLAYER 1 (LEAD REGISTRANT) -->
-          <div class="form-sec-title">PLAYER 1 (LEAD REGISTRANT)</div>
-
-          <div class="form-group">
-            <label class="form-label">Full Name *</label>
-            <input type="text" class="form-input" id="p1Name" placeholder="Player 1 Full Name" required>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label class="form-label">
-                <span>Date of Birth *</span>
-                <span class="age-calc-badge" id="p1AgeBadge" style="display:none;"></span>
+          <!-- CATEGORY SELECTION -->
+          <div style="margin-bottom: 20px;">
+            <label class="form-label" style="font-weight:700; margin-bottom:8px;">SELECT AGE CATEGORY *</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <label id="catLabelBelow35" style="border:2px solid var(--court); background:rgba(30,122,69,0.08); border-radius:12px; padding:12px 14px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-family:'Outfit','Inter',sans-serif; font-weight:800; font-size:15px; color:var(--court-deep);">BELOW 35</div>
+                  <div style="font-size:11px; color:#666;">Under 35 Years • Men's Doubles</div>
+                </div>
+                <input type="radio" name="modalCatRadio" value="Below 35" checked style="accent-color:var(--court); width:18px; height:18px;" onchange="handleModalCatChange('Below 35')">
               </label>
-              <input type="date" class="form-input" id="p1Dob" onchange="calculateAndValidateAges()" required>
-              <input type="hidden" id="p1Age" value="">
-            </div>
-            <div class="form-group">
-              <label class="form-label">WhatsApp / Mobile *</label>
-              <input type="tel" class="form-input" id="p1Phone" placeholder="10-digit mobile (e.g. 9876543210)" maxlength="10" inputmode="numeric"
-                oninput="sanitizePhoneInput(this)" onblur="sanitizePhoneInput(this); checkDuplicateField(this, 'p1Phone')" required>
-            </div>
-          </div>
 
-          <div class="form-group">
-            <label class="form-label">Email Address *</label>
-            <input type="email" class="form-input" id="p1Email" placeholder="For confirmation updates"
-              onblur="checkDuplicateField(this, 'p1Email')" required>
-          </div>
-
-          <!-- PLAYER 2 (PARTNER) -->
-          <div class="form-sec-title">PLAYER 2 (PARTNER)</div>
-
-          <div class="form-group">
-            <label class="form-label">Partner Full Name *</label>
-            <input type="text" class="form-input" id="p2Name" placeholder="Player 2 Full Name" required>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label class="form-label">
-                <span>Partner Date of Birth *</span>
-                <span class="age-calc-badge" id="p2AgeBadge" style="display:none;"></span>
+              <label id="catLabelAbove35" style="border:1.5px solid var(--line); background:var(--paper); border-radius:12px; padding:12px 14px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-family:'Outfit','Inter',sans-serif; font-weight:800; font-size:15px; color:var(--ink);">ABOVE 35</div>
+                  <div style="font-size:11px; color:#666;">35 Years &amp; Above • Men's Doubles</div>
+                </div>
+                <input type="radio" name="modalCatRadio" value="Above 35" style="accent-color:var(--court); width:18px; height:18px;" onchange="handleModalCatChange('Above 35')">
               </label>
-              <input type="date" class="form-input" id="p2Dob" onchange="calculateAndValidateAges()" required>
-              <input type="hidden" id="p2Age" value="">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Partner WhatsApp / Mobile *</label>
-              <input type="tel" class="form-input" id="p2Phone" placeholder="10-digit mobile (e.g. 9876543210)" maxlength="10" inputmode="numeric"
-                oninput="sanitizePhoneInput(this)" onblur="sanitizePhoneInput(this); checkDuplicateField(this, 'p2Phone')" required>
             </div>
           </div>
 
-          <!-- PAYMENT REFERENCE & SCREENSHOT -->
-          <div class="form-sec-title">PAYMENT &amp; VERIFICATION</div>
+          <input type="hidden" id="finalCategory" value="Below 35">
 
-          <!-- OFFICIAL PHONEPE / UPI QR CODE CARD -->
-          <div class="payment-qr-card">
-            <div class="qr-img-wrapper">
-              <img src="/qr_code.png" id="officialUpiQrImg" alt="Official Tournament UPI QR" class="qr-img" onerror="if(!this._hasRetried){this._hasRetried=true; const upi=document.getElementById('displayUpiId')?.innerText||'blistedx@okhdfcbank'; const name=document.getElementById('displayPayeeName')?.innerText||'S.P. Badminton Club'; this.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='+encodeURIComponent('upi://pay?pa='+upi+'&pn='+encodeURIComponent(name)+'&am=1000&cu=INR');}">
-              <div class="qr-brand-badge">PhonePe · GPay · Paytm · UPI</div>
+          <div class="reg-modal-grid">
+            <!-- LEFT COLUMN: PLAYERS -->
+            <div class="reg-modal-col">
+              <!-- PLAYER 1 (LEAD REGISTRANT) -->
+              <div class="form-sec-title">PLAYER 1 (LEAD REGISTRANT)</div>
+
+              <div class="form-group">
+                <label class="form-label">Player 1 Full Name *</label>
+                <input type="text" class="form-input" id="p1Name" placeholder="Full Name" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">WhatsApp / Mobile Number *</label>
+                <input type="tel" class="form-input" id="p1Phone" placeholder="10-digit mobile (e.g. 9876543210)" maxlength="10" inputmode="numeric"
+                  oninput="sanitizePhoneInput(this)" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <input type="email" class="form-input" id="p1Email" placeholder="For tournament schedule updates" required>
+              </div>
+
+              <!-- PLAYER 2 (PARTNER) -->
+              <div class="form-sec-title" style="margin-top:20px;">PLAYER 2 (PARTNER)</div>
+
+              <div class="form-group">
+                <label class="form-label">Partner Full Name *</label>
+                <input type="text" class="form-input" id="p2Name" placeholder="Partner Full Name" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Partner WhatsApp / Mobile Number *</label>
+                <input type="tel" class="form-input" id="p2Phone" placeholder="10-digit mobile (e.g. 9876543210)" maxlength="10" inputmode="numeric"
+                  oninput="sanitizePhoneInput(this)" required>
+              </div>
             </div>
-            <div class="payment-qr-info">
-              <div class="payee-tag">OFFICIAL TOURNAMENT ACCOUNT</div>
-              <div class="payee-name" id="displayPayeeName">ABHISHEK SHUKLA</div>
-              <div class="upi-id-pill" onclick="copyUpiId()" title="Click to Copy UPI ID">
-                <span id="displayUpiId">blistedx@okhdfcbank</span>
-                <button type="button" class="btn-copy-upi">Copy</button>
-              </div>
-              <div class="fee-text">
-                Entry Fee: <strong id="displayEntryFee">&#8377;1000 / Team</strong><br>
-                <span style="color:#777; font-size:11px;">Scan QR using any UPI app to pay entry fee</span>
-              </div>
-            </div>
-          </div>
 
-          <div class="form-group">
-            <label class="form-label">UPI UTR / Reference No. *</label>
-            <input type="text" class="form-input" id="upiUtr" placeholder="12-digit UTR from PhonePe / GPay" required>
-          </div>
+            <!-- RIGHT COLUMN: PAYMENT & SUBMISSION -->
+            <div class="reg-modal-col">
+              <!-- PAYMENT REFERENCE & SCREENSHOT -->
+              <div class="form-sec-title">PAYMENT &amp; VERIFICATION</div>
 
-          <div class="form-group">
-            <label class="form-label">Upload Screenshot of Payment Receipt</label>
-            <div
-              style="background:#fafaf8; border:1.5px dashed var(--line); border-radius:12px; padding:16px; text-align:center; cursor:pointer;"
-              onclick="document.getElementById('receiptFile').click()">
-              <input type="file" id="receiptFile" accept="image/*" style="display:none;"
-                onchange="handleReceiptFileSelect(event)">
-              <div id="uploadPrompt">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E7A45" stroke-width="2"
-                  style="margin-bottom:4px;">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="17 8 12 3 7 8" />
-                  <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
-                <div style="font-size:13px; font-weight:700; color:var(--court-deep);">Click to upload payment
-                  screenshot</div>
-                <div style="font-size:11px; color:#777; margin-top:2px;">PNG, JPG, JPEG up to 5MB</div>
-              </div>
-              <div id="uploadPreview"
-                style="display:none; align-items:center; justify-content:center; gap:12px; margin-top:6px;">
-                <img id="previewImg" src="" alt="Receipt Preview"
-                  style="max-height:80px; border-radius:8px; border:1px solid var(--line); object-fit:contain;">
-                <div style="text-align:left;">
-                  <div id="previewFileName" style="font-size:12px; font-weight:700; color:#111;"></div>
-                  <div style="font-size:11px; color:#1E7A45; font-weight:bold;">Screenshot Selected</div>
+              <!-- OFFICIAL PHONEPE / UPI QR CODE CARD -->
+              <div class="payment-qr-card">
+                <div class="qr-img-wrapper">
+                  <img src="/qr_code.png" id="officialUpiQrImg" alt="Official Tournament UPI QR" class="qr-img" onerror="if(!this._hasRetried){this._hasRetried=true; const upi=document.getElementById('displayUpiId')?.innerText||'blistedx@okhdfcbank'; const name=document.getElementById('displayPayeeName')?.innerText||'S.P. Badminton Club'; this.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='+encodeURIComponent('upi://pay?pa='+upi+'&pn='+encodeURIComponent(name)+'&am=1000&cu=INR');}">
+                  <div class="qr-brand-badge">PhonePe · GPay · Paytm · UPI</div>
+                </div>
+                <div class="payment-qr-info">
+                  <div class="payee-tag">OFFICIAL TOURNAMENT ACCOUNT</div>
+                  <div class="payee-name" id="displayPayeeName">ABHISHEK SHUKLA</div>
+                  <div class="upi-id-pill" onclick="copyUpiId()" title="Click to Copy UPI ID">
+                    <span id="displayUpiId">blistedx@okhdfcbank</span>
+                    <button type="button" class="btn-copy-upi">Copy</button>
+                  </div>
+                  <div class="fee-text">
+                    Entry Fee: <strong id="displayEntryFee">&#8377;1000 / Team</strong><br>
+                    <span style="color:#777; font-size:11px;">Scan QR using any UPI app to pay entry fee</span>
+                  </div>
                 </div>
               </div>
+
+              <div class="form-group">
+                <label class="form-label">UPI UTR / Reference No. *</label>
+                <input type="text" class="form-input" id="upiUtr" placeholder="12-digit UTR from PhonePe / GPay" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Upload Screenshot of Payment Receipt</label>
+                <div
+                  style="background:#fafaf8; border:1.5px dashed var(--line); border-radius:12px; padding:16px; text-align:center; cursor:pointer;"
+                  onclick="document.getElementById('receiptFile').click()">
+                  <input type="file" id="receiptFile" accept="image/*" style="display:none;"
+                    onchange="handleReceiptFileSelect(event)">
+                  <div id="uploadPrompt">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E7A45" stroke-width="2"
+                      style="margin-bottom:4px;">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <div style="font-size:13px; font-weight:700; color:var(--court-deep);">Click to upload payment
+                      screenshot</div>
+                    <div style="font-size:11px; color:#777; margin-top:2px;">PNG, JPG, JPEG up to 5MB</div>
+                  </div>
+                  <div id="uploadPreview"
+                    style="display:none; align-items:center; justify-content:center; gap:12px; margin-top:6px;">
+                    <img id="previewImg" src="" alt="Receipt Preview"
+                      style="max-height:80px; border-radius:8px; border:1px solid var(--line); object-fit:contain;">
+                    <div style="text-align:left;">
+                      <div id="previewFileName" style="font-size:12px; font-weight:700; color:#111;"></div>
+                      <div style="font-size:11px; color:#1E7A45; font-weight:bold;">Screenshot Selected</div>
+                    </div>
+                  </div>
+                </div>
+                <input type="hidden" id="receiptBase64" value="">
+                <input type="hidden" id="receiptFileName" value="">
+              </div>
+
+              <!-- ================= RULES & REGULATIONS AGREEMENT ================= -->
+              <div class="terms-agree-strip" id="termsAgreeStrip" style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:13px 16px; margin:16px 0; display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="document.getElementById('regTermsAgree').click()">
+                <input type="checkbox" id="regTermsAgree" required style="width:18px; height:18px; accent-color:var(--court); cursor:pointer;" onclick="event.stopPropagation()">
+                <label for="regTermsAgree" style="font-size:13px; color:#0f172a; font-weight:700; cursor:pointer; line-height:1.4;" onclick="event.stopPropagation()">
+                  I agree to the Tournament Rules &amp; Regulations *
+                </label>
+              </div>
+
+              <button type="submit" class="btn solid" id="submitBtn"
+                style="width:100%; justify-content:center; margin-top:6px; padding:13px 20px; font-size:15px;">
+                Submit Registration &rarr;
+              </button>
             </div>
-            <input type="hidden" id="receiptBase64" value="">
-            <input type="hidden" id="receiptFileName" value="">
           </div>
-
-          <!-- ================= RULES & REGULATIONS AGREEMENT ================= -->
-          <div class="terms-agree-strip" id="termsAgreeStrip" style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:13px 16px; margin:16px 0; display:flex; align-items:center; gap:12px; cursor:pointer; transition:border-color 0.3s, background-color 0.3s;" onclick="openTermsModal()">
-            <input type="checkbox" id="regTermsAgree" required style="width:18px; height:18px; accent-color:var(--court); cursor:pointer;" onclick="event.stopPropagation(); if(this.checked){ openTermsModal(); } else { resetTermsAgreement(); }">
-            <label for="regTermsAgree" style="font-size:13px; color:#0f172a; font-weight:700; cursor:pointer; line-height:1.4;" onclick="event.preventDefault(); event.stopPropagation(); openTermsModal();">
-              I agree to the Tournament Rules &amp; Regulations *
-            </label>
-          </div>
-
-          <button type="submit" class="btn solid" id="submitBtn"
-            style="width:100%; justify-content:center; margin-top:6px;">
-            Submit Registration &rarr;
-          </button>
         </form>
       </div>
     </div>
@@ -6441,6 +6429,19 @@
       }
     }
 
+    function handleModalCatChange(cat) {
+      document.getElementById('finalCategory').value = cat;
+      const bLabel = document.getElementById('catLabelBelow35');
+      const aLabel = document.getElementById('catLabelAbove35');
+      if (cat === 'Below 35') {
+        if (bLabel) { bLabel.style.borderColor = "var(--court)"; bLabel.style.background = "rgba(30,122,69,0.08)"; }
+        if (aLabel) { aLabel.style.borderColor = "var(--line)"; aLabel.style.background = "var(--paper)"; }
+      } else {
+        if (aLabel) { aLabel.style.borderColor = "var(--court)"; aLabel.style.background = "rgba(30,122,69,0.08)"; }
+        if (bLabel) { bLabel.style.borderColor = "var(--line)"; bLabel.style.background = "var(--paper)"; }
+      }
+    }
+
     function openRegister(prefCat) {
       if (isRegistrationClosed()) {
         const cfg = publicConfigCache || {};
@@ -6454,8 +6455,14 @@
         return;
       }
       document.getElementById('regModal').classList.add('open');
-      if (prefCat) {
-        document.getElementById('autoCatDisplay').innerText = prefCat + " (Select DOBs)";
+      if (prefCat && prefCat.toLowerCase().includes('above')) {
+        const r = document.querySelector('input[name="modalCatRadio"][value="Above 35"]');
+        if (r) r.checked = true;
+        handleModalCatChange('Above 35');
+      } else {
+        const r = document.querySelector('input[name="modalCatRadio"][value="Below 35"]');
+        if (r) r.checked = true;
+        handleModalCatChange('Below 35');
       }
     }
 
@@ -7408,10 +7415,6 @@
     // Submit Handler
     function submitForm(e) {
       e.preventDefault();
-      if (!isAgeValid) {
-        alert("Both players must belong to the same age category (Both Below 35 or Both Above 35).");
-        return;
-      }
 
       const p1Phone = (document.getElementById('p1Phone')?.value || '').replace(/\D/g, '').slice(-10);
       const p2Phone = (document.getElementById('p2Phone')?.value || '').replace(/\D/g, '').slice(-10);
@@ -7429,32 +7432,21 @@
 
       const agree = document.getElementById('regTermsAgree');
       if (!agree || !agree.checked) {
-        const strip = document.getElementById('termsAgreeStrip');
-        if (strip) {
-          strip.style.borderColor = '#ef4444';
-          strip.style.backgroundColor = '#fef2f2';
-          strip.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        openTermsModal();
-        showToast("⚠️ Please read & accept Tournament Rules to proceed.");
+        alert("Please agree to the Tournament Rules & Regulations to proceed.");
         return;
       }
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
-      btn.innerText = "Submitting & Uploading Receipt...";
+      btn.innerText = "Submitting Registration...";
 
       const data = {
         action: "register",
         category: document.getElementById('finalCategory').value || "Below 35",
         player1Name: (document.getElementById('p1Name')?.value || '').trim(),
-        player1Dob: document.getElementById('p1Dob')?.value || '',
-        player1Age: document.getElementById('p1Age')?.value || '',
         player1Phone: p1Phone,
         player1Email: (document.getElementById('p1Email')?.value || '').trim(),
         player2Name: (document.getElementById('p2Name')?.value || '').trim(),
-        player2Dob: document.getElementById('p2Dob')?.value || '',
-        player2Age: document.getElementById('p2Age')?.value || '',
         player2Phone: p2Phone,
         upiUtr: (document.getElementById('upiUtr')?.value || '').trim(),
         receiptBase64: document.getElementById('receiptBase64')?.value || '',

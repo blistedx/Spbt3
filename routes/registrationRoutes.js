@@ -56,17 +56,19 @@ async function generateUniqueRegId(p1Phone, p1Dob) {
   const phoneDigits = (p1Phone || '').toString().replace(/\D/g, '');
   const last2Phone = phoneDigits.length >= 2 ? phoneDigits.slice(-2) : phoneDigits.padStart(2, '0');
 
-  let last2Dob = '90';
-  const dobStr = (p1Dob || '').toString();
-  const yearMatch = dobStr.match(/(?:19|20)\d{2}/);
-  if (yearMatch) {
-    last2Dob = yearMatch[0].slice(-2);
-  } else {
-    const anyDigits = dobStr.replace(/\D/g, '');
-    if (anyDigits.length >= 4) {
-      last2Dob = anyDigits.slice(-2);
-    } else if (anyDigits.length >= 2) {
-      last2Dob = anyDigits.slice(-2);
+  let last2Dob = String(Math.floor(10 + Math.random() * 90));
+  if (p1Dob) {
+    const dobStr = (p1Dob || '').toString();
+    const yearMatch = dobStr.match(/(?:19|20)\d{2}/);
+    if (yearMatch) {
+      last2Dob = yearMatch[0].slice(-2);
+    } else {
+      const anyDigits = dobStr.replace(/\D/g, '');
+      if (anyDigits.length >= 4) {
+        last2Dob = anyDigits.slice(-2);
+      } else if (anyDigits.length >= 2) {
+        last2Dob = anyDigits.slice(-2);
+      }
     }
   }
 
@@ -161,8 +163,8 @@ router.post('/submit', upload.single('paymentScreenshot'), async (req, res) => {
     }
 
     // Required fields check
-    if (!body.category || !body.p1Name || !body.p1Phone || !body.p1Email || !body.p1Dob) {
-      return res.status(400).json({ success: false, error: 'Please provide all mandatory player details.' });
+    if (!body.category || !body.p1Name || !body.p1Phone) {
+      return res.status(400).json({ success: false, error: 'Please provide Category, Player 1 Name, and Mobile number.' });
     }
 
     // Generate unique Custom Reg ID

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tournament Categories | S.P. Badminton Tourney Season 3</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #09090B; 
+    --bg-surface: #141417;
+    --bg-card: #18181B;
+    --text-primary: #FFFFFF; 
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+    --gold-primary: #FBBF24; 
+    --gold-hover: #F59E0B;
+    --gold-glow: rgba(251,191,36,0.45);
+    --cyan-accent: #22D3EE; 
+    --cyan-glow: rgba(34,211,238,0.4);
+    --green-accent: #22c55e;
+    --font-display: 'Oswald', sans-serif; 
+    --font-body: 'Inter', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body); 
+    background-color: var(--bg-dark); 
+    color: var(--text-primary);
+    min-height: 100vh; 
+    overflow-x: hidden;
+    background-image: radial-gradient(circle at 70% 30%, rgba(251,191,36,0.07) 0%, transparent 65%),
+                      radial-gradient(circle at 20% 80%, rgba(34,211,238,0.04) 0%, transparent 50%);
+    opacity: 0; 
+    animation: pageFadeIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  @keyframes pageFadeIn { to { opacity: 1; } }
+
+  /* ============ COURT 3D LINES BACKGROUND ============ */
+  .court-bg { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    pointer-events: none; z-index: 0; opacity: 0.07; perspective: 1200px; 
+  }
+  .court-lines { 
+    position: absolute; top: 50%; left: 50%; 
+    transform: translate(-50%,-50%) rotateX(60deg); 
+    width: 92%; height: 92%; 
+    border: 2px solid var(--gold-primary); 
+    box-shadow: 0 0 20px var(--gold-glow); 
+  }
+  .court-lines::before, .court-lines::after { content: ''; position: absolute; background: var(--gold-primary); }
+  .court-lines::before { top: 0; left: 50%; width: 2px; height: 100%; transform: translateX(-50%); }
+  .court-lines::after { top: 50%; left: 0; width: 100%; height: 2px; transform: translateY(-50%); }
+  .court-inner { position: absolute; top: 15%; left: 15%; width: 70%; height: 70%; border: 2px solid var(--gold-primary); }
+
+  /* ============ FLOATING PARTICLES ============ */
+  .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+  .particle { 
+    position: absolute; width: 3px; height: 3px; 
+    background: var(--gold-primary); border-radius: 50%; 
+    opacity: 0.4; box-shadow: 0 0 8px var(--gold-glow); 
+    animation: floatUp linear infinite; 
+  }
+  @keyframes floatUp { 
+    0% { transform: translateY(100vh) scale(0); opacity: 0; } 
+    10% { opacity: 0.7; } 
+    90% { opacity: 0.7; } 
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; } 
+  }
+
+  /* ============ CURSOR SPARKLE ============ */
+  .cursor-sparkle { 
+    position: fixed; width: 6px; height: 6px; 
+    background: var(--cyan-accent); border-radius: 50%; 
+    pointer-events: none; z-index: 9999; 
+    box-shadow: 0 0 10px var(--cyan-accent); 
+    transition: transform 0.12s ease-out; 
+  }
+
+  /* ============ HEADER ============ */
+  header { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 1.1rem 5%; position: fixed; width: 100%; top: 0; z-index: 1000; 
+    background: rgba(9,9,11,0.9); backdrop-filter: blur(16px); 
+    border-bottom: 1px solid rgba(255,255,255,0.06); 
+    transform: translateY(-100%); 
+    animation: slideDown 0.8s cubic-bezier(0.16,1,0.3,1) 0.1s forwards; 
+  }
+  @keyframes slideDown { to { transform: translateY(0); } }
+  
+  .logo { 
+    display: flex; align-items: center; gap: 10px; 
+    font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; 
+    letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; 
+    color: var(--text-primary); transition: transform 0.3s; 
+  }
+  .logo:hover { transform: scale(1.04); }
+  .logo-icon { 
+    width: 36px; height: 36px; border: 2px solid var(--gold-primary); 
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+    font-size: 1rem; color: var(--gold-primary); font-weight: 700; 
+    animation: pulseRing 2.5s ease-in-out infinite; 
+    background: rgba(251,191,36,0.08);
+  }
+  @keyframes pulseRing { 
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.6); } 
+    50% { box-shadow: 0 0 0 10px rgba(251,191,36,0); } 
+  }
+  .logo-sub { font-size: 0.65rem; color: var(--gold-primary); letter-spacing: 2px; display: block; }
+
+  .nav-links { 
+    display: flex; gap: 1.8rem; font-size: 0.82rem; font-weight: 600; 
+    text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); 
+  }
+  .nav-links a { color: inherit; text-decoration: none; transition: color 0.2s; position: relative; padding-bottom: 4px; }
+  .nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: var(--gold-primary); transition: width 0.3s; }
+  .nav-links a:hover { color: var(--gold-primary); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-links a.active { color: var(--gold-primary); }
+  .nav-links a.active::after { width: 100%; }
+
+  .header-actions { display: flex; align-items: center; gap: 1rem; }
+  
+  .sound-btn { 
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(251,191,36,0.3); 
+    color: var(--gold-primary); padding: 0.55rem 0.95rem; border-radius: 6px; 
+    cursor: pointer; display: flex; align-items: center; gap: 0.5rem; 
+    font-family: var(--font-body); font-size: 0.75rem; font-weight: 700; 
+    text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; 
+  }
+  .sound-btn:hover { background: rgba(251,191,36,0.15); border-color: var(--gold-primary); transform: translateY(-2px); }
+  .sound-wave { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+  .sound-wave span { width: 2px; background: var(--gold-primary); border-radius: 1px; animation: quiet 1s ease-in-out infinite; }
+  .sound-wave.active span:nth-child(1) { animation: soundBar 0.4s ease-in-out infinite alternate; }
+  .sound-wave.active span:nth-child(2) { animation: soundBar 0.6s ease-in-out 0.1s infinite alternate; }
+  .sound-wave.active span:nth-child(3) { animation: soundBar 0.5s ease-in-out 0.2s infinite alternate; }
+  @keyframes soundBar { 0% { height: 3px; } 100% { height: 12px; } }
+  @keyframes quiet { 0%, 100% { height: 3px; } }
+
+  .nav-cta { 
+    background: linear-gradient(135deg, var(--gold-primary), #f59e0b); 
+    color: #000; padding: 0.65rem 1.4rem; border-radius: 6px; 
+    font-weight: 800; font-size: 0.8rem; text-decoration: none; 
+    text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; 
+    position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .nav-cta::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transition: left 0.5s; }
+  .nav-cta:hover::before { left: 100%; }
+  .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--gold-glow); }
+
+  .menu-toggle { display: none; flex-direction: column; gap: 5px; background: transparent; border: none; cursor: pointer; padding: 5px; }
+  .menu-toggle span { width: 22px; height: 2px; background: var(--text-primary); transition: all 0.3s; }
+  
+  .mobile-nav { 
+    display: none; position: fixed; top: 68px; left: 0; width: 100%; 
+    background: rgba(9,9,11,0.98); backdrop-filter: blur(20px); 
+    border-bottom: 1px solid rgba(251,191,36,0.2); 
+    padding: 1.5rem 6%; flex-direction: column; gap: 1.2rem; z-index: 999; 
+  }
+  .mobile-nav.open { display: flex; }
+  .mobile-nav a { color: var(--text-primary); text-decoration: none; font-family: var(--font-display); font-size: 1.25rem; letter-spacing: 1.5px; text-transform: uppercase; }
+
+  /* ============ PAGE SECTION ============ */
+  .page-section {
+    padding: 8.5rem 5% 4rem;
+    max-width: 1240px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .page-tag {
+    font-family: var(--font-display);
+    font-size: 0.9rem; font-style: italic;
+    color: var(--gold-primary);
+    letter-spacing: 3px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 1rem;
+    opacity: 0; animation: slideRight 0.8s ease 0.2s forwards;
+  }
+  .page-tag::before { content: ''; width: 40px; height: 2px; background: var(--gold-primary); }
+  @keyframes slideRight { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 5.5vw, 4.5rem);
+    font-style: italic; text-transform: uppercase;
+    font-weight: 700; letter-spacing: -0.5px;
+    line-height: 1.05; margin-bottom: 1.2rem;
+    opacity: 0; animation: fadeUp 0.9s ease 0.4s forwards;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .page-title .gold {
+    background: linear-gradient(90deg, #FBBF24, #F59E0B, #FDE68A, #FBBF24);
+    background-size: 200% auto;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    animation: shimmer 3.5s linear infinite;
+    filter: drop-shadow(0 0 25px var(--gold-glow));
+  }
+  @keyframes shimmer { to { background-position: 200% center; } }
+
+  .page-desc {
+    color: var(--text-secondary);
+    max-width: 720px; font-size: 1.05rem; line-height: 1.65;
+    margin-bottom: 3rem;
+    opacity: 0; animation: fadeUp 0.9s ease 0.6s forwards;
+  }
+  .page-desc strong { color: var(--gold-primary); }
+
+  /* ============ CATEGORY CARDS ============ */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .cat-card {
+    background: linear-gradient(150deg, #18181B 0%, #0D0D10 100%);
+    border: 1px solid rgba(251,191,36,0.22);
+    border-radius: 20px;
+    padding: 2.5rem 2.2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+    opacity: 0; transform: translateY(40px);
+    animation: cardIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .cat-card:nth-child(1) { animation-delay: 0.7s; }
+  .cat-card:nth-child(2) { animation-delay: 0.85s; }
+
+  @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+
+  .cat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 4px;
+    background: linear-gradient(90deg, var(--gold-primary), var(--cyan-accent), var(--gold-primary));
+    transition: left 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+  .cat-card:hover::before { left: 0; }
+  .cat-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--gold-primary);
+    box-shadow: 0 25px 60px rgba(251,191,36,0.18), 0 0 35px rgba(251,191,36,0.12);
+  }
+
+  .cat-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    color: var(--gold-primary);
+    background: rgba(251,191,36,0.12);
+    border: 1px solid rgba(251,191,36,0.4);
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    text-transform: uppercase;
+    margin-bottom: 1.3rem;
+  }
+
+  .cat-age {
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .cat-age .gold { color: var(--gold-primary); }
+
+  .cat-sub {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 1.8rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cat-sub .dot { width: 6px; height: 6px; background: var(--gold-primary); border-radius: 50%; }
+
+  .cat-details {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 1.5rem;
+    display: flex; flex-direction: column; gap: 0.9rem;
+    margin-bottom: 2rem;
+  }
+
+  .cat-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.92rem;
+  }
+  .cat-detail .label { color: var(--text-secondary); }
+  .cat-detail .value { color: var(--text-primary); font-weight: 600; }
+  .cat-detail .value.gold { color: var(--gold-primary); font-weight: 800; font-size: 1rem; }
+  .cat-detail .value.green { color: var(--green-accent); font-weight: 700; }
+
+  .cat-btn {
+    display: block; width: 100%;
+    padding: 1.05rem;
+    text-align: center;
+    background: transparent;
+    color: var(--gold-primary);
+    border: 2px solid var(--gold-primary);
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, var(--gold-primary), #f59e0b);
+    transition: left 0.35s cubic-bezier(0.16,1,0.3,1);
+    z-index: -1;
+  }
+  .cat-btn:hover::before { left: 0; }
+  .cat-btn:hover { color: #000; transform: translateY(-2px); box-shadow: 0 10px 30px var(--gold-glow); }
+
+  /* ============ VERIFICATION RULES HIGHLIGHT BOX ============ */
+  .rule-highlight {
+    background: rgba(251,191,36,0.05);
+    border: 1px solid rgba(251,191,36,0.25);
+    border-radius: 16px;
+    padding: 1.8rem 2rem;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+  }
+  .rule-icon { font-size: 2.2rem; flex-shrink: 0; }
+  .rule-text h4 { font-family: var(--font-display); font-size: 1.2rem; color: var(--gold-primary); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .rule-text p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; }
+
+  /* ============ COUNTDOWN ============ */
+  .countdown-bar { 
+    background: linear-gradient(90deg, #111114, #0b0b0d); 
+    padding: 1.8rem 5%; 
+    border-top: 1px solid rgba(251,191,36,0.2); 
+    border-bottom: 1px solid rgba(251,191,36,0.2); 
+    display: flex; justify-content: center; align-items: center; 
+    gap: 2.5rem; flex-wrap: wrap; position: relative; z-index: 2; 
+    margin-top: 3.5rem; 
+  }
+  .countdown-title { 
+    font-family: var(--font-display); 
+    font-size: 1.15rem; color: var(--gold-primary); 
+    letter-spacing: 2px; text-transform: uppercase; 
+    display: flex; align-items: center; gap: 8px;
+    animation: pulse 2s ease-in-out infinite; 
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+  .countdown { display: flex; gap: 1.1rem; flex-wrap: wrap; justify-content: center; }
+  .count-box { 
+    background: rgba(255,255,255,0.04); 
+    border: 1px solid rgba(251,191,36,0.3); 
+    border-radius: 10px; padding: 0.75rem 1.2rem; 
+    min-width: 76px; text-align: center; transition: all 0.3s; 
+  }
+  .count-box:hover { transform: translateY(-5px); border-color: var(--gold-primary); box-shadow: 0 10px 25px var(--gold-glow); }
+  .count-box .num { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; color: var(--gold-primary); display: block; line-height: 1; }
+  .count-box .label { font-size: 0.65rem; letter-spacing: 1.5px; color: var(--text-secondary); text-transform: uppercase; margin-top: 5px; }
+
+  /* ============ FLOATING WHATSAPP ============ */
+  .whatsapp-float { 
+    position: fixed; bottom: 25px; right: 25px; 
+    width: 60px; height: 60px; background: #25D366; 
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+    font-size: 1.9rem; text-decoration: none; 
+    box-shadow: 0 6px 28px rgba(37,211,102,0.5); 
+    z-index: 999; transition: transform 0.3s; 
+    animation: whatsappPulse 2s ease-in-out infinite; 
+  }
+  @keyframes whatsappPulse { 
+    0%, 100% { box-shadow: 0 5px 25px rgba(37,211,102,0.5); } 
+    50% { box-shadow: 0 5px 40px rgba(37,211,102,0.9); } 
+  }
+  .whatsapp-float:hover { transform: scale(1.15) rotate(10deg); }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .menu-toggle { display: flex; }
+    .page-section { padding-top: 6.8rem; }
+    .page-title { font-size: 2.2rem; }
+    .cat-age { font-size: 2.6rem; }
+    .countdown-bar { flex-direction: column; gap: 1.2rem; }
+    .sound-btn span:last-child { display: none; }
+    .rule-highlight { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor-sparkle" id="cursorSparkle"></div>
+
+<div class="court-bg">
+  <div class="court-lines">
+    <div class="court-inner"></div>
+  </div>
+</div>
+
+<div class="particles" id="particles"></div>
+
+<header>
+  <a href="/" class="logo" data-sound="hover">
+    <div class="logo-icon">🏸</div>
+    <div>
+      SURYODAYA
+      <span class="logo-sub">BADMINTON TOURNEY 3</span>
+    </div>
+  </a>
+  <nav class="nav-links">
+    <a href="/" data-sound="hover">Home</a>
+    <a href="/categories" class="active" data-sound="hover">Categories</a>
+    <a href="/register" data-sound="hover">Register</a>
+    <a href="/#schedule" data-sound="hover">Schedule</a>
+    <a href="/#draws" data-sound="hover">Fixtures</a>
+    <a href="/#rules-faq" data-sound="hover">Rules</a>
+  </nav>
+  <div class="header-actions">
+    <button class="sound-btn" id="soundToggleBtn" title="Toggle Sound">
+      <div class="sound-wave active" id="soundWaveIcon"><span></span><span></span><span></span></div>
+      <span id="soundBtnText">Sound On</span>
+    </button>
+    <a href="/register" class="nav-cta" data-sound="click">Register Now &rarr;</a>
+    <button class="menu-toggle" id="menuToggleBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="mobile-nav" id="mobileNav">
+  <a href="/" data-sound="click">Home</a>
+  <a href="/categories" data-sound="click">Categories</a>
+  <a href="/register" data-sound="click">Register</a>
+  <a href="/#schedule" data-sound="click">Schedule</a>
+  <a href="/#draws" data-sound="click">Fixtures</a>
+  <a href="/#rules-faq" data-sound="click">Rules</a>
+</div>
+
+<section class="page-section">
+  <div class="page-tag">Tournament Categories</div>
+  <h1 class="page-title">Two Bands. <span class="gold">One Bracket Each.</span></h1>
+  <p class="page-desc">
+    Men's Doubles Badminton across two official categories at Suryodaya Park. <strong>Straight knockout</strong> format. <strong>Aadhaar / Government Photo ID</strong> age verification required for all players.
+  </p>
+
+  <div class="cards">
+    <!-- Category 1: Below 35 -->
+    <div class="cat-card" data-sound="hover">
+      <div class="cat-badge">Category 01 · Youth &amp; Open</div>
+      <div class="cat-age">BELOW <span class="gold">35</span></div>
+      <div class="cat-sub"><span class="dot"></span> Under 35 Years • Men's Doubles</div>
+      <div class="cat-details">
+        <div class="cat-detail"><span class="label">Entry Fee</span><span class="value gold" id="feeBelow35">₹1000 / Team</span></div>
+        <div class="cat-detail"><span class="label">Format</span><span class="value">Straight Knockout</span></div>
+        <div class="cat-detail"><span class="label">Eligibility</span><span class="value">Both Players &lt; 35 Yrs (Aadhaar Proof)</span></div>
+        <div class="cat-detail"><span class="label">Max Teams</span><span class="value" id="slotsBelow35">32 Pairs Max</span></div>
+        <div class="cat-detail"><span class="label">Status</span><span class="value green" id="statusBelow35">Registrations Open</span></div>
+      </div>
+      <a href="/register?cat=Below+35" class="cat-btn" data-sound="smash">Register in Below 35 &rarr;</a>
+    </div>
+
+    <!-- Category 2: Above 35 -->
+    <div class="cat-card" data-sound="hover">
+      <div class="cat-badge">Category 02 · Masters &amp; Veterans</div>
+      <div class="cat-age">ABOVE <span class="gold">35</span></div>
+      <div class="cat-sub"><span class="dot"></span> 35 Years &amp; Above • Men's Doubles</div>
+      <div class="cat-details">
+        <div class="cat-detail"><span class="label">Entry Fee</span><span class="value gold" id="feeAbove35">₹1000 / Team</span></div>
+        <div class="cat-detail"><span class="label">Format</span><span class="value">Straight Knockout</span></div>
+        <div class="cat-detail"><span class="label">Eligibility</span><span class="value">Both Players &ge; 35 Yrs (Aadhaar Proof)</span></div>
+        <div class="cat-detail"><span class="label">Max Teams</span><span class="value" id="slotsAbove35">32 Pairs Max</span></div>
+        <div class="cat-detail"><span class="label">Status</span><span class="value green" id="statusAbove35">Registrations Open</span></div>
+      </div>
+      <a href="/register?cat=Above+35" class="cat-btn" data-sound="smash">Register in Above 35 &rarr;</a>
+    </div>
+  </div>
+
+  <div class="rule-highlight">
+    <div class="rule-icon">🪪</div>
+    <div class="rule-text">
+      <h4>Strict Age Verification Policy</h4>
+      <p>Age is calculated as of tournament start. Both partners in a pair must fall in the exact same age band. Government-issued photo ID (Aadhaar Card, Driving License, or Voter ID) will be verified at the courtside registration desk prior to the first match.</p>
+    </div>
+  </div>
+</section>
+
+<div class="countdown-bar">
+  <span class="countdown-title">⏳ Registration Closes In</span>
+  <div class="countdown" id="countdown">
+    <div class="count-box"><span class="num" id="days">00</span><span class="label">Days</span></div>
+    <div class="count-box"><span class="num" id="hours">00</span><span class="label">Hours</span></div>
+    <div class="count-box"><span class="num" id="mins">00</span><span class="label">Minutes</span></div>
+    <div class="count-box"><span class="num" id="secs">00</span><span class="label">Seconds</span></div>
+  </div>
+</div>
+
+<a href="https://wa.me/919903000000" class="whatsapp-float" target="_blank" data-sound="click" title="Chat on WhatsApp">💬</a>
+
+<script>
+  // ============ SOUND ENGINE (Web Audio API) ============
+  class SoundEngine {
+    constructor() { this.ctx = null; this.enabled = true; }
+    init() {
+      if (!this.ctx) { 
+        const AC = window.AudioContext || window.webkitAudioContext; 
+        if (AC) this.ctx = new AC(); 
+      }
+      if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+    }
+    playHover() {
+      if (!this.enabled) return; this.init(); if (!this.ctx) return;
+      try {
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(600, this.ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.05);
+        g.gain.setValueAtTime(0.02, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.05);
+        o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + 0.05);
+      } catch (e) {}
+    }
+    playClick() {
+      if (!this.enabled) return; this.init(); if (!this.ctx) return;
+      try {
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = 'triangle'; o.frequency.setValueAtTime(220, this.ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 0.08);
+        g.gain.setValueAtTime(0.1, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+        o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + 0.08);
+      } catch (e) {}
+    }
+    playSmash() {
+      if (!this.enabled) return; this.init(); if (!this.ctx) return;
+      try {
+        const t = this.ctx.currentTime;
+        const bufSize = this.ctx.sampleRate * 0.15;
+        const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = this.ctx.createBufferSource(); noise.buffer = buf;
+        const filt = this.ctx.createBiquadFilter(); filt.type = 'bandpass';
+        filt.frequency.setValueAtTime(800, t); filt.frequency.exponentialRampToValueAtTime(3000, t + 0.08); filt.Q.value = 3;
+        const ng = this.ctx.createGain(); ng.gain.setValueAtTime(0.15, t); ng.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        noise.connect(filt); filt.connect(ng); ng.connect(this.ctx.destination);
+        const o = this.ctx.createOscillator(), og = this.ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(1800, t); o.frequency.exponentialRampToValueAtTime(200, t + 0.12);
+        og.gain.setValueAtTime(0.3, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        o.connect(og); og.connect(this.ctx.destination);
+        noise.start(t); o.start(t); noise.stop(t + 0.15); o.stop(t + 0.12);
+      } catch (e) {}
+    }
+  }
+  const audioFX = new SoundEngine();
+  const soundToggleBtn = document.getElementById('soundToggleBtn');
+  const soundWaveIcon = document.getElementById('soundWaveIcon');
+  const soundBtnText = document.getElementById('soundBtnText');
+  soundToggleBtn.addEventListener('click', () => {
+    audioFX.enabled = !audioFX.enabled;
+    if (audioFX.enabled) { soundWaveIcon.classList.add('active'); soundBtnText.innerText = 'Sound On'; audioFX.playClick(); }
+    else { soundWaveIcon.classList.remove('active'); soundBtnText.innerText = 'Muted'; }
+  });
+  document.querySelectorAll('[data-sound="hover"]').forEach(el => el.addEventListener('mouseenter', () => audioFX.playHover()));
+  document.querySelectorAll('[data-sound="click"]').forEach(el => el.addEventListener('click', () => audioFX.playClick()));
+  document.querySelectorAll('[data-sound="smash"]').forEach(el => el.addEventListener('click', () => audioFX.playSmash()));
+
+  // ============ CURSOR SPARKLE ============
+  const cs = document.getElementById('cursorSparkle');
+  window.addEventListener('mousemove', (e) => { 
+    if (cs) cs.style.transform = `translate3d(${e.clientX - 3}px, ${e.clientY - 3}px, 0)`; 
+  });
+
+  // ============ MOBILE MENU ============
+  document.getElementById('menuToggleBtn').addEventListener('click', () => {
+    document.getElementById('mobileNav').classList.toggle('open');
+  });
+
+  // ============ COUNTDOWN TIMER ============
+  const targetDate = new Date("2026-10-28T23:59:59").getTime();
+  const timer = setInterval(function() {
+    const now = new Date().getTime();
+    const diff = targetDate - now;
+    if (diff < 0) { 
+      clearInterval(timer); 
+      document.getElementById("countdown").innerHTML = "<p style='color:#FBBF24; font-weight:700;'>🔴 Registrations Closed</p>"; 
+      return; 
+    }
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+    document.getElementById("days").innerText = String(d).padStart(2, '0');
+    document.getElementById("hours").innerText = String(h).padStart(2, '0');
+    document.getElementById("mins").innerText = String(m).padStart(2, '0');
+    document.getElementById("secs").innerText = String(s).padStart(2, '0');
+  }, 1000);
+
+  // ============ PARTICLES ============
+  const particles = document.getElementById('particles');
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (7 + Math.random() * 11) + 's';
+    p.style.animationDelay = Math.random() * 8 + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 3.5) + 'px';
+    particles.appendChild(p);
+  }
+
+  // ============ LOAD DYNAMIC CONFIG FROM SERVER ============
+  fetch('/api?action=getPublicConfig&_=' + Date.now())
+    .then(r => r.json())
+    .then(cfg => {
+      const s = (cfg && (cfg.settings || cfg)) || {};
+      if (s.categories && Array.isArray(s.categories)) {
+        s.categories.forEach(c => {
+          const name = (c.name || '').toLowerCase();
+          if (name.includes('below')) {
+            if (c.fee) document.getElementById('feeBelow35').innerText = '₹' + c.fee + ' / Team';
+            if (c.maxPairs) document.getElementById('slotsBelow35').innerText = c.maxPairs + ' Pairs Max';
+            if (c.status === 'INACTIVE' || s.registration_status === 'CLOSED') {
+              document.getElementById('statusBelow35').innerText = 'Closed';
+              document.getElementById('statusBelow35').className = 'value';
+              document.getElementById('statusBelow35').style.color = '#ef4444';
+            }
+          } else if (name.includes('above')) {
+            if (c.fee) document.getElementById('feeAbove35').innerText = '₹' + c.fee + ' / Team';
+            if (c.maxPairs) document.getElementById('slotsAbove35').innerText = c.maxPairs + ' Pairs Max';
+            if (c.status === 'INACTIVE' || s.registration_status === 'CLOSED') {
+              document.getElementById('statusAbove35').innerText = 'Closed';
+              document.getElementById('statusAbove35').className = 'value';
+              document.getElementById('statusAbove35').style.color = '#ef4444';
+            }
+          }
+        });
+      }
+    }).catch(() => {});
+</script>
+
+</body>
+</html>

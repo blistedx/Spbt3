@@ -88,6 +88,8 @@ app.use(express.static(path.join(__dirname), {
 
 // Direct Page Routes
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/categories', (req, res) => res.sendFile(path.join(__dirname, 'categories.html')));
+app.get('/register', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
 app.get('/tv', (req, res) => res.sendFile(path.join(__dirname, 'tv.html')));
 app.get('/scorer', (req, res) => res.sendFile(path.join(__dirname, 'scorer.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
@@ -112,15 +114,17 @@ async function generateUniqueRegId(p1Phone, p1Dob) {
   const phoneDigits = (p1Phone || '').toString().replace(/\D/g, '');
   const last2Phone = phoneDigits.length >= 2 ? phoneDigits.slice(-2) : phoneDigits.padStart(2, '0');
 
-  let last2Dob = '90';
-  const dobStr = (p1Dob || '').toString();
-  const yearMatch = dobStr.match(/(?:19|20)\d{2}/);
-  if (yearMatch) {
-    last2Dob = yearMatch[0].slice(-2);
-  } else {
-    const anyDigits = dobStr.replace(/\D/g, '');
-    if (anyDigits.length >= 4) last2Dob = anyDigits.slice(-2);
-    else if (anyDigits.length >= 2) last2Dob = anyDigits.slice(-2);
+  let last2Dob = String(Math.floor(10 + Math.random() * 90));
+  if (p1Dob) {
+    const dobStr = p1Dob.toString();
+    const yearMatch = dobStr.match(/(?:19|20)\d{2}/);
+    if (yearMatch) {
+      last2Dob = yearMatch[0].slice(-2);
+    } else {
+      const anyDigits = dobStr.replace(/\D/g, '');
+      if (anyDigits.length >= 4) last2Dob = anyDigits.slice(-2);
+      else if (anyDigits.length >= 2) last2Dob = anyDigits.slice(-2);
+    }
   }
 
   const baseId = `SP3-${last2Phone}${last2Dob}`;
@@ -1186,8 +1190,8 @@ async function processLegacyRegistration(body, res) {
     const p1Email = body.p1Email || body.player1Email;
     const category = body.category || 'Below 35';
 
-    if (!p1Name || !p1Phone || !p1Dob) {
-      return res.status(400).json({ success: false, error: 'Please provide all mandatory player details.' });
+    if (!p1Name || !p1Phone) {
+      return res.status(400).json({ success: false, error: 'Please provide Player 1 Full Name and Mobile Number.' });
     }
 
     const regId = await generateUniqueRegId(p1Phone, p1Dob);
