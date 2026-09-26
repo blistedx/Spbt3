@@ -127,6 +127,10 @@ export default function App() {
 
       {/* Footer */}
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '24px 16px', textAlign: 'center', fontSize: '13px', color: '#64748b' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '10px', flexWrap: 'wrap' }}>
+          <a href="https://www.instagram.com/sm_badminton_tournament_13?stkn=ZDVwcmpyOWU2cTlj" target="_blank" rel="noopener noreferrer" style={{ color: '#e1306c', textDecoration: 'none', fontWeight: 600 }}>📸 Instagram (@sm_badminton_tournament_13)</a>
+          <a href="https://youtube.com/@suryodaybadmintonclub?si=ej3mvLa6angJnqVj" target="_blank" rel="noopener noreferrer" style={{ color: '#ef4444', textDecoration: 'none', fontWeight: 600 }}>▶️ YouTube (@suryodaybadmintonclub)</a>
+        </div>
         <p>© 2026 S.P. Badminton Tourney 3 · Powered by Node.js, Express & MongoDB Database</p>
       </footer>
     </div>

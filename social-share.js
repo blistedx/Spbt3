@@ -152,6 +152,53 @@
       .sp3-copy-btn:hover {
         background: #166336;
       }
+      .sp3-official-strip {
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(20, 24, 15, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      [data-theme="dark"] .sp3-official-strip {
+        border-top-color: rgba(255, 255, 255, 0.12);
+      }
+      .sp3-official-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        margin: 0;
+      }
+      .sp3-official-btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .sp3-official-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 7px 10px;
+        border-radius: 10px;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #fff !important;
+        text-decoration: none;
+        transition: transform 0.2s ease, filter 0.2s ease;
+      }
+      .sp3-official-btn.insta {
+        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      }
+      .sp3-official-btn.yt {
+        background: #ef4444;
+      }
+      .sp3-official-btn:hover {
+        transform: translateY(-1.5px);
+        filter: brightness(1.08);
+      }
     `;
     document.head.appendChild(style);
   }
@@ -198,6 +245,18 @@
         <div class="sp3-copy-box">
           <input type="text" class="sp3-copy-input" id="sp3ShareUrlInput" readonly value="${window.location.origin || 'https://spbadminton.in'}">
           <button type="button" class="sp3-copy-btn" id="sp3CopyShareLinkBtn">Copy Link</button>
+        </div>
+
+        <div class="sp3-official-strip">
+          <div class="sp3-official-title">Official Tournament Channels</div>
+          <div class="sp3-official-btns">
+            <a href="https://www.instagram.com/sm_badminton_tournament_13?stkn=ZDVwcmpyOWU2cTlj" target="_blank" rel="noopener noreferrer" class="sp3-official-btn insta">
+              <span>📸 Instagram</span>
+            </a>
+            <a href="https://youtube.com/@suryodaybadmintonclub?si=ej3mvLa6angJnqVj" target="_blank" rel="noopener noreferrer" class="sp3-official-btn yt">
+              <span>▶️ YouTube</span>
+            </a>
+          </div>
         </div>
       </div>
     `;
