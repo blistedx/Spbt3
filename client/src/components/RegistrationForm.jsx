@@ -321,7 +321,9 @@ export default function RegistrationForm({ config }) {
         <div style={{ margin: '20px 0', padding: '14px 18px', borderRadius: '12px', background: termsAccepted ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.04)', border: termsAccepted ? '1.5px solid #22c55e' : '1.5px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '14px', color: '#f8fafc', fontWeight: 600 }}>
             <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#22c55e', cursor: 'pointer' }} />
-            I agree to the Tournament Rules &amp; Regulations *
+            <span>
+              I agree to the <a href="#rules" onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }} style={{ color: '#4ade80', textDecoration: 'underline', fontWeight: 700 }}>Tournament Rules &amp; Regulations</a> *
+            </span>
           </label>
           <button type="button" onClick={() => setShowTermsModal(true)} style={{ background: 'transparent', border: 'none', color: '#4ade80', fontSize: '13px', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}>
             Read Official Rules &rarr;
