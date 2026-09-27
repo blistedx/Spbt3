@@ -318,16 +318,32 @@ export default function RegistrationForm({ config }) {
         </div>
 
         {/* 5. Terms & Conditions Agreement */}
-        <div style={{ margin: '20px 0', padding: '14px 18px', borderRadius: '12px', background: termsAccepted ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.04)', border: termsAccepted ? '1.5px solid #22c55e' : '1.5px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '14px', color: '#f8fafc', fontWeight: 600 }}>
-            <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#22c55e', cursor: 'pointer' }} />
-            <span>
-              I agree to the <a href="#rules" onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }} style={{ color: '#4ade80', textDecoration: 'underline', fontWeight: 700 }}>Tournament Rules &amp; Regulations</a> *
-            </span>
-          </label>
-          <button type="button" onClick={() => setShowTermsModal(true)} style={{ background: 'transparent', border: 'none', color: '#4ade80', fontSize: '13px', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}>
-            Read Official Rules &rarr;
-          </button>
+        <div 
+          onClick={() => setShowTermsModal(true)}
+          style={{ 
+            margin: '20px 0', 
+            padding: '14px 18px', 
+            borderRadius: '12px', 
+            background: termsAccepted ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.04)', 
+            border: termsAccepted ? '1.5px solid #22c55e' : '1.5px solid rgba(255,255,255,0.12)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px', 
+            cursor: 'pointer' 
+          }}
+        >
+          <input 
+            type="checkbox" 
+            checked={termsAccepted} 
+            readOnly 
+            style={{ width: '18px', height: '18px', accentColor: '#22c55e', pointerEvents: 'none' }} 
+          />
+          <div style={{ fontSize: '14px', color: '#f8fafc', fontWeight: 600, flex: 1 }}>
+            I agree to the <span style={{ color: '#4ade80', textDecoration: 'underline', fontWeight: 700 }}>Tournament Rules &amp; Regulations</span> *
+          </div>
+          <span style={{ fontSize: '12.5px', color: '#4ade80', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', padding: '4px 10px', borderRadius: '6px', fontWeight: 700, whiteSpace: 'nowrap' }}>
+            📋 View &amp; Accept &rarr;
+          </span>
         </div>
 
         <button type="submit" disabled={submitting} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '16px' }}>
