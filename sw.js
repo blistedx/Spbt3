@@ -1,5 +1,5 @@
 // S.P. Badminton Tourney 3 · Service Worker
-const CACHE_NAME = 'sp3-cache-v3';
+const CACHE_NAME = 'sp3-cache-v4';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -17,8 +17,7 @@ const PRECACHE_ASSETS = [
   '/alert-modal.js',
   '/cookie-consent.js',
   '/pwa-install.js',
-  '/analytics.js',
-  '/social-share.js'
+  '/analytics.js'
 ];
 
 // Install: Cache core app shell

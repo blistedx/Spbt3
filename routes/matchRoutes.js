@@ -44,10 +44,8 @@ router.get('/live', async (req, res) => {
     try {
       if (mongoose.connection && mongoose.connection.readyState === 1) {
         liveMatches = await Match.find({
-          $or: [
-            { status: { $in: ['Live', 'LIVE', 'IN PROGRESS', 'UPCOMING', 'INTERVAL', 'COMPLETED'] } },
-            { isLive: true }
-          ]
+          status: { $in: ['Live', 'LIVE', 'IN PROGRESS'] },
+          isComplete: { $ne: true }
         }).sort({ updatedAt: -1, courtNumber: 1 }).lean();
       }
     } catch (e) {
@@ -58,8 +56,8 @@ router.get('/live', async (req, res) => {
     const allMatches = dataStore.getMatches();
 
     if (!liveMatches || liveMatches.length === 0) {
-      liveMatches = allMatches.filter(m => m.isLive || ['LIVE', 'IN PROGRESS', 'UPCOMING', 'INTERVAL'].includes((m.status || '').toUpperCase()));
-      if (liveMatches.length === 0 && liveMatch && liveMatch.status && liveMatch.status !== 'NO_LIVE_MATCH') {
+      liveMatches = allMatches.filter(m => (m.isLive === true || ['LIVE', 'IN PROGRESS'].includes(String(m.status || '').toUpperCase())) && !m.isComplete && String(m.status || '').toUpperCase() !== 'COMPLETED');
+      if (liveMatches.length === 0 && liveMatch && liveMatch.isLive === true && !liveMatch.isComplete && !['COMPLETED', 'NO_LIVE_MATCH'].includes(String(liveMatch.status || '').toUpperCase())) {
         liveMatches = [liveMatch];
       }
     }

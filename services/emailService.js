@@ -1,10 +1,17 @@
 const nodemailer = require('nodemailer');
 
+let cachedTransporter = null;
+
 function getTransporter() {
-  const user = process.env.SMTP_USER || process.env.EMAIL_USER || process.env.GMAIL_USER;
-  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.GMAIL_APP_PASS;
+  if (cachedTransporter) {
+    return cachedTransporter;
+  }
+
+  const user = (process.env.SMTP_USER || process.env.EMAIL_USER || process.env.GMAIL_USER || '').trim();
+  const pass = (process.env.SMTP_PASS || process.env.EMAIL_PASS || process.env.GMAIL_APP_PASS || '').replace(/\s+/g, '');
 
   if (!user || !pass) {
+    console.warn('⚠️ SMTP credentials not found in environment (SMTP_USER/SMTP_PASS missing). Emails will be skipped.');
     return null;
   }
 
@@ -12,19 +19,29 @@ function getTransporter() {
   const port = Number(process.env.SMTP_PORT) || 465;
   const secure = port === 465;
 
-  return nodemailer.createTransport({
+  cachedTransporter = nodemailer.createTransport({
     host,
     port,
     secure,
+    pool: true,
+    maxConnections: 3,
+    maxMessages: 200,
+    family: 4, // Prevents Windows IPv6 DNS timeout (drops latency from 30s to <1s)
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 30000,
     auth: { user, pass }
   });
+
+  return cachedTransporter;
 }
 
 function getAdminEmails() {
   if (process.env.ADMIN_EMAILS) {
     return process.env.ADMIN_EMAILS.split(',').map(e => e.trim()).filter(Boolean);
   }
-  return [];
+  const fallback = process.env.SMTP_USER || process.env.EMAIL_USER;
+  return fallback ? [fallback] : [];
 }
 
 /**
@@ -33,27 +50,58 @@ function getAdminEmails() {
 async function sendPlayerRegistrationReceipt(reg) {
   try {
     const transporter = getTransporter();
-    const p1Email = (reg.p1Email || reg.player1Email || '').trim();
-    if (!p1Email || !p1Email.includes('@')) return;
+    const p1Email = (reg.p1Email || reg.player1Email || reg.email || reg.p1_email || '').trim().toLowerCase();
+    const p2Email = (reg.p2Email || reg.player2Email || reg.p2_email || '').trim().toLowerCase();
 
-    const senderEmail = process.env.SMTP_USER || process.env.EMAIL_USER || 'no-reply@spbadminton.com';
+    if (!p1Email || !p1Email.includes('@')) {
+      console.warn(`ℹ️ Registration receipt skipped: No valid player email provided for Reg ID: ${reg.regId || 'N/A'}`);
+      return;
+    }
+
+    const senderEmail = process.env.SMTP_USER || process.env.EMAIL_USER || 'blistedx@gmail.com';
     const regId = reg.regId || 'SP3-XXXX';
-    const category = reg.categoryName || reg.category || 'Men\'s Doubles';
+    const category = reg.categoryName || reg.category || "Men's Doubles";
     const p1Name = reg.p1Name || reg.player1Name || 'Lead Player';
     const p2Name = reg.p2Name || reg.player2Name || 'Partner';
     const p1Phone = reg.p1Phone || reg.player1Phone || '';
     const utr = reg.paymentUtr || reg.upiUtr || 'N/A';
-    const time = reg.timestamp || new Date().toLocaleString('en-IN');
+    const time = reg.timestamp || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
-    const html = `
-    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width:600px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 4px 12px rgba(0,0,0,0.06);">
-      <div style="background: linear-gradient(135deg, #0f172a 0%, #166534 100%); padding:26px 20px; text-align:center; color:#ffffff;">
-        <h2 style="margin:0 0 4px 0; font-size:22px; color:#fde047; letter-spacing:0.5px;">S.P. BADMINTON TOURNEY 3</h2>
-        <p style="margin:0; font-size:12.5px; opacity:0.9; text-transform:uppercase; letter-spacing:0.05em;">Registration Received · Under Verification</p>
+    const textContent = `
+S.P. BADMINTON TOURNEY SEASON 3
+REGISTRATION RECEIPT & STATUS
+
+Dear ${p1Name} & ${p2Name},
+
+Thank you for registering for S.P. BADMINTON TOURNEY 3!
+Your team registration has been successfully received and is currently Under Verification (2-6 Hours).
+
+DETAILS:
+- Registration ID: ${regId}
+- Category: ${category}
+- Player 1 (Lead): ${p1Name} (${p1Phone})
+- Player 2 (Partner): ${p2Name}
+- UPI UTR / Ref: ${utr}
+- Submitted: ${time}
+
+NEXT STEPS:
+- Our committee will verify your payment details and approve your team slot.
+- Once approved, you will automatically receive your Official Digital Match Pass.
+- Track live status anytime on the tournament website with your Reg ID (${regId}) or mobile number.
+
+Tournament Website: https://spbt3.vercel.app
+Suryodaya Park Badminton Club
+    `.trim();
+
+    const htmlContent = `
+    <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width:600px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 4px 14px rgba(0,0,0,0.07);">
+      <div style="background: linear-gradient(135deg, #09090b 0%, #15803d 100%); padding:28px 24px; text-align:center; color:#ffffff;">
+        <h1 style="margin:0 0 6px 0; font-size:22px; color:#fde047; letter-spacing:0.5px; font-weight:800;">S.P. BADMINTON TOURNEY 3</h1>
+        <p style="margin:0; font-size:12.5px; opacity:0.92; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Registration Received · Under Verification</p>
       </div>
 
-      <div style="padding:24px;">
-        <p style="font-size:15px; color:#1e293b; margin:0 0 16px 0;">Dear <strong>${p1Name} &amp; ${p2Name}</strong>,</p>
+      <div style="padding:26px 22px;">
+        <p style="font-size:15px; color:#1e293b; margin:0 0 14px 0;">Dear <strong>${p1Name} &amp; ${p2Name}</strong>,</p>
         <p style="font-size:13.5px; color:#475569; line-height:1.6; margin:0 0 20px 0;">
           Thank you for registering for <strong>S.P. BADMINTON TOURNEY 3</strong>! Your team registration has been successfully submitted and is currently <strong>Under Verification (2–6 Hours)</strong>.
         </p>
@@ -61,63 +109,71 @@ async function sendPlayerRegistrationReceipt(reg) {
         <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:18px; margin-bottom:20px;">
           <table style="width:100%; border-collapse:collapse; font-size:13.5px; color:#334155;">
             <tr style="border-bottom:1px solid #e2e8f0;">
-              <td style="padding:8px 0; color:#64748b; width:40%;"><strong>Registration ID:</strong></td>
-              <td style="padding:8px 0; font-weight:800; font-family:monospace; font-size:16px; color:#166534;">${regId}</td>
+              <td style="padding:9px 0; color:#64748b; width:40%;"><strong>Registration ID:</strong></td>
+              <td style="padding:9px 0; font-weight:800; font-family:monospace; font-size:16px; color:#15803d;">${regId}</td>
             </tr>
             <tr style="border-bottom:1px solid #e2e8f0;">
-              <td style="padding:8px 0; color:#64748b;"><strong>Category:</strong></td>
-              <td style="padding:8px 0; font-weight:700; color:#0f172a;">${category}</td>
+              <td style="padding:9px 0; color:#64748b;"><strong>Category:</strong></td>
+              <td style="padding:9px 0; font-weight:700; color:#0f172a;">${category}</td>
             </tr>
             <tr style="border-bottom:1px solid #e2e8f0;">
-              <td style="padding:8px 0; color:#64748b;"><strong>Player 1 (Lead):</strong></td>
-              <td style="padding:8px 0;">${p1Name} (${p1Phone})</td>
+              <td style="padding:9px 0; color:#64748b;"><strong>Player 1 (Lead):</strong></td>
+              <td style="padding:9px 0;">${p1Name} (${p1Phone})</td>
             </tr>
             <tr style="border-bottom:1px solid #e2e8f0;">
-              <td style="padding:8px 0; color:#64748b;"><strong>Player 2 (Partner):</strong></td>
-              <td style="padding:8px 0;">${p2Name}</td>
+              <td style="padding:9px 0; color:#64748b;"><strong>Player 2 (Partner):</strong></td>
+              <td style="padding:9px 0;">${p2Name}</td>
             </tr>
             <tr style="border-bottom:1px solid #e2e8f0;">
-              <td style="padding:8px 0; color:#64748b;"><strong>Payment Reference / UTR:</strong></td>
-              <td style="padding:8px 0; font-family:monospace; font-weight:700;">${utr}</td>
+              <td style="padding:9px 0; color:#64748b;"><strong>Payment UTR / Ref:</strong></td>
+              <td style="padding:9px 0; font-family:monospace; font-weight:700;">${utr}</td>
             </tr>
             <tr>
-              <td style="padding:8px 0; color:#64748b;"><strong>Submission Time:</strong></td>
-              <td style="padding:8px 0;">${time}</td>
+              <td style="padding:9px 0; color:#64748b;"><strong>Submission Time:</strong></td>
+              <td style="padding:9px 0;">${time}</td>
             </tr>
           </table>
         </div>
 
         <div style="background:#eff6ff; border-left:4px solid #3b82f6; border-radius:6px; padding:14px; margin-bottom:20px; font-size:13px; color:#1e40af; line-height:1.5;">
-          <strong>Next Steps:</strong><br>
-          • Our committee will verify your payment details and approve your entry.<br>
+          <strong>What Happens Next?</strong><br>
+          • Our committee will verify your payment details and approve your entry slot.<br>
           • Once approved, you will automatically receive your <strong>Official Digital Match Pass</strong>.<br>
-          • You can track live verification status anytime on the tournament website by entering your Reg ID (<strong>${regId}</strong>) or mobile number.
+          • You can track live verification status anytime on the tournament website using your Reg ID (<strong>${regId}</strong>) or mobile number.
         </div>
 
-        <div style="text-align:center; margin-top:20px;">
-          <a href="https://spbt3.vercel.app" target="_blank" style="background:#166534; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:700; font-size:13.5px; display:inline-block;">Track Status on Website &rarr;</a>
+        <div style="text-align:center; margin:24px 0 10px 0;">
+          <a href="https://spbt3.vercel.app" target="_blank" style="background:#15803d; color:#ffffff; padding:13px 26px; text-decoration:none; border-radius:8px; font-weight:700; font-size:14px; display:inline-block; box-shadow:0 2px 8px rgba(21,128,61,0.3);">Track Status on Tournament Portal &rarr;</a>
         </div>
       </div>
 
       <div style="background:#f1f5f9; text-align:center; padding:14px; font-size:11.5px; color:#64748b; border-top:1px solid #e2e8f0;">
-        S.P. Badminton Club · Suryodaya Park · Official Tournament System
+        S.P. Badminton Club · Suryodaya Park Outdoor Courts · Official Tournament System
       </div>
     </div>
     `;
 
+    // Send to Player 1, and CC Player 2 if provided
+    let toList = [p1Email];
+    if (p2Email && p2Email.includes('@') && p2Email !== p1Email) {
+      toList.push(p2Email);
+    }
+
     if (transporter) {
-      await transporter.sendMail({
+      const info = await transporter.sendMail({
         from: `"S.P. Badminton Tourney 3" <${senderEmail}>`,
-        to: p1Email,
-        subject: `🏸 Registration Received: S.P. Badminton Tourney 3 (${regId})`,
-        html
+        replyTo: senderEmail,
+        to: toList.join(', '),
+        subject: `🏸 Registration Received: S.P. Badminton Tourney 3 [ID: ${regId}]`,
+        text: textContent,
+        html: htmlContent
       });
-      console.log(`✅ Registration receipt email sent to: ${p1Email}`);
+      console.log(`✅ [Email] Player receipt successfully sent to: ${toList.join(', ')} (MsgID: ${info.messageId})`);
     } else {
-      console.log(`ℹ️ Email skipped (SMTP not configured in .env). Receipt email ready for: ${p1Email}`);
+      console.log(`ℹ️ [Email] Skipped (SMTP not configured). Receipt ready for: ${toList.join(', ')}`);
     }
   } catch (err) {
-    console.warn(`⚠️ Error sending player registration receipt email:`, err.message);
+    console.error(`❌ [Email] Error sending player registration receipt:`, err.message);
   }
 }
 
@@ -130,18 +186,31 @@ async function sendAdminRegistrationAlert(reg) {
     const adminEmails = getAdminEmails();
     if (!adminEmails || adminEmails.length === 0) return;
 
-    const senderEmail = process.env.SMTP_USER || process.env.EMAIL_USER || 'no-reply@spbadminton.com';
+    const senderEmail = process.env.SMTP_USER || process.env.EMAIL_USER || 'blistedx@gmail.com';
     const regId = reg.regId || 'SP3-XXXX';
-    const category = reg.categoryName || reg.category || 'Men\'s Doubles';
+    const category = reg.categoryName || reg.category || "Men's Doubles";
     const p1Name = reg.p1Name || reg.player1Name || 'Player 1';
     const p2Name = reg.p2Name || reg.player2Name || 'Player 2';
     const p1Phone = reg.p1Phone || reg.player1Phone || '';
     const p2Phone = reg.p2Phone || reg.player2Phone || '';
     const utr = reg.paymentUtr || reg.upiUtr || 'N/A';
-    const time = reg.timestamp || new Date().toLocaleString('en-IN');
+    const time = reg.timestamp || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
-    const html = `
-    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width:600px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e2e8f0;">
+    const textContent = `
+[NEW REGISTRATION ALERT] S.P. BADMINTON TOURNEY 3
+Registration ID: ${regId}
+Category: ${category}
+
+Player 1: ${p1Name} (${p1Phone})
+Player 2: ${p2Name} (${p2Phone})
+Payment UTR: ${utr}
+Time: ${time}
+
+Approve or review in Admin Panel: https://spbt3.vercel.app/admin
+    `.trim();
+
+    const htmlContent = `
+    <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width:600px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e2e8f0;">
       <div style="background:#14532d; padding:22px 20px; text-align:center; color:#ffffff;">
         <h2 style="margin:0 0 4px 0; font-size:20px; color:#facc15;">🏸 S.P. BADMINTON TOURNEY 3</h2>
         <p style="margin:0; font-size:13px; opacity:0.95;">New Team Registration Alert</p>
@@ -159,10 +228,10 @@ async function sendAdminRegistrationAlert(reg) {
         </div>
 
         <table style="width:100%; border-collapse:collapse; font-size:13.5px; color:#334155; margin-bottom:18px;">
-          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:6px 0; color:#64748b; width:35%;"><strong>Player 1 (Lead):</strong></td><td style="padding:6px 0; font-weight:600;">${p1Name} (<a href="tel:${p1Phone}" style="color:#16a34a; text-decoration:none;">${p1Phone}</a>)</td></tr>
-          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:6px 0; color:#64748b;"><strong>Player 2 (Partner):</strong></td><td style="padding:6px 0; font-weight:600;">${p2Name} (<a href="tel:${p2Phone}" style="color:#16a34a; text-decoration:none;">${p2Phone}</a>)</td></tr>
-          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:6px 0; color:#64748b;"><strong>UPI UTR / Ref:</strong></td><td style="padding:6px 0; font-family:monospace; font-weight:700; color:#0f172a;">${utr}</td></tr>
-          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:6px 0; color:#64748b;"><strong>Time:</strong></td><td style="padding:6px 0;">${time}</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 0; color:#64748b; width:35%;"><strong>Player 1 (Lead):</strong></td><td style="padding:7px 0; font-weight:600;">${p1Name} (<a href="tel:${p1Phone}" style="color:#16a34a; text-decoration:none;">${p1Phone}</a>)</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 0; color:#64748b;"><strong>Player 2 (Partner):</strong></td><td style="padding:7px 0; font-weight:600;">${p2Name} (<a href="tel:${p2Phone}" style="color:#16a34a; text-decoration:none;">${p2Phone}</a>)</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 0; color:#64748b;"><strong>UPI UTR / Ref:</strong></td><td style="padding:7px 0; font-family:monospace; font-weight:700; color:#0f172a;">${utr}</td></tr>
+          <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:7px 0; color:#64748b;"><strong>Time:</strong></td><td style="padding:7px 0;">${time}</td></tr>
         </table>
 
         <div style="text-align:center; margin-top:20px;">
@@ -177,18 +246,18 @@ async function sendAdminRegistrationAlert(reg) {
     `;
 
     if (transporter) {
-      await transporter.sendMail({
+      const info = await transporter.sendMail({
         from: `"S.P. Badminton Alerts" <${senderEmail}>`,
+        replyTo: senderEmail,
         to: adminEmails.join(', '),
         subject: `🏸 [New Registration] ${p1Name} & ${p2Name} (${category} - ${regId})`,
-        html
+        text: textContent,
+        html: htmlContent
       });
-      console.log(`✅ Admin notification email sent to: ${adminEmails.join(', ')}`);
-    } else {
-      console.log(`ℹ️ Admin email skipped (SMTP not configured in .env). Alert ready for: ${adminEmails.join(', ')}`);
+      console.log(`✅ [Email] Admin notification sent to: ${adminEmails.join(', ')} (MsgID: ${info.messageId})`);
     }
   } catch (err) {
-    console.warn(`⚠️ Error sending admin registration alert email:`, err.message);
+    console.error(`❌ [Email] Error sending admin registration alert:`, err.message);
   }
 }
 
@@ -198,19 +267,36 @@ async function sendAdminRegistrationAlert(reg) {
 async function sendPlayerApprovalEmail(reg) {
   try {
     const transporter = getTransporter();
-    const p1Email = (reg.p1Email || reg.player1Email || '').trim();
+    const p1Email = (reg.p1Email || reg.player1Email || reg.email || reg.p1_email || '').trim().toLowerCase();
+    const p2Email = (reg.p2Email || reg.player2Email || reg.p2_email || '').trim().toLowerCase();
+
     if (!p1Email || !p1Email.includes('@')) return;
 
-    const senderEmail = process.env.SMTP_USER || process.env.EMAIL_USER || 'no-reply@spbadminton.com';
+    const senderEmail = process.env.SMTP_USER || process.env.EMAIL_USER || 'blistedx@gmail.com';
     const regId = reg.regId || 'SP3-XXXX';
-    const category = reg.categoryName || reg.category || 'Men\'s Doubles';
+    const category = reg.categoryName || reg.category || "Men's Doubles";
     const p1Name = reg.p1Name || reg.player1Name || 'Player 1';
     const p2Name = reg.p2Name || reg.player2Name || 'Player 2';
     const p1Phone = reg.p1Phone || reg.player1Phone || '';
     const utr = reg.paymentUtr || reg.upiUtr || 'VERIFIED';
 
-    const html = `
-    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width:600px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 4px 12px rgba(0,0,0,0.06);">
+    const textContent = `
+CONGRATULATIONS! REGISTRATION APPROVED
+S.P. BADMINTON TOURNEY SEASON 3
+
+Dear ${p1Name} & ${p2Name},
+Your registration has been VERIFIED & APPROVED for the tournament.
+
+REGISTRATION ID: ${regId}
+CATEGORY: ${category}
+VENUE: Suryodaya Park Outdoor Badminton Court
+DATES: 28–30 Aug 2026
+
+Access your official Match Pass: https://spbt3.vercel.app
+    `.trim();
+
+    const htmlContent = `
+    <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width:600px; margin:0 auto; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 4px 14px rgba(0,0,0,0.07);">
       <div style="background: linear-gradient(135deg, #14180F 0%, #1E7A45 100%); padding:28px 20px; text-align:center; color:#ffffff;">
         <h2 style="margin:0 0 4px 0; font-size:24px; color:#FFD700; letter-spacing:0.02em;">S.P. BADMINTON TOURNEY 3</h2>
         <div style="font-size:12px; opacity:0.9; text-transform:uppercase; letter-spacing:0.06em;">Official Player Match Pass &amp; Entry Confirmation</div>
@@ -250,19 +336,24 @@ async function sendPlayerApprovalEmail(reg) {
     </div>
     `;
 
+    let toList = [p1Email];
+    if (p2Email && p2Email.includes('@') && p2Email !== p1Email) {
+      toList.push(p2Email);
+    }
+
     if (transporter) {
-      await transporter.sendMail({
+      const info = await transporter.sendMail({
         from: `"S.P. Badminton Tourney 3" <${senderEmail}>`,
-        to: p1Email,
-        subject: `🎉 Registration APPROVED: S.P. Badminton Tourney 3 (${regId})`,
-        html
+        replyTo: senderEmail,
+        to: toList.join(', '),
+        subject: `🎉 Registration APPROVED: S.P. Badminton Tourney 3 [Pass: ${regId}]`,
+        text: textContent,
+        html: htmlContent
       });
-      console.log(`✅ Approval confirmation email sent to: ${p1Email}`);
-    } else {
-      console.log(`ℹ️ Approval email skipped (SMTP not configured in .env). Ready for: ${p1Email}`);
+      console.log(`✅ [Email] Approval confirmation sent to: ${toList.join(', ')} (MsgID: ${info.messageId})`);
     }
   } catch (err) {
-    console.warn(`⚠️ Error sending player approval email:`, err.message);
+    console.error(`❌ [Email] Error sending player approval email:`, err.message);
   }
 }
 

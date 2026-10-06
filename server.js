@@ -147,10 +147,10 @@ async function generateUniqueRegId(p1Phone, p1Dob) {
 let globalSettingsState = dataStore.getSettings();
 let globalLiveMatchState = dataStore.getLiveMatch();
 
-async function getMergedSettings() {
+function getMergedSettings() {
   try {
-    if (!dataStore.isSynced || Date.now() - (dataStore.lastSyncTime || 0) > 10000) {
-      await dataStore.syncFromDb();
+    if (!dataStore.isSynced || Date.now() - (dataStore.lastSyncTime || 0) > 60000) {
+      dataStore.syncFromDb().catch(() => {});
     }
   } catch (e) {}
   return dataStore.getSettings();
@@ -1255,9 +1255,9 @@ async function processLegacyRegistration(body, res) {
     // Save to PostgreSQL
     dataStore.addOrUpdateRegistration(regData);
 
-    // Trigger automated email notifications
-    emailService.sendPlayerRegistrationReceipt(regData).catch(e => console.warn('Receipt email error:', e.message));
-    emailService.sendAdminRegistrationAlert(regData).catch(e => console.warn('Admin alert email error:', e.message));
+    // Trigger automated email notifications (dispatched via pooled SMTP)
+    emailService.sendPlayerRegistrationReceipt(regData).catch(e => console.error('❌ Player receipt email dispatch error:', e.message));
+    emailService.sendAdminRegistrationAlert(regData).catch(e => console.error('❌ Admin alert email dispatch error:', e.message));
 
     return res.json({
       success: true,
@@ -1272,6 +1272,7 @@ async function processLegacyRegistration(body, res) {
 
 // Attach compatibility bridge
 app.use('/exec', handleActionBridge);
+app.use('/api', handleActionBridge);
 app.use(handleActionBridge);
 
 // Portal Page Routes

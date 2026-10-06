@@ -162,13 +162,18 @@ router.post('/submit', upload.single('paymentScreenshot'), async (req, res) => {
       return res.status(400).json({ success: false, error: 'Registrations are currently closed for this tournament.' });
     }
 
+    const p1Name = (body.p1Name || body.player1Name || '').trim();
+    const p1Phone = (body.p1Phone || body.player1Phone || '').trim();
+    const p1Email = (body.p1Email || body.player1Email || body.email || '').trim().toLowerCase();
+    const category = body.category || 'Below 35';
+
     // Required fields check
-    if (!body.category || !body.p1Name || !body.p1Phone) {
+    if (!category || !p1Name || !p1Phone) {
       return res.status(400).json({ success: false, error: 'Please provide Category, Player 1 Name, and Mobile number.' });
     }
 
     // Generate unique Custom Reg ID
-    const regId = await generateUniqueRegId(body.p1Phone, body.p1Dob);
+    const regId = await generateUniqueRegId(p1Phone, body.p1Dob || body.player1Dob);
 
     // Determine screenshot URL
     let paymentScreenshotUrl = body.paymentScreenshotUrl || '';
@@ -182,27 +187,27 @@ router.post('/submit', upload.single('paymentScreenshot'), async (req, res) => {
     }
 
     // Find category name
-    let categoryName = body.category;
+    let categoryName = category;
     if (settings && settings.categories) {
       const cats = Array.isArray(settings.categories) ? settings.categories : [];
-      const matchCat = cats.find(c => c.code === body.category || c.name === body.category);
+      const matchCat = cats.find(c => c.code === category || c.name === category);
       if (matchCat) categoryName = matchCat.name;
     }
 
     const regData = {
       regId,
-      category: body.category,
+      category,
       categoryName,
-      p1Name: body.p1Name.trim(),
-      player1Name: body.p1Name.trim(),
-      p1Phone: body.p1Phone.trim(),
-      player1Phone: body.p1Phone.trim(),
-      p1Email: body.p1Email.trim().toLowerCase(),
-      player1Email: body.p1Email.trim().toLowerCase(),
-      p1Dob: body.p1Dob,
-      player1Dob: body.p1Dob,
-      p1Age: body.p1Age || '',
-      player1Age: body.p1Age || '',
+      p1Name,
+      player1Name: p1Name,
+      p1Phone,
+      player1Phone: p1Phone,
+      p1Email,
+      player1Email: p1Email,
+      p1Dob: body.p1Dob || body.player1Dob || '',
+      player1Dob: body.p1Dob || body.player1Dob || '',
+      p1Age: body.p1Age || body.player1Age || '',
+      player1Age: body.p1Age || body.player1Age || '',
       p1Tshirt: body.p1Tshirt || 'L',
       player1Tshirt: body.p1Tshirt || 'L',
       p1BloodGroup: body.p1BloodGroup || '',

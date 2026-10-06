@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>S.P. Badminton Tourney 3</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -26,20 +26,11 @@
   <meta name="twitter:description" content="Men's Doubles knockout tournament. Register your pair, view fixtures, and follow live scores!">
   <meta name="twitter:image" content="/logo.png">
 
-  <!-- Performance Preconnect & DNS Prefetch -->
-  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <!-- Performance Preconnect & Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
-    rel="stylesheet">
-  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <script src="/socket.io/socket.io.js" defer></script>
   <script src="/alert-modal.js" defer></script>
   <script>
     (function () {
@@ -85,8 +76,11 @@
   }
 
   /* Typography Enhancements */
-  h1, h2, h3, h4, .sec-heading, .cat-card-title, .modal-title, .comm-title, .reg-success-title {
+  h2, h3, h4, .sec-heading, .cat-card-title, .modal-title, .comm-title, .reg-success-title {
     font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  }
+  h1, .hero h1 {
+    font-family: 'Anton', 'Impact', sans-serif !important;
   }
 
   /* Buttons in Dark Theme */
@@ -233,13 +227,17 @@
     background: transparent !important;
   }
   [data-theme="dark"] .hero h1 {
+    font-family: 'Anton', 'Impact', sans-serif !important;
     color: #ffffff !important;
   }
   [data-theme="dark"] .hero h1 .l1 {
+    font-family: 'Anton', 'Impact', sans-serif !important;
     color: #ffffff !important;
   }
   [data-theme="dark"] .hero h1 .l2 {
-    color: #22c55e !important;
+    font-family: 'Anton', 'Impact', sans-serif !important;
+    color: transparent !important;
+    -webkit-text-stroke: 1.8px #22c55e !important;
   }
   [data-theme="dark"] .eyebrow {
     background: rgba(34, 197, 94, 0.14) !important;
@@ -1111,6 +1109,56 @@
     flex-shrink: 0;
     margin-right: -1px;
   }
+  /* Desktop Navbar & Sidebar Live Active Highlight */
+  .navlinks a.nav-pill-live.live-active-match {
+    background: rgba(239, 68, 68, 0.16) !important;
+    border-color: rgba(239, 68, 68, 0.6) !important;
+    color: #dc2626 !important;
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.35) !important;
+    animation: livePillGlow 2s infinite ease-in-out !important;
+  }
+  .navlinks a.nav-pill-live.live-active-match .nav-live-dot {
+    background: #ef4444 !important;
+    box-shadow: 0 0 8px #ef4444 !important;
+    animation: dockLiveRipple 1.4s infinite ease-out !important;
+  }
+  .navlinks a.nav-pill-live.live-active-match .nav-text {
+    font-weight: 800 !important;
+    color: #dc2626 !important;
+  }
+  [data-theme="dark"] .navlinks a.nav-pill-live.live-active-match {
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(248, 113, 113, 0.6) !important;
+    color: #f87171 !important;
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.45) !important;
+  }
+  [data-theme="dark"] .navlinks a.nav-pill-live.live-active-match .nav-text {
+    color: #fca5a5 !important;
+  }
+  .sidebar-live-tag {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 7px;
+    background: #ef4444;
+    color: #ffffff;
+    border-radius: 999px;
+    margin-left: 8px;
+    display: inline-block;
+    vertical-align: middle;
+    animation: liveBadgePulse 1.4s infinite ease-in-out;
+  }
+  @keyframes livePillGlow {
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.55), 0 0 6px rgba(239, 68, 68, 0.8);
+    }
+  }
+  @keyframes liveBadgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
   .navlinks a[data-tooltip],
   .nav-right-actions button[data-tooltip],
   .nav-right-actions a[data-tooltip] {
@@ -1259,26 +1307,30 @@
     100% { opacity: 1; transform: translateY(0); }
   }
 
-  h1{
-    font-family:'Anton',sans-serif;
-    font-weight:400;
-    text-transform:uppercase;
-    line-height:0.93;
-    font-size:clamp(64px, 6.2vw, 114px);
-    letter-spacing:0.01em;
+  h1, .hero h1 {
+    font-family: 'Anton', 'Impact', sans-serif !important;
+    font-weight: 400 !important;
+    text-transform: uppercase;
+    line-height: 0.93;
+    font-size: clamp(64px, 6.2vw, 114px);
+    letter-spacing: 0.01em;
   }
-  h1 .l1{
+  h1 .l1, .hero h1 .l1 {
+    font-family: 'Anton', 'Impact', sans-serif !important;
     display: block;
     color: var(--ink);
     animation: heroTitleSlide 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
   }
-  h1 .l2{
-    color:transparent; -webkit-text-stroke: 1.8px var(--ink); display:block;
+  h1 .l2, .hero h1 .l2 {
+    font-family: 'Anton', 'Impact', sans-serif !important;
+    color: transparent !important;
+    -webkit-text-stroke: 1.8px var(--ink);
+    display: block;
     animation: heroOutlineSlide 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
     transition: -webkit-text-stroke 0.25s ease, transform 0.25s ease;
   }
 
-  h1:hover .l2 {
+  h1:hover .l2, .hero h1:hover .l2 {
     -webkit-text-stroke: 1.8px var(--court);
   }
 
@@ -3177,47 +3229,48 @@
 
   /* ================= RESOLUTION ADAPTATION & RESPONSIVE BREAKPOINTS ================= */
   
-  /* Ultra-wide & Desktop (>= 1380px) */
+  /* Ultra-wide & Large Desktop (>= 1380px) */
   @media (min-width: 1380px) {
-    .site-header nav { padding: 8px 20px; gap: 14px; }
-    .navlinks { gap: 3px; padding: 4px 7px; }
-    .navlinks a { padding: 6px 11px !important; font-size: 12.5px; }
+    .site-header nav { padding: 8px 22px; gap: 14px; }
+    .navlinks { gap: 3px; padding: 4px 8px; }
+    .navlinks a { padding: 5.5px 9.5px !important; font-size: 12px; gap: 4.5px !important; }
     .header-reg-btn { padding: 7px 16px !important; font-size: 12px !important; }
   }
 
-  /* Standard Laptops & 1080p Scaled (1200px to 1379px) */
-  @media (max-width: 1379px) and (min-width: 1200px) {
+  /* Standard Laptops & 1080p Desktop Displays (1024px to 1379px) */
+  @media (max-width: 1379px) and (min-width: 1024px) {
     .site-header nav {
-      padding: 7px 14px;
-      gap: 10px;
+      padding: 7px 12px;
+      gap: 8px;
     }
     .logo .mark { width: 32px; height: 32px; }
-    .logo b { font-size: 12.5px; }
-    .logo span { font-size: 8.5px; }
+    .logo b { font-size: 12px; }
+    .logo span { font-size: 8px; }
     .navlinks {
+      display: flex !important;
       gap: 2px;
       padding: 3px 5px;
     }
     .navlinks a {
-      padding: 5px 8px !important;
-      font-size: 11.5px;
-      gap: 4px !important;
+      padding: 4.5px 6.5px !important;
+      font-size: 11px;
+      gap: 3.5px !important;
     }
-    /* Hide text on secondary items so nav fits perfectly without any overflow */
-    .navlinks a[href="#rules-faq"] .nav-text,
-    .navlinks a[href="#team"] .nav-text,
-    .navlinks a[onclick*="openStatusModal"] .nav-text,
-    .navlinks a#adminNavLink .nav-text {
-      display: none !important;
+    .navlinks a .nav-icon svg {
+      width: 13.5px;
+      height: 13.5px;
     }
     .header-reg-btn {
-      padding: 6px 13px !important;
-      font-size: 11.5px !important;
+      padding: 6px 12px !important;
+      font-size: 11px !important;
+    }
+    .mobile-hamburger-btn {
+      display: none !important;
     }
   }
 
-  /* Compact Laptops, Tablets & Scaled Displays (<= 1199px) */
-  @media (max-width: 1199px) {
+  /* Tablets & Mobile Screens (<= 1023px) */
+  @media (max-width: 1023px) {
     .site-header nav {
       padding: 8px 14px;
     }
@@ -3227,16 +3280,32 @@
     .navlinks { display: none !important; }
     .mobile-hamburger-btn { display: flex !important; }
     .header-reg-btn {
-      display: inline-flex !important;
-      padding: 6px 12px !important;
-      font-size: 11px !important;
-    }
-    .header-reg-btn .reg-btn-text {
-      font-size: 11px;
+      display: none !important;
     }
     .lede { max-width: 100%; }
     .stats { max-width: 100%; }
     .medallion { width: 360px; height: 360px; max-width: 90vw; }
+  }
+
+  /* Tablets & Mobile Screens (<= 768px) */
+  @media (max-width: 768px) {
+    .header-reg-btn {
+      display: none !important;
+    }
+    .site-header nav {
+      padding: 7px 12px !important;
+    }
+    .nav-right-actions {
+      gap: 6px !important;
+    }
+    .nav-right-actions .theme-toggle-btn {
+      width: 36px !important;
+      height: 36px !important;
+    }
+    .mobile-hamburger-btn {
+      width: 38px !important;
+      height: 38px !important;
+    }
   }
 
   /* Mobile Small Screens (<= 480px) */
@@ -3263,29 +3332,55 @@
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      padding: 10px 12px;
-      border-radius: 16px;
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--line);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    }
+    [data-theme="dark"] .stats {
+      background: rgba(18, 26, 22, 0.75);
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
     .stat {
       padding: 6px 4px;
+      text-align: center;
     }
     .stat .num {
-      font-size: 20px;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--court-deep);
+    }
+    [data-theme="dark"] .stat .num {
+      color: #4ade80;
     }
     .stat .lbl {
-      font-size: 9px;
+      font-size: 9.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
     .cta-row {
       display: flex;
       flex-direction: column;
       width: 100%;
-      gap: 8px;
+      gap: 10px;
+      margin-top: 8px;
     }
     .cta-row .btn {
       width: 100%;
+      min-height: 50px;
       justify-content: center;
       text-align: center;
+      border-radius: 16px;
+      font-size: 14.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      box-shadow: 0 6px 18px rgba(30, 122, 69, 0.28);
     }
   }
 
@@ -3577,6 +3672,238 @@
   }
   .ticker-btn.secondary:hover {
     background: rgba(255, 255, 255, 0.25);
+  }
+
+  /* ================= CENTER FLOATING LIVE MATCH WINDOW (MIDDLE OF SCREEN) ================= */
+  .sliding-live-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.88);
+    width: 92%;
+    max-width: 480px;
+    z-index: 10050;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    margin: 0;
+  }
+  .sliding-live-window.is-visible {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .sliding-live-card {
+    background: linear-gradient(145deg, rgba(10, 31, 20, 0.98) 0%, rgba(4, 18, 11, 0.99) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px solid rgba(52, 211, 153, 0.65);
+    border-radius: 22px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(16, 185, 129, 0.3);
+    padding: 20px 22px;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+  .sliding-live-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.1), transparent);
+    animation: slidingShimmer 3.5s infinite linear;
+    pointer-events: none;
+  }
+  @keyframes slidingShimmer {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(50%); }
+  }
+  .sliding-live-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .sliding-live-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .sliding-live-beacon {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(239, 68, 68, 0.25);
+    border: 1px solid rgba(239, 68, 68, 0.6);
+    color: #fca5a5;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .sliding-live-beacon-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ef4444;
+    position: relative;
+  }
+  .sliding-live-beacon-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: #ef4444;
+    opacity: 0.7;
+    animation: beaconPulse 1.4s infinite;
+  }
+  @keyframes beaconPulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(2.6); opacity: 0; }
+  }
+  .sliding-live-court {
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    color: #a7f3d0;
+    letter-spacing: 0.02em;
+    font-weight: 600;
+  }
+  .sliding-live-main {
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .sliding-live-match-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+  }
+  .sliding-live-score-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(34, 197, 94, 0.22);
+    border: 1px solid rgba(34, 197, 94, 0.5);
+    color: #4ade80;
+    padding: 4px 14px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .sliding-live-cta-prompt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #fef08a;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    transition: color 0.15s ease;
+    margin-top: 2px;
+  }
+  .sliding-live-card:hover .sliding-live-cta-prompt {
+    color: #fde047;
+    text-decoration: underline;
+  }
+  .sliding-live-spark {
+    animation: sparkBounce 1s infinite alternate ease-in-out;
+    display: inline-block;
+  }
+  @keyframes sparkBounce {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.3); }
+  }
+  .sliding-live-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+  }
+  .sliding-tv-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 10px 22px;
+    border-radius: 999px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .sliding-tv-btn:hover {
+    background: linear-gradient(135deg, #34d198 0%, #10b981 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.55);
+    color: #ffffff !important;
+  }
+  .sliding-close-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #cbd5e1;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .sliding-close-btn:hover {
+    background: rgba(239, 68, 68, 0.4);
+    color: #ffffff;
+    border-color: rgba(239, 68, 68, 0.7);
+  }
+
+  @media (max-width: 640px) {
+    .sliding-live-window {
+      width: 92%;
+      max-width: 380px;
+    }
+    .sliding-live-card {
+      padding: 16px 18px;
+      border-radius: 18px;
+    }
+    .sliding-live-match-title {
+      font-size: 14px;
+    }
+    .sliding-live-cta-prompt {
+      font-size: 11.5px;
+    }
+    .sliding-tv-btn {
+      padding: 8px 16px;
+      font-size: 12px;
+    }
   }
 
   /* ================= FULLSCREEN FLASH ANNOUNCEMENT OVERLAY MODAL ================= */
@@ -4219,7 +4546,528 @@
       text-decoration: underline;
     }
 
+    /* ============================================================== */
+    /* 📱 MOBILE UI/UX & TOUCH ERGONOMICS UPGRADE (ROADMAP PHASE)     */
+    /* ============================================================== */
+    
+    /* Touch Feedback & Accessibility */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active, 
+    .sched-day-btn:active, 
+    .sched-cat-btn:active, 
+    .cat-info-card:active,
+    .dock-item:active {
+      transform: scale(0.95);
+      transition: transform 0.08s ease;
+    }
 
+    /* Swipe hint pulse animation */
+    .bracket-swipe-hint span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      animation: pulseSwipeHint 2.4s infinite ease-in-out;
+    }
+    @keyframes pulseSwipeHint {
+      0%, 100% { transform: scale(1); opacity: 0.92; }
+      50% { transform: scale(1.04); opacity: 1; box-shadow: 0 4px 14px rgba(30,122,69,0.22); }
+    }
+
+    /* Mobile Bottom Dock (Hidden on Desktop) */
+    .mobile-bottom-dock {
+      display: none;
+    }
+
+    /* Mobile Bottom Sheet Animations */
+    @keyframes mobileBottomSheetSlideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0.85;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive adjustments for screens <= 768px */
+    @media (max-width: 768px) {
+      /* Body content clearance for floating bottom island dock */
+      body {
+        padding-bottom: calc(86px + env(safe-area-inset-bottom, 12px)) !important;
+      }
+
+      /* Native App Mobile Floating Island Navigation Dock */
+      .mobile-bottom-dock {
+        display: block !important;
+        position: fixed !important;
+        bottom: calc(10px + env(safe-area-inset-bottom, 6px)) !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1100 !important;
+        padding: 0 12px !important;
+        pointer-events: none !important;
+      }
+
+      .dock-container {
+        pointer-events: auto !important;
+        max-width: 420px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-around !important;
+        padding: 6px 6px !important;
+        gap: 2px !important;
+        border-radius: 999px !important;
+        background: rgba(255, 255, 255, 0.86) !important;
+        backdrop-filter: blur(24px) saturate(190%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+        box-shadow: 0 14px 34px -4px rgba(0, 0, 0, 0.16), 0 2px 10px rgba(0, 0, 0, 0.06) !important;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s !important;
+      }
+
+      [data-theme="dark"] .dock-container {
+        background: rgba(13, 20, 16, 0.88) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 18px 42px -6px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(74, 222, 128, 0.18) !important;
+      }
+
+      .dock-item {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        color: var(--ink) !important;
+        opacity: 0.68 !important;
+        gap: 3px !important;
+        background: none !important;
+        border: none !important;
+        cursor: pointer !important;
+        padding: 5px 6px 4px !important;
+        border-radius: 20px !important;
+        min-width: 44px !important;
+        flex: 1 1 0 !important;
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        user-select: none !important;
+        position: relative !important;
+      }
+
+      .dock-item:hover,
+      .dock-item.active {
+        opacity: 1 !important;
+        color: var(--court-deep) !important;
+        background: rgba(30, 122, 69, 0.09) !important;
+      }
+
+      [data-theme="dark"] .dock-item:hover,
+      [data-theme="dark"] .dock-item.active {
+        color: #4ade80 !important;
+        background: rgba(74, 222, 128, 0.16) !important;
+      }
+
+      .dock-item.active .dock-icon svg {
+        stroke-width: 2.5 !important;
+        transform: translateY(-1px) !important;
+        transition: transform 0.2s !important;
+      }
+
+      .dock-icon {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 22px !important;
+        height: 22px !important;
+      }
+
+      .dock-label {
+        font-size: 10px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.02em !important;
+        line-height: 1 !important;
+      }
+
+      .dock-item.active .dock-label {
+        font-weight: 800 !important;
+      }
+
+      /* Dynamic Live Item in Floating Island Mobile Dock */
+      .dock-item-live {
+        display: none;
+        color: #ef4444 !important;
+        opacity: 1 !important;
+        position: relative !important;
+        padding: 5px 6px 4px !important;
+        border-radius: 20px !important;
+        min-width: 44px !important;
+        flex: 1 1 0 !important;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        animation: dockLivePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .dock-item-live:hover,
+      .dock-item-live.active {
+        color: #dc2626 !important;
+        background: rgba(239, 68, 68, 0.12) !important;
+        opacity: 1 !important;
+      }
+
+      .dock-item-live .dock-icon-live {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 22px !important;
+        height: 22px !important;
+      }
+
+      .dock-item-live .dock-icon-live svg {
+        stroke: #ef4444 !important;
+        filter: drop-shadow(0 2px 6px rgba(239, 68, 68, 0.45)) !important;
+        animation: dockLiveSvgPulse 1.8s infinite ease-in-out !important;
+      }
+
+      .dock-live-ping {
+        position: absolute !important;
+        top: -1px !important;
+        right: -3px !important;
+        width: 8px !important;
+        height: 8px !important;
+        background: #ef4444 !important;
+        border-radius: 50% !important;
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7) !important;
+        animation: dockLiveRipple 1.6s infinite ease-out !important;
+      }
+
+      .dock-item-live .dock-label {
+        color: #dc2626 !important;
+        font-weight: 800 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 3px !important;
+        font-size: 10px !important;
+        letter-spacing: 0.02em !important;
+      }
+
+      .dock-live-dot-text {
+        color: #ef4444 !important;
+        font-size: 8px !important;
+        display: inline-block !important;
+        animation: dockLiveBlink 1s infinite alternate !important;
+      }
+
+      [data-theme="dark"] .dock-item-live {
+        color: #f87171 !important;
+      }
+      [data-theme="dark"] .dock-item-live:hover,
+      [data-theme="dark"] .dock-item-live.active {
+        color: #fca5a5 !important;
+        background: rgba(239, 68, 68, 0.22) !important;
+      }
+      [data-theme="dark"] .dock-item-live .dock-icon-live svg {
+        stroke: #f87171 !important;
+        filter: drop-shadow(0 2px 8px rgba(248, 113, 113, 0.6)) !important;
+      }
+      [data-theme="dark"] .dock-item-live .dock-label {
+        color: #fca5a5 !important;
+      }
+      [data-theme="dark"] .dock-live-ping {
+        background: #f87171 !important;
+      }
+
+      @keyframes dockLivePopIn {
+        from {
+          opacity: 0;
+          transform: scale(0.6) translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      @keyframes dockLiveRipple {
+        0% {
+          transform: scale(0.85);
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8);
+        }
+        70% {
+          transform: scale(1.15);
+          box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
+        }
+        100% {
+          transform: scale(0.85);
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+      }
+
+      @keyframes dockLiveSvgPulse {
+        0%, 100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.09);
+        }
+      }
+
+      @keyframes dockLiveBlink {
+        0% { opacity: 0.35; }
+        100% { opacity: 1; }
+      }
+
+      /* Highlighted Floating Center Register Action */
+      .dock-item-highlight {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+        color: #ffffff !important;
+        opacity: 1 !important;
+        padding: 8px 18px 7px !important;
+        border-radius: 999px !important;
+        min-width: 66px !important;
+        transform: translateY(-4px) !important;
+        box-shadow: 0 6px 18px rgba(22, 163, 74, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+        animation: dockCenterPulse 3s infinite ease-in-out !important;
+      }
+
+      .dock-item-highlight .dock-icon-center {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 20px !important;
+        height: 20px !important;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25)) !important;
+      }
+
+      .dock-item-highlight .dock-label {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 10.5px !important;
+        letter-spacing: 0.04em !important;
+      }
+
+      [data-theme="dark"] .dock-item-highlight {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+        color: #06150d !important;
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+      }
+
+      [data-theme="dark"] .dock-item-highlight .dock-label {
+        color: #06150d !important;
+      }
+
+      @keyframes dockCenterPulse {
+        0%, 100% {
+          box-shadow: 0 6px 18px rgba(22, 163, 74, 0.45);
+          transform: translateY(-4px);
+        }
+        50% {
+          box-shadow: 0 10px 26px rgba(34, 197, 94, 0.7);
+          transform: translateY(-6px) scale(1.03);
+        }
+      }
+
+      /* Floating buttons bottom offset clearance */
+      .scroll-top-btn {
+        bottom: calc(84px + env(safe-area-inset-bottom, 8px)) !important;
+        right: 16px !important;
+      }
+
+      .toast-alert {
+        bottom: calc(88px + env(safe-area-inset-bottom, 8px)) !important;
+        right: 16px !important;
+        left: 16px !important;
+        text-align: center !important;
+      }
+
+      .sp3-cookie-banner {
+        bottom: calc(86px + env(safe-area-inset-bottom, 8px)) !important;
+        left: 12px !important;
+        right: 12px !important;
+        padding: 16px !important;
+      }
+
+      /* Form inputs: Prevent iOS Safari Auto-Zoom (Font-Size >= 16px) */
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+
+      /* Mobile Bottom Sheet Drawer Modals */
+      .modal-overlay {
+        align-items: flex-end !important;
+        padding: 0 !important;
+        overflow-y: hidden !important;
+        background: rgba(8, 14, 11, 0.75) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+      }
+
+      .modal-card,
+      #regModal .modal-card,
+      #statusModal .modal-card,
+      #termsModal .modal-card,
+      #regSuccessModal .modal-card {
+        margin: auto 0 0 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 28px 28px 0 0 !important;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-bottom: none !important;
+        max-height: calc(100dvh - 20px) !important;
+        animation: mobileBottomSheetSlideUp 0.34s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        box-shadow: 0 -14px 48px rgba(0, 0, 0, 0.5) !important;
+      }
+
+      /* Tactile Pull-down indicator bar & sticky header */
+      .modal-head {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 20 !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        background: rgba(246, 245, 238, 0.95) !important;
+        border-bottom: 1px solid var(--line) !important;
+        border-radius: 28px 28px 0 0 !important;
+        padding-top: 24px !important;
+        padding-bottom: 14px !important;
+      }
+
+      [data-theme="dark"] .modal-head {
+        background: rgba(17, 24, 21, 0.95) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+
+      .modal-head::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 48px;
+        height: 5px;
+        border-radius: 999px;
+        background: rgba(100, 116, 139, 0.38);
+      }
+
+      [data-theme="dark"] .modal-head::before {
+        background: rgba(255, 255, 255, 0.32);
+      }
+
+      .modal-close-btn {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 50% !important;
+        background: rgba(0, 0, 0, 0.06) !important;
+        font-size: 20px !important;
+        transition: background 0.2s !important;
+      }
+
+      [data-theme="dark"] .modal-close-btn {
+        background: rgba(255, 255, 255, 0.12) !important;
+        color: #ffffff !important;
+      }
+
+      .modal-content {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding: 18px 16px calc(24px + env(safe-area-inset-bottom, 12px)) !important;
+      }
+
+      /* Horizontal Touch Carousels & Snap Gestures */
+      .schedule-day-tabs {
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 6px 16px 14px !important;
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+        gap: 10px !important;
+      }
+      .schedule-day-tabs::-webkit-scrollbar {
+        display: none;
+      }
+      .sched-day-btn {
+        flex: 0 0 auto !important;
+        scroll-snap-align: center;
+        min-width: 145px;
+        border-radius: 18px !important;
+        padding: 10px 18px !important;
+        background: rgba(255, 255, 255, 0.8) !important;
+        border: 1.5px solid var(--line) !important;
+        backdrop-filter: blur(12px) !important;
+      }
+      .sched-day-btn.active {
+        background: linear-gradient(135deg, #0f2e1c 0%, #15803d 100%) !important;
+        border-color: #22c55e !important;
+        color: #ffffff !important;
+        box-shadow: 0 8px 22px rgba(22, 163, 74, 0.35) !important;
+        transform: translateY(-2px) !important;
+      }
+      [data-theme="dark"] .sched-day-btn {
+        background: rgba(17, 24, 21, 0.85) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+      }
+      [data-theme="dark"] .sched-day-btn.active {
+        background: linear-gradient(135deg, #13271d 0%, #16a34a 100%) !important;
+        box-shadow: 0 8px 24px rgba(34, 197, 94, 0.45) !important;
+      }
+
+      .sched-cat-filters {
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 4px 16px 12px !important;
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+        gap: 8px !important;
+      }
+      .sched-cat-filters::-webkit-scrollbar {
+        display: none;
+      }
+      .sched-cat-btn {
+        flex: 0 0 auto !important;
+        scroll-snap-align: center;
+        white-space: nowrap;
+        padding: 8px 18px !important;
+        border-radius: 999px !important;
+        font-weight: 700 !important;
+      }
+      .sched-cat-btn.active {
+        background: var(--court) !important;
+        color: #ffffff !important;
+        border-color: var(--court) !important;
+        box-shadow: 0 4px 14px rgba(30, 122, 69, 0.3) !important;
+      }
+
+      /* Bracket snap & polish */
+      .bracket-tree-wrapper {
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        padding-bottom: 16px !important;
+      }
+      .bracket-round {
+        scroll-snap-align: center;
+      }
+
+      /* Category card touch feel */
+      .cat-info-card {
+        border-radius: 22px !important;
+      }
+    }
   </style>
 
 <style>
@@ -4251,7 +5099,7 @@
     border: none !important;
     padding: 0 !important;
   }
-  .modal-head, .modal-close-btn, #statusQueryInput, #checkStatusBtn {
+  .modal-head, .modal-close-btn, #statusQueryInput, #checkStatusBtn, .mobile-bottom-dock {
     display: none !important;
   }
 }
@@ -4402,15 +5250,7 @@
               <line x1="16" y1="2" x2="16" y2="6" />
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
-            </svg></span> Match Schedule</a></li>
-      <li><a href="#draws" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="4" rx="1" />
-              <rect x="3" y="17" width="7" height="4" rx="1" />
-              <rect x="14" y="10" width="7" height="4" rx="1" />
-              <path d="M10 5h2a2 2 0 0 1 2 2v3m-4 9h2a2 2 0 0 0 2-2v-3" />
-            </svg></span> Knockout Draws</a></li>
+            </svg></span> Match Schedule &amp; Fixtures</a></li>
       <li><a href="#rules-faq" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16"
               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round">
@@ -4451,12 +5291,12 @@
               stroke-linecap="round" stroke-linejoin="round">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
             </svg></span> Live Scorer</a></li>
-      <li><a href="javascript:void(0)" onclick="closeMobileSidebar(); handleTvNav(event)"><span class="icon"><svg
+      <li><a href="javascript:void(0)" id="sidebarLiveLink" onclick="closeMobileSidebar(); handleTvNav(event)"><span class="icon"><svg
               width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="7" width="20" height="15" rx="2" ry="2" />
               <polyline points="17 2 12 7 7 2" />
-            </svg></span> Courtside TV</a></li>
+            </svg></span> Courtside TV <span class="sidebar-live-tag" id="sidebarLiveTag" style="display:none;">● LIVE</span></a></li>
       <li><a href="javascript:void(0)" id="adminSidebarLink" onclick="closeMobileSidebar(); handleAdminNav(event)"
           class="admin-link"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -4529,7 +5369,7 @@
           </a>
         </li>
         <li>
-          <a href="#schedule" title="Match Schedule" data-tooltip="Schedule">
+          <a href="#schedule" title="Match Schedule & Fixtures" data-tooltip="Schedule">
             <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
               <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -4540,12 +5380,12 @@
           </a>
         </li>
         <li>
-          <a href="#draws" title="Knockout Draws" data-tooltip="Draws">
+          <a href="#draws" title="Tournament Draw & Knockout Bracket" data-tooltip="Draws">
             <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="6" height="5" rx="1"></rect>
-              <rect x="3" y="16" width="6" height="5" rx="1"></rect>
-              <rect x="15" y="9.5" width="6" height="5" rx="1"></rect>
-              <path d="M9 5.5h3a2 2 0 0 1 2 2v2.5m-5 8.5h3a2 2 0 0 0 2-2v-2.5"></path>
+              <polygon points="6 2 18 2 18 6 6 6"></polygon>
+              <rect x="3" y="6" width="18" height="13" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
             </svg>
             <span class="nav-text">Draws</span>
           </a>
@@ -4562,37 +5402,43 @@
           </a>
         </li>
         <li>
-          <a href="#team" title="Organizing Team" data-tooltip="Team">
-            <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-            <span class="nav-text">Team</span>
-          </a>
-        </li>
-        <li>
-          <a href="/tv" target="_blank" onclick="handleTvNav(event)" class="nav-pill-live" title="Watch Courtside Live TV" data-tooltip="Live TV">
-            <span class="nav-live-dot"></span>
+          <a href="/tv" target="_blank" onclick="handleTvNav(event)" class="nav-pill-live" id="desktopLiveNavLink" title="Watch Courtside Live TV" data-tooltip="Live TV">
+            <span class="nav-live-dot" id="desktopLiveNavDot"></span>
             <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
               <polyline points="17 2 12 7 7 2"></polyline>
             </svg>
-            <span class="nav-text">Live TV</span>
+            <span class="nav-text" id="desktopLiveNavText">Live TV</span>
           </a>
         </li>
         <li>
-          <a href="javascript:void(0)" onclick="openStatusModal()" title="Verify Registration & Digital Pass" data-tooltip="Verify Status">
+          <a href="javascript:void(0)" onclick="openStatusModal()" title="Verify Entry & Match Pass" data-tooltip="Verify Pass">
             <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <span class="nav-text">Verify</span>
+            <span class="nav-text">Verify Pass</span>
           </a>
         </li>
         <li>
-          <a href="/admin" id="adminNavLink" onclick="handleAdminNav(event)" class="nav-pill-admin" title="Admin Control Panel" data-tooltip="Admin Desk">
+          <a href="#venue" title="Court Location & Venue" data-tooltip="Venue">
+            <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span class="nav-text">Venue</span>
+          </a>
+        </li>
+        <li>
+          <a href="/scorer" onclick="handleScorerNav(event)" title="Live Scorer Tablet" data-tooltip="Scorer">
+            <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span class="nav-text">Scorer</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin" onclick="handleAdminNav(event)" class="nav-pill-admin" id="adminNavLink" title="Admin Control Center" data-tooltip="Admin">
             <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -4621,6 +5467,122 @@
       </div>
     </nav>
   </header>
+
+  <!-- ================= CENTER FLOATING LIVE MATCH WINDOW ================= -->
+  <div id="slidingLiveWindow" class="sliding-live-window" role="dialog" aria-modal="true" aria-label="Live Match Announcement" style="display:none;">
+    <div class="sliding-live-card">
+      <div class="sliding-live-card-top">
+        <div class="sliding-live-meta-row">
+          <span class="sliding-live-beacon">
+            <span class="sliding-live-beacon-dot"></span>
+            <span>LIVE NOW</span>
+          </span>
+          <span class="sliding-live-court" id="slidingCourtMeta">Court 1 · Live Match</span>
+        </div>
+        <button type="button" class="sliding-close-btn" onclick="dismissSlidingLiveWindow(event)" title="Dismiss Live Alert" aria-label="Dismiss">&times;</button>
+      </div>
+
+      <div class="sliding-live-main" onclick="handleTvNav(event)" role="button" tabindex="0" title="Click to view live scores on TV">
+        <div class="sliding-live-match-title" id="slidingMatchTitle">Live Match in Progress</div>
+        <div class="sliding-live-score-badge" id="slidingScoreTag">G1 · 0 - 0</div>
+        <div class="sliding-live-cta-prompt">
+          <span class="sliding-live-spark">⚡</span>
+          <span>Game is live to see live scores click here &rarr;</span>
+        </div>
+      </div>
+
+      <div class="sliding-live-actions">
+        <a href="/tv" target="_blank" onclick="handleTvNav(event)" class="sliding-tv-btn" title="Watch Courtside Live TV">
+          <span>📺 Watch Live TV &rarr;</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Instant Live Score Floating Window Controller (Screen Center)
+    (function () {
+      function checkIsStrictlyLive(m) {
+        if (!m) return false;
+        const s = String(m.status || '').toUpperCase();
+        if (m.isComplete === true || m.is_complete === true || s === 'COMPLETED' || s === 'NO_LIVE_MATCH' || s === 'UPCOMING') {
+          return false;
+        }
+        const p1 = (m.p1Name || m.pair1 || m.team1_name || m.player1 || '').trim();
+        const p2 = (m.p2Name || m.pair2 || m.team2_name || m.player2 || '').trim();
+        if (!p1 || !p2) return false;
+        return (m.isLive === true || m.is_live === true || s === 'LIVE' || s === 'IN PROGRESS');
+      }
+
+      function showCenterLiveCard(m) {
+        const win = document.getElementById('slidingLiveWindow');
+        if (!win) return;
+        const sTitle = document.getElementById('slidingMatchTitle');
+        const sCourt = document.getElementById('slidingCourtMeta');
+        const sScore = document.getElementById('slidingScoreTag');
+        const p1 = (m.p1Name || m.pair1 || m.team1_name || '').trim();
+        const p2 = (m.p2Name || m.pair2 || m.team2_name || '').trim();
+        if (sTitle && p1 && p2) sTitle.textContent = p1 + ' vs ' + p2;
+        if (sCourt) sCourt.textContent = (m.court || m.matchId || 'Court 1') + ' · ' + (m.category || 'Live Match');
+        const g = (typeof m.currentGame === 'number') ? m.currentGame : 0;
+        const sc = (m.games && m.games[g]) ? m.games[g] : [0, 0];
+        const sw = (m.setsWon && Array.isArray(m.setsWon)) ? m.setsWon : [0, 0];
+        if (sScore) sScore.textContent = 'G' + (g + 1) + ' · ' + (sc[0] || 0) + ' - ' + (sc[1] || 0) + ' (' + sw[0] + '-' + sw[1] + ')';
+        win.style.display = 'block';
+        void win.offsetHeight;
+        win.classList.add('is-visible');
+      }
+
+      function hideCenterLiveCard() {
+        try { localStorage.removeItem('sp3_cached_live_match'); } catch (e) {}
+        const win = document.getElementById('slidingLiveWindow');
+        if (win) {
+          win.classList.remove('is-visible');
+          win.style.display = 'none';
+        }
+      }
+
+      try {
+        const cachedStr = localStorage.getItem('sp3_cached_live_match');
+        if (cachedStr) {
+          const m = JSON.parse(cachedStr);
+          const ts = m.updatedAt || m.ts || 0;
+          if (m && checkIsStrictlyLive(m) && (ts > 0 && (Date.now() - ts < 900000))) {
+            showCenterLiveCard(m);
+          } else {
+            hideCenterLiveCard();
+          }
+        } else {
+          hideCenterLiveCard();
+        }
+      } catch (e) {
+        hideCenterLiveCard();
+      }
+
+      // Parallel immediate fetch
+      fetch('/api/matches/live')
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          const lm = (res && res.success && res.liveMatch) ? res.liveMatch : null;
+          if (lm && checkIsStrictlyLive(lm)) {
+            try { localStorage.setItem('sp3_cached_live_match', JSON.stringify(Object.assign({}, lm, { ts: Date.now() }))); } catch (e) {}
+            if (typeof updateSlidingLiveWindow === 'function') {
+              updateSlidingLiveWindow(true, lm);
+            } else {
+              showCenterLiveCard(lm);
+            }
+          } else {
+            hideCenterLiveCard();
+            if (typeof updateSlidingLiveWindow === 'function') {
+              updateSlidingLiveWindow(false);
+            }
+          }
+        })
+        .catch(function () {
+          // If server fails or offline, hide stale card
+          hideCenterLiveCard();
+        });
+    })();
+  </script>
 
   <!-- ================= HERO SECTION ================= -->
   <div class="hero">
@@ -5472,10 +6434,6 @@
               <span>🔍</span>
               <span>Check Verification Status</span>
             </button>
-            <button type="button" class="btn btn-share-trigger" style="padding:15px 22px !important; font-size:14.5px !important; font-weight:700 !important; border-radius:14px !important;" title="Share with Badminton Players">
-              <span>📤</span>
-              <span>Share Tourney</span>
-            </button>
           </div>
 
           <div class="cta-guarantee-note">
@@ -5519,23 +6477,64 @@
         <a href="/terms.html" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">⚖️ Terms &amp; Conditions</a>
         <a href="/privacy.html" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">🛡️ Privacy Policy</a>
         <a href="javascript:void(0)" id="cookieSettingsLink" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">🍪 Cookie Settings</a>
-        <a href="javascript:void(0)" class="btn-share-trigger" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">📤 Share</a>
         <a href="/404.html" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">🏸 Court 404</a>
         <a href="javascript:void(0)" onclick="window.promptPwaInstall && window.promptPwaInstall()" style="color:inherit; text-decoration:none; opacity:0.85; transition:opacity 0.2s; margin-left:auto;" onmouseover="this.style.opacity=1;this.style.color='var(--court)'" onmouseout="this.style.opacity=0.85;this.style.color='inherit'">📱 Install App</a>
       </div>
     </div>
   </footer>
 
-
-  <!-- FLOATING SHARE BUTTON FOR DESKTOP -->
-  <button type="button" class="sp3-share-float-btn btn-share-trigger" title="Share Tournament" aria-label="Share Tournament" style="bottom: 80px;">
-    <span style="font-size:20px;">📤</span>
-  </button>
-
   <!-- FLOATING SCROLL TO TOP BUTTON -->
   <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()" aria-label="Scroll to top">
     &uarr;
   </button>
+
+  <!-- ================= 📱 ULTRA-PREMIUM FLOATING ISLAND MOBILE DOCK ================= -->
+  <nav class="mobile-bottom-dock" id="mobileBottomDock" aria-label="Mobile Navigation">
+    <div class="dock-container">
+      <a href="#" class="dock-item active" id="dockHomeBtn" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;">
+        <span class="dock-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </span>
+        <span class="dock-label">Home</span>
+      </a>
+      
+      <a href="#schedule" class="dock-item" id="dockScheduleBtn">
+        <span class="dock-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </span>
+        <span class="dock-label">Schedule</span>
+      </a>
+
+      <!-- 🔴 DYNAMIC LIVE MATCH BUTTON (Appears when match is live) -->
+      <a href="/tv" target="_blank" onclick="handleTvNav(event)" class="dock-item dock-item-live" id="dockLiveBtn" style="display:none;" title="Watch Live Match & Scores">
+        <span class="dock-icon dock-icon-live">
+          <span class="dock-live-ping"></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+            <polyline points="17 2 12 7 7 2"></polyline>
+          </svg>
+        </span>
+        <span class="dock-label"><span class="dock-live-dot-text">●</span> Live</span>
+      </a>
+
+      <!-- Floating Center Register Hero Button -->
+      <button type="button" class="dock-item dock-item-highlight" id="dockRegisterBtn" onclick="openRegister()" title="Register Pair Now">
+        <span class="dock-icon-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </span>
+        <span class="dock-label">Register</span>
+      </button>
+
+
+
+      <button type="button" class="dock-item" id="dockPassBtn" onclick="openStatusModal()" title="My Entry Pass & Verification">
+        <span class="dock-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line><circle cx="7" cy="15" r="1.5"></circle><line x1="12" y1="15" x2="18" y2="15"></line></svg>
+        </span>
+        <span class="dock-label">My Pass</span>
+      </button>
+    </div>
+  </nav>
 
   <!-- ================= OFFICIAL TERMS & CONDITIONS MODAL ================= -->
   <div class="modal-overlay" id="termsModal" style="z-index:100005;">
@@ -7665,14 +8664,26 @@
       btn.disabled = true;
       btn.innerText = "Submitting Registration...";
 
+      const p1N = (document.getElementById('p1Name')?.value || '').trim();
+      const p1E = (document.getElementById('p1Email')?.value || '').trim();
+      const p2N = (document.getElementById('p2Name')?.value || '').trim();
+      const p2E = (document.getElementById('p2Email')?.value || '').trim();
+
       const data = {
         action: "register",
         category: document.getElementById('finalCategory').value || "Below 35",
-        player1Name: (document.getElementById('p1Name')?.value || '').trim(),
+        p1Name: p1N,
+        player1Name: p1N,
+        p1Phone: p1Phone,
         player1Phone: p1Phone,
-        player1Email: (document.getElementById('p1Email')?.value || '').trim(),
-        player2Name: (document.getElementById('p2Name')?.value || '').trim(),
+        p1Email: p1E,
+        player1Email: p1E,
+        p2Name: p2N,
+        player2Name: p2N,
+        p2Phone: p2Phone,
         player2Phone: p2Phone,
+        p2Email: p2E,
+        player2Email: p2E,
         upiUtr: (document.getElementById('upiUtr')?.value || '').trim(),
         receiptBase64: document.getElementById('receiptBase64')?.value || '',
         receiptFileName: document.getElementById('receiptFileName')?.value || ''
@@ -7975,20 +8986,28 @@
         }
         renderScheduleGrid();
         renderBracketTree();
+        if (typeof updateLiveNavbarStatus === 'function') {
+          updateLiveNavbarStatus();
+        }
       };
 
-      if (isGAS) {
-        google.script.run
-          .withSuccessHandler(onSuccess)
-          .getMatchSchedule();
-      } else if (SCRIPT_URL) {
-        fetch(SCRIPT_URL + "?action=getSchedule" + "&_=" + Date.now(), { cache: "no-store" })
-          .then(r => r.json())
-          .then(onSuccess)
-          .catch(() => renderScheduleGrid());
-      } else {
-        renderScheduleGrid();
-      }
+      fetch('/api/matches/schedule')
+        .then(r => r.json())
+        .then(onSuccess)
+        .catch(() => {
+          if (isGAS) {
+            google.script.run
+              .withSuccessHandler(onSuccess)
+              .getMatchSchedule();
+          } else if (SCRIPT_URL) {
+            fetch(SCRIPT_URL + "?action=getSchedule" + "&_=" + Date.now(), { cache: "no-store" })
+              .then(r => r.json())
+              .then(onSuccess)
+              .catch(() => renderScheduleGrid());
+          } else {
+            renderScheduleGrid();
+          }
+        });
     }
 
     function renderScheduleGrid() {
@@ -8157,9 +9176,149 @@
       const metaEl = document.getElementById('tickerCourtMeta');
       if (!ticker) return;
 
+      let slidingDismissedMatchId = null;
+
+      function isStrictLiveActive(d) {
+        if (!d) return false;
+        const s = String(d.status || '').toUpperCase();
+        if (d.isComplete === true || d.is_complete === true || s === 'COMPLETED' || s === 'NO_LIVE_MATCH' || s === 'UPCOMING') {
+          return false;
+        }
+        const p1 = (d.p1Name || d.pair1 || d.team1_name || d.player1 || '').trim();
+        const p2 = (d.p2Name || d.pair2 || d.team2_name || d.player2 || '').trim();
+        if (!p1 || !p2) return false;
+        return Boolean(d.isLive === true || d.is_live === true || s === 'LIVE' || s === 'IN PROGRESS');
+      }
+
+      function updateSlidingLiveWindow(isLive, data) {
+        try {
+          const win = document.getElementById('slidingLiveWindow');
+          if (!win) return;
+
+          if (!isLive || !isStrictLiveActive(data)) {
+            try { localStorage.removeItem('sp3_cached_live_match'); } catch (e) {}
+            win.classList.remove('is-visible');
+            win.style.display = 'none';
+            return;
+          }
+
+          const mid = (data && (data.matchId || data.id)) || 'live_court_1';
+          if (slidingDismissedMatchId && slidingDismissedMatchId === mid) {
+            return;
+          }
+
+          try {
+            localStorage.setItem('sp3_cached_live_match', JSON.stringify(Object.assign({}, data, { ts: Date.now() })));
+          } catch (e) {}
+
+          const p1 = (data && (data.p1Name || data.pair1 || data.team1_name || data.player1 || '')).trim();
+          const p2 = (data && (data.p2Name || data.pair2 || data.team2_name || data.player2 || '')).trim();
+          const matchTitle = (p1 && p2) ? `${p1} vs ${p2}` : 'Live Match on Court';
+
+          const sTitle = document.getElementById('slidingMatchTitle');
+          const sCourt = document.getElementById('slidingCourtMeta');
+          const sScore = document.getElementById('slidingScoreTag');
+
+          if (sTitle) sTitle.textContent = matchTitle;
+          if (sCourt) sCourt.textContent = (data && (data.court || data.matchId || 'Court 1')) + ' · ' + (data && (data.category || 'Live Match'));
+
+          const g = (data && typeof data.currentGame === 'number') ? data.currentGame : 0;
+          const currentScores = (data && data.games && data.games[g]) ? data.games[g] : [0, 0];
+          const p1Pts = currentScores[0] || 0;
+          const p2Pts = currentScores[1] || 0;
+          const sWon = (data && data.setsWon && Array.isArray(data.setsWon)) ? data.setsWon : [0, 0];
+          if (sScore) {
+            sScore.textContent = `G${g + 1} · ${p1Pts} - ${p2Pts} (${sWon[0]}-${sWon[1]})`;
+          }
+
+          win.style.display = 'block';
+          void win.offsetHeight;
+          win.classList.add('is-visible');
+        } catch (err) {
+          console.warn('updateSlidingLiveWindow error:', err);
+        }
+      }
+      window.updateSlidingLiveWindow = updateSlidingLiveWindow;
+
+      window.dismissSlidingLiveWindow = function (e) {
+        if (e) {
+          try { e.preventDefault(); e.stopPropagation(); } catch (err) {}
+        }
+        const win = document.getElementById('slidingLiveWindow');
+        if (win) {
+          win.classList.remove('is-visible');
+          win.style.display = 'none';
+        }
+        if (window._currentLiveMatchData) {
+          slidingDismissedMatchId = window._currentLiveMatchData.matchId || window._currentLiveMatchData.id || 'live_court_1';
+        } else {
+          slidingDismissedMatchId = 'dismissed';
+        }
+      };
+
+      function updateLiveNavbarStatus(isLive, data) {
+        try {
+          const dockLiveBtn = document.getElementById('dockLiveBtn');
+          const desktopLiveLink = document.getElementById('desktopLiveNavLink');
+          const desktopLiveText = document.getElementById('desktopLiveNavText');
+          const sidebarLiveLink = document.getElementById('sidebarLiveLink');
+          const sidebarLiveTag = document.getElementById('sidebarLiveTag');
+
+          const isMatchLive = Boolean(isLive && isStrictLiveActive(data));
+
+          if (isMatchLive) {
+            if (dockLiveBtn) {
+              dockLiveBtn.style.display = 'flex';
+              const p1 = (data && (data.p1Name || data.pair1 || data.team1_name || '')) || '';
+              const p2 = (data && (data.p2Name || data.pair2 || data.team2_name || '')) || '';
+              if (p1 && p2) {
+                dockLiveBtn.title = `● LIVE: ${p1} vs ${p2} (Tap to Watch)`;
+              } else {
+                dockLiveBtn.title = '● LIVE Match in Progress (Tap to Watch)';
+              }
+            }
+            if (desktopLiveLink) {
+              desktopLiveLink.classList.add('live-active-match');
+            }
+            if (desktopLiveText) {
+              desktopLiveText.innerHTML = 'Live <span style="font-size:9px; vertical-align:middle;">🔴</span>';
+            }
+            if (sidebarLiveLink) {
+              sidebarLiveLink.classList.add('live-active-match');
+            }
+            if (sidebarLiveTag) {
+              sidebarLiveTag.style.display = 'inline-block';
+            }
+            updateSlidingLiveWindow(true, data);
+          } else {
+            if (dockLiveBtn) {
+              dockLiveBtn.style.display = 'none';
+            }
+            if (desktopLiveLink) {
+              desktopLiveLink.classList.remove('live-active-match');
+            }
+            if (desktopLiveText) {
+              desktopLiveText.textContent = 'Live TV';
+            }
+            if (sidebarLiveLink) {
+              sidebarLiveLink.classList.remove('live-active-match');
+            }
+            if (sidebarLiveTag) {
+              sidebarLiveTag.style.display = 'none';
+            }
+            updateSlidingLiveWindow(false);
+          }
+        } catch (err) {
+          console.warn('updateLiveNavbarStatus error:', err);
+        }
+      }
+      window.updateLiveNavbarStatus = updateLiveNavbarStatus;
+
       function renderTickerData(data) {
         if (!data) {
           ticker.style.display = 'none';
+          updateLiveNavbarStatus(false);
+          updateSlidingLiveWindow(false);
           return;
         }
 
@@ -8175,18 +9334,25 @@
 
         if (!hasPlayers && !data.customMessage) {
           ticker.style.display = 'none';
+          updateLiveNavbarStatus(false);
+          updateSlidingLiveWindow(false);
           return;
         }
 
         const statusStr = String(data.status || '').toUpperCase();
-        const isCompleted = (statusStr === 'COMPLETED' || data.isComplete === true || data.is_complete === true);
-        const isLive = (data.isLive === true || data.is_live === true || statusStr === 'LIVE' || statusStr === 'IN PROGRESS') && !isCompleted;
+        const isCompleted = (statusStr === 'COMPLETED' || data.isComplete === true || data.is_complete === true || statusStr === 'NO_LIVE_MATCH');
+        const isLive = (data.isLive === true || data.is_live === true || statusStr === 'LIVE' || statusStr === 'IN PROGRESS') && !isCompleted && hasPlayers;
 
-        // Strictly hide top ticker banner when no match is actively LIVE on court
+        // Strictly hide top ticker banner and floating alert when no match is actively LIVE on court
         if (!isLive) {
           ticker.style.display = 'none';
+          updateLiveNavbarStatus(false);
+          updateSlidingLiveWindow(false);
           return;
         }
+
+        window._currentLiveMatchData = data;
+        updateLiveNavbarStatus(true, data);
 
         const pill = ticker.querySelector('.ticker-live-pill');
         const g = (typeof data.currentGame === 'number') ? data.currentGame : 0;
@@ -8214,19 +9380,30 @@
             renderTickerData(res.liveMatch);
           } else {
             ticker.style.display = 'none';
+            updateLiveNavbarStatus(false);
           }
         };
 
-        if (isGAS) {
-          google.script.run
-            .withSuccessHandler(onLiveSuccess)
-            .getLiveMatch();
-        } else if (SCRIPT_URL) {
-          fetch(SCRIPT_URL + "?action=getLiveMatch" + "&_=" + Date.now(), { cache: "no-store" })
-            .then(r => r.json())
-            .then(onLiveSuccess)
-            .catch(() => { });
-        }
+        // Try direct backend API first, fallback to SCRIPT_URL or Google Apps Script
+        fetch('/api/matches/live')
+          .then(r => r.json())
+          .then(onLiveSuccess)
+          .catch(() => {
+            if (isGAS) {
+              google.script.run
+                .withSuccessHandler(onLiveSuccess)
+                .getLiveMatch();
+            } else if (SCRIPT_URL) {
+              fetch(SCRIPT_URL + "?action=getLiveMatch" + "&_=" + Date.now(), { cache: "no-store" })
+                .then(r => r.json())
+                .then(onLiveSuccess)
+                .catch(() => {
+                  updateLiveNavbarStatus(false);
+                });
+            } else {
+              updateLiveNavbarStatus(false);
+            }
+          });
       }
 
       if (window.BroadcastChannel) {
@@ -8455,28 +9632,39 @@
     }
 
     function triggerCelebrationConfetti() {
-      if (typeof confetti !== 'function') return;
-      try {
-        confetti({
-          particleCount: 110,
-          spread: 85,
-          origin: { y: 0.6 }
-        });
-        setTimeout(() => {
+      function fireConfetti() {
+        if (typeof confetti !== 'function') return;
+        try {
           confetti({
-            particleCount: 65,
-            angle: 60,
-            spread: 60,
-            origin: { x: 0.1, y: 0.7 }
+            particleCount: 110,
+            spread: 85,
+            origin: { y: 0.6 }
           });
-          confetti({
-            particleCount: 65,
-            angle: 120,
-            spread: 60,
-            origin: { x: 0.9, y: 0.7 }
-          });
-        }, 220);
-      } catch (e) { }
+          setTimeout(() => {
+            confetti({
+              particleCount: 65,
+              angle: 60,
+              spread: 60,
+              origin: { x: 0.1, y: 0.7 }
+            });
+            confetti({
+              particleCount: 65,
+              angle: 120,
+              spread: 60,
+              origin: { x: 0.9, y: 0.7 }
+            });
+          }, 220);
+        } catch (e) { }
+      }
+
+      if (typeof confetti === 'function') {
+        fireConfetti();
+      } else {
+        const s = document.createElement('script');
+        s.src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js";
+        s.onload = fireConfetti;
+        document.head.appendChild(s);
+      }
     }
 
     /* ================= SITE-WIDE SCROLL REVEAL ANIMATIONS ================= */
@@ -8601,7 +9789,56 @@
 
       // Initialize Theme button state
       updateThemeButtons();
+
+      // Initialize Mobile Bottom Dock scroll spy
+      initMobileDockNav();
     });
+
+    function initMobileDockNav() {
+      try {
+        const dock = document.getElementById('mobileBottomDock');
+        if (!dock) return;
+
+        const navLinks = {
+          home: document.getElementById('dockHomeBtn'),
+          schedule: document.getElementById('dockScheduleBtn')
+        };
+
+        function setActiveDock(activeKey) {
+          Object.keys(navLinks).forEach(key => {
+            const el = navLinks[key];
+            if (el) {
+              if (key === activeKey) {
+                el.classList.add('active');
+              } else {
+                el.classList.remove('active');
+              }
+            }
+          });
+        }
+
+        let isTicking = false;
+        window.addEventListener('scroll', function () {
+          if (!isTicking) {
+            window.requestAnimationFrame(function () {
+              const scrollY = window.scrollY || window.pageYOffset;
+              const schedEl = document.getElementById('schedule');
+              const schedTop = schedEl ? schedEl.offsetTop - 260 : 99999;
+
+              if (schedEl && scrollY >= schedTop) {
+                setActiveDock('schedule');
+              } else {
+                setActiveDock('home');
+              }
+              isTicking = false;
+            });
+            isTicking = true;
+          }
+        }, { passive: true });
+      } catch (e) {
+        console.warn('Mobile dock init error:', e);
+      }
+    }
 
     function toggleDarkTheme() {
       try {
@@ -8633,9 +9870,8 @@
       } catch (e) { }
     }
   </script>
-  <script src="/cookie-consent.js"></script>
-  <script src="/pwa-install.js"></script>
+  <script src="/cookie-consent.js" defer></script>
+  <script src="/pwa-install.js" defer></script>
   <script src="/analytics.js" defer></script>
-  <script src="/social-share.js" defer></script>
 </body>
 </html>

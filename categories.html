@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Tournament Categories | S.P. Badminton Tourney Season 3</title>
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -396,6 +396,16 @@
   }
   .whatsapp-float:hover { transform: scale(1.15) rotate(10deg); }
 
+  /* Touch Ergonomics & Tap Highlight */
+  * { -webkit-tap-highlight-color: transparent; }
+  .btn-register-cat:active,
+  .btn-details:active,
+  .category-card:active,
+  .menu-toggle:active {
+    transform: scale(0.96);
+    transition: transform 0.08s ease;
+  }
+
   @media (max-width: 768px) {
     .nav-links { display: none; }
     .menu-toggle { display: flex; }
@@ -405,6 +415,15 @@
     .countdown-bar { flex-direction: column; gap: 1.2rem; }
     .sound-btn span:last-child { display: none; }
     .rule-highlight { flex-direction: column; text-align: center; }
+    .whatsapp-float { bottom: calc(20px + env(safe-area-inset-bottom, 8px)) !important; }
+  }
+
+  @media (max-width: 480px) {
+    .page-section { padding-top: 5.5rem; padding-left: 0.8rem; padding-right: 0.8rem; }
+    .category-card { padding: 1.5rem 1.1rem; border-radius: 20px; }
+    .cat-age { font-size: 2.2rem; }
+    .cat-btn-group { flex-direction: column; gap: 0.8rem; }
+    .btn-register-cat, .btn-details { width: 100%; justify-content: center; min-height: 46px; }
   }
 </style>
 </head>
