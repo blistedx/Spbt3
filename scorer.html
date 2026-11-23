@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>Scorer Desk · S.P. Badminton Tourney 3</title>
+    <title>Scorer Desk · S.M. Badminton Tourney 2</title>
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="shortcut icon" href="/favicon.ico">
@@ -1646,6 +1646,7 @@
                 <button class="btn solid" id="startMatchBtn">▶ Start Match</button>
                 <button class="btn outline" id="swapSidesBtn" title="Swap court sides">⇄ Swap Sides</button>
                 <button class="btn outline" id="switchServeBtn" title="Change serving player">🏸 Switch Serve</button>
+                <button class="btn solid" id="saveMatchBtn" style="background:#1E7A45; color:#ffffff; font-weight:700;" title="Save current match & score to tournament database">💾 Save Match</button>
                 <button class="btn outline" onclick="window.startInterval('60s', 'Manual 60s Interval')"
                     title="Trigger 60s BWF Break">⏱️ 60s Break</button>
                 <button class="btn outline" onclick="window.startInterval('120s', 'Between Games (2 Min)')"
@@ -1806,13 +1807,14 @@
             </div>
 
             <div class="modal-actions" style="display:flex; flex-direction:column; gap:8px;">
-                <button class="btn solid" id="endConfirmBtn" style="width:100%;">✓ Finish & Reset Match</button>
+                <button class="btn solid" id="endSaveMatchBtn" style="background:#1E7A45; color:#ffffff; width:100%; font-size:15px; font-weight:800; padding:12px;">💾 Save Match to Tournament Records</button>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; width:100%;">
                     <button class="btn outline" onclick="window.exportMatchResultToExcel()"
                         style="border-color:#1E7A45; color:#1E7A45; font-weight:700; font-size:12px; padding:9px 4px;">📥 Last Match (.CSV)</button>
                     <button class="btn solid" onclick="window.exportAllMatchesReportToExcel()"
                         style="background:#1E7A45; color:#ffffff; font-weight:700; font-size:12px; padding:9px 4px;">📊 All Matches Report</button>
                 </div>
+                <button class="btn outline" id="endConfirmBtn" style="width:100%;">↺ Save &amp; Reset for Next Match</button>
                 <button class="btn outline" id="endCancelBtn" style="width:100%; margin-top:2px;">Close</button>
             </div>
         </div>
@@ -2012,6 +2014,15 @@
             }
             requestScorerScreenWakeLock();
 
+            // ─── INTERVAL LOGIC (30 PTS -> 15 PTS BREAK, 21 PTS -> 11 PTS BREAK) ───
+            function getIntervalPoint(target) {
+                const t = Number(target) || (typeof state !== 'undefined' && state.targetPoints) || 21;
+                if (t === 30) return 15;
+                if (t === 15) return 8;
+                if (t === 25) return 13;
+                return Math.ceil(t / 2);
+            }
+
             // ─── STATE ───
             let state = {
                 selectedMatchId: '',
@@ -2041,7 +2052,7 @@
                 interval: {
                     active: false,
                     type: '60s',
-                    title: 'Mid-Game Interval (11 Pts)',
+                    title: 'Mid-Game Interval',
                     totalSeconds: 60,
                     secondsLeft: 60,
                     paused: false,
@@ -2099,9 +2110,10 @@
                             }
 
                             if (state.games) {
+                                const threshold = getIntervalPoint(state.targetPoints);
                                 for (let i = 0; i < 3; i++) {
                                     const gm = state.games[i] || [0, 0];
-                                    if (i < state.currentGame || gm[0] >= 11 || gm[1] >= 11) {
+                                    if (i < state.currentGame || gm[0] >= threshold || gm[1] >= threshold) {
                                         state.interval.intervalTakenForGame[i] = true;
                                     }
                                 }
@@ -2292,7 +2304,9 @@
                 if (intervalTimerId) clearInterval(intervalTimerId);
 
                 const total = customTotal || (type === '120s' ? 120 : 60);
-                const title = customTitle || (type === '120s' ? 'Between Games Break (2 Min)' : 'Mid-Game Interval (11 Pts)');
+                const threshold = getIntervalPoint(state.targetPoints);
+                const defaultMidTitle = 'Mid-Game Interval (' + threshold + ' Pts)';
+                const title = customTitle || (type === '120s' ? 'Between Games Break (2 Min)' : defaultMidTitle);
                 const now = Date.now();
                 const canonicalEndTime = (explicitEndTime && explicitEndTime > now) ? explicitEndTime : (now + total * 1000);
                 const sec = Math.max(0, Math.ceil((canonicalEndTime - now) / 1000));
@@ -3193,30 +3207,113 @@
 
                 updateUI();
                 syncMatchScoreToSheet('COMPLETED');
+
+                // Auto-save completed match record to tournament database
+                if (typeof window.saveMatchRecord === 'function') {
+                    window.saveMatchRecord(false);
+                }
             }
+
+            // ─── SAVE MATCH RECORD TO TOURNAMENT DATABASE ───
+            window.saveMatchRecord = function (showToast = true) {
+                const mid = state.selectedMatchId || state.matchId || 'Court 1';
+                const p1 = state.p1Name || 'Team 1';
+                const p2 = state.p2Name || 'Team 2';
+                const sets = state.setsWon || [0, 0];
+                const isDone = state.isComplete;
+                const winner = sets[0] > sets[1] ? p1 : (sets[1] > sets[0] ? p2 : (isDone ? 'Draw' : ''));
+                const status = isDone ? 'COMPLETED' : (state.isLive ? 'LIVE' : (state.status || 'IN PROGRESS'));
+
+                const payload = {
+                    action: 'saveMatchReport',
+                    matchId: mid,
+                    id: mid,
+                    category: state.category || 'Below 35',
+                    court: state.court || 'Court 1',
+                    round: state.round || 'Tournament Match',
+                    p1Name: p1,
+                    p2Name: p2,
+                    team1_name: p1,
+                    team2_name: p2,
+                    team1Name: p1,
+                    team2Name: p2,
+                    winner: winner,
+                    status: status,
+                    sets: sets,
+                    setsWon: sets,
+                    scores: state.games,
+                    games: state.games,
+                    targetPoints: state.targetPoints,
+                    durationFormatted: state.durationFormatted || (state.durationMinutes ? state.durationMinutes + ' Mins' : ''),
+                    durationMinutes: state.durationMinutes || 0,
+                    isComplete: isDone
+                };
+
+                const saveBtn = document.getElementById('saveMatchBtn');
+                const endSaveBtn = document.getElementById('endSaveMatchBtn');
+                if (saveBtn) saveBtn.textContent = '⏳ Saving...';
+                if (endSaveBtn) endSaveBtn.textContent = '⏳ Saving Match...';
+
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res && res.success) {
+                        if (saveBtn) {
+                            saveBtn.textContent = '✅ Saved!';
+                            setTimeout(() => { saveBtn.textContent = '💾 Save Match'; }, 3000);
+                        }
+                        if (endSaveBtn) {
+                            endSaveBtn.textContent = '✅ Match Saved in Records!';
+                        }
+                        if (showToast) {
+                            alert(`✓ Match "${p1} vs ${p2}" (${status}) saved successfully to tournament database!`);
+                        }
+                    } else {
+                        if (saveBtn) saveBtn.textContent = '💾 Save Match';
+                        if (endSaveBtn) endSaveBtn.textContent = '💾 Save Match to Tournament Records';
+                        if (showToast) alert('Match recorded locally.');
+                    }
+                })
+                .catch(err => {
+                    if (saveBtn) saveBtn.textContent = '💾 Save Match';
+                    if (endSaveBtn) endSaveBtn.textContent = '💾 Save Match to Tournament Records';
+                    if (showToast) alert('Match saved locally. Live background sync active.');
+                });
+            };
 
             window.exportMatchResultToExcel = function () {
                 const mid = state.selectedMatchId || state.matchId || 'Court 1';
                 const p1 = state.p1Name || 'Team 1';
                 const p2 = state.p2Name || 'Team 2';
                 const sets = state.setsWon || [0, 0];
-                const winner = sets[0] > sets[1] ? p1 : (sets[1] > sets[0] ? p2 : 'Draw / Incomplete');
-                const duration = state.durationFormatted || 'N/A';
+                const isDone = state.isComplete;
+                const winner = sets[0] > sets[1] ? p1 : (sets[1] > sets[0] ? p2 : (isDone ? 'Draw' : 'In Progress'));
+                const duration = state.durationFormatted || (state.durationMinutes ? (state.durationMinutes + ' Mins') : 'N/A');
+                const status = isDone ? 'COMPLETED' : (state.isLive ? 'LIVE / IN PROGRESS' : (state.status || 'IN PROGRESS'));
 
-                const s1 = state.games[0] ? `${state.games[0][0]}-${state.games[0][1]}` : '';
-                const s2 = state.games[1] ? `${state.games[1][0]}-${state.games[1][1]}` : '';
-                const s3 = state.games[2] ? `${state.games[2][0]}-${state.games[2][1]}` : '';
-                const summary = `${winner} won (${[s1, s2, s3].filter(Boolean).join(', ')}) in ${duration}`;
+                const s1 = state.games[0] ? `${state.games[0][0]}-${state.games[0][1]}` : '0-0';
+                const s2 = state.games[1] ? `${state.games[1][0]}-${state.games[1][1]}` : '0-0';
+                const s3 = state.games[2] ? `${state.games[2][0]}-${state.games[2][1]}` : '0-0';
+                const activeSets = [s1, s2, s3].filter(s => s !== '0-0');
+                const scoreSummary = activeSets.length > 0 ? activeSets.join(', ') : `${state.games[state.currentGame][0]}-${state.games[state.currentGame][1]}`;
+                const summary = `${winner} (${scoreSummary}) [${status}] in ${duration}`;
 
-                const csvHeaders = ["Match ID", "Category", "Player 1 (Team A)", "Player 2 (Team B)", "Winner", "Duration", "Sets Won (A-B)", "Set 1", "Set 2", "Set 3", "Full Result Summary", "Date"];
+                const csvHeaders = ["Match ID", "Category", "Court", "Match Status", "Player 1 (Team A)", "Player 2 (Team B)", "Winner / Leader", "Duration", "Sets Won (A-B)", "Score Summary", "Set 1", "Set 2", "Set 3", "Full Result Summary", "Date"];
                 const csvRow = [
                     `"${mid}"`,
                     `"${state.category || 'Below 35'}"`,
+                    `"${state.court || 'Court 1'}"`,
+                    `"${status}"`,
                     `"${p1}"`,
                     `"${p2}"`,
                     `"${winner}"`,
                     `"${duration}"`,
                     `"${sets[0]} - ${sets[1]}"`,
+                    `"${scoreSummary}"`,
                     `"${s1}"`,
                     `"${s2}"`,
                     `"${s3}"`,
@@ -3242,11 +3339,11 @@
 
                 function downloadCsv(reports) {
                     if (!reports || reports.length === 0) {
-                        if (state.p1Name && (state.isComplete || (state.setsWon && (state.setsWon[0] > 0 || state.setsWon[1] > 0)))) {
+                        if (state.p1Name && state.p2Name) {
                             window.exportMatchResultToExcel();
                             return;
                         }
-                        alert('No completed matches found in tournament history yet.');
+                        alert('No matches found to export yet.');
                         return;
                     }
 
@@ -3256,16 +3353,17 @@
                         "Category",
                         "Round",
                         "Court",
+                        "Match Status",
                         "Player 1 / Team A",
                         "Player 2 / Team B",
-                        "Winner Name",
+                        "Winner / Leader",
                         "Sets Won (A - B)",
-                        "Final Score",
+                        "Score",
                         "Set 1",
                         "Set 2",
                         "Set 3",
                         "Duration",
-                        "Completed Date & Time"
+                        "Date & Time"
                     ];
 
                     const rows = reports.map((m, index) => {
@@ -3274,9 +3372,10 @@
                         const cat = m.category || 'Below 35';
                         const rnd = m.round || 'Knockout';
                         const crt = m.court || 'Court 1';
-                        const p1 = m.p1Name || 'Team 1';
-                        const p2 = m.p2Name || 'Team 2';
-                        const win = m.winner || m.winnerName || 'N/A';
+                        const p1 = m.p1Name || m.pair1 || 'Team 1';
+                        const p2 = m.p2Name || m.pair2 || 'Team 2';
+                        const stat = m.status || (m.isComplete ? 'COMPLETED' : 'IN PROGRESS');
+                        const win = m.winner || (stat === 'COMPLETED' ? 'N/A' : 'In Progress');
                         const sets = (m.setsWon && Array.isArray(m.setsWon)) ? (m.setsWon[0] + " - " + m.setsWon[1]) : '0 - 0';
                         const score = m.score || '';
                         const s1 = m.games && m.games[0] ? (m.games[0][0] + "-" + m.games[0][1]) : '';
@@ -3291,6 +3390,7 @@
                             ('"' + cat + '"'),
                             ('"' + rnd + '"'),
                             ('"' + crt + '"'),
+                            ('"' + stat + '"'),
                             ('"' + p1 + '"'),
                             ('"' + p2 + '"'),
                             ('"' + win + '"'),
@@ -3329,19 +3429,19 @@
                             if (res && res.reports && res.reports.length > 0) {
                                 downloadCsv(res.reports);
                             } else {
-                                if (state.p1Name && (state.isComplete || (state.setsWon && (state.setsWon[0] > 0 || state.setsWon[1] > 0)))) {
+                                if (state.p1Name && state.p2Name) {
                                     window.exportMatchResultToExcel();
                                 } else {
-                                    alert('No completed matches found in tournament history yet.');
+                                    alert('No matches found to export yet.');
                                 }
                             }
                         })
                         .catch(err => {
                             console.warn("Failed to fetch all matches report, falling back to local match:", err);
-                            if (state.p1Name && (state.isComplete || (state.setsWon && (state.setsWon[0] > 0 || state.setsWon[1] > 0)))) {
+                            if (state.p1Name && state.p2Name) {
                                 window.exportMatchResultToExcel();
                             } else {
-                                alert('Could not load matches report. Please check your network connection.');
+                                alert('Could not load matches report. Please check your connection.');
                             }
                         });
                 }
@@ -3378,15 +3478,16 @@
                 } else {
                     const s1 = state.games[g][0];
                     const s2 = state.games[g][1];
-                    // BWF Official 60s Interval at 11 points (ONLY on the exact single point when leader reaches 11)
-                    const justReached11 = (player === 1 && s1 === 11 && s2 < 11) || (player === 2 && s2 === 11 && s1 < 11);
-                    if (justReached11 && !state.interval.intervalTakenForGame[g]) {
+                    const intervalThreshold = getIntervalPoint(state.targetPoints);
+                    // BWF Interval (15 pts for 30-pt games, 11 pts for 21-pt games)
+                    const justReachedInterval = (player === 1 && s1 === intervalThreshold && s2 < intervalThreshold) || (player === 2 && s2 === intervalThreshold && s1 < intervalThreshold);
+                    if (justReachedInterval && !state.interval.intervalTakenForGame[g]) {
                         state.interval.intervalTakenForGame[g] = true;
                         updateUI();
-                        const note = (g === 2) ? '11 Pts Mid-Game Interval & Change Ends!' : 'Mid-Game Interval (11 Points)';
+                        const note = (g === 2) ? (intervalThreshold + ' Pts Mid-Game Interval & Change Ends!') : ('Mid-Game Interval (' + intervalThreshold + ' Points)');
                         window.startInterval('60s', note);
                     } else {
-                        if (s1 >= 11 || s2 >= 11) {
+                        if (s1 >= intervalThreshold || s2 >= intervalThreshold) {
                             state.interval.intervalTakenForGame[g] = true;
                         }
                         updateUI();
@@ -3414,8 +3515,9 @@
                 const g = state.currentGame;
                 state.games[g][last.point - 1] = Math.max(0, state.games[g][last.point - 1] - 1);
 
-                // If score drops below 11, allow interval to trigger again if reached later
-                if (Math.max(state.games[g][0], state.games[g][1]) < 11) {
+                // If score drops below interval threshold, allow interval to trigger again if reached later
+                const intervalThreshold = getIntervalPoint(state.targetPoints);
+                if (Math.max(state.games[g][0], state.games[g][1]) < intervalThreshold) {
                     state.interval.intervalTakenForGame[g] = false;
                 }
 
@@ -3649,6 +3751,13 @@
             resetBtn.addEventListener('click', resetMatch);
             endBtn.addEventListener('click', manualEndMatch);
             setupBtn.addEventListener('click', setupMatch);
+
+            const saveMatchBtn = document.getElementById('saveMatchBtn');
+            if (saveMatchBtn) saveMatchBtn.addEventListener('click', () => window.saveMatchRecord(true));
+
+            const endSaveMatchBtn = document.getElementById('endSaveMatchBtn');
+            if (endSaveMatchBtn) endSaveMatchBtn.addEventListener('click', () => window.saveMatchRecord(true));
+
             if (p1ScoreName) p1ScoreName.addEventListener('click', setupMatch);
             if (p2ScoreName) p2ScoreName.addEventListener('click', setupMatch);
             if (p1NameDisplay) p1NameDisplay.addEventListener('click', setupMatch);
@@ -3658,6 +3767,7 @@
             modalCancelBtn.addEventListener('click', () => setupModal.classList.remove('open'));
 
             endConfirmBtn.addEventListener('click', () => {
+                window.saveMatchRecord(false);
                 endModal.classList.remove('open');
                 resetMatch();
             });

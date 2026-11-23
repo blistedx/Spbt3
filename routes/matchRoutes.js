@@ -5,6 +5,16 @@ const Match = require('../models/Match');
 const dataStore = require('../config/dataStore');
 const { requireAdmin, requireScorerOrAdmin } = require('../middleware/auth');
 
+// 0. Get All Matches (Public / Fallback)
+router.get('/', async (req, res) => {
+  try {
+    const matches = dataStore.getMatches();
+    return res.json({ success: true, matches });
+  } catch (err) {
+    return res.json({ success: true, matches: [] });
+  }
+});
+
 // 1. Get Match Schedule (Public)
 router.get('/schedule', async (req, res) => {
   try {

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>S.P. Badminton Tourney 3</title>
+  <title>S.M. Badminton Tourney 2 · Official Portal</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="shortcut icon" href="/favicon.ico">
@@ -13,16 +13,16 @@
   <meta name="theme-color" content="#16a34a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Official Tournament Portal for S.P. Badminton Tourney 3 at Suryodaya Park. Men's Doubles knockout matches, live TV broadcast, fixtures and instant digital passes.">
+  <meta name="description" content="Official Tournament Portal for S.M. Badminton Tourney 2 at Suryodaya Park. Men's Doubles knockout matches, live TV broadcast, fixtures and instant digital passes.">
   
   <!-- Open Graph & Social Sharing Metadata -->
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="S.P. Badminton Tourney 3">
-  <meta property="og:title" content="S.P. Badminton Tourney Season 3 · Official Portal">
+  <meta property="og:site_name" content="S.M. Badminton Tourney 2">
+  <meta property="og:title" content="S.M. Badminton Tourney 2 · Official Portal">
   <meta property="og:description" content="Official Men's Doubles knockout tournament at Suryodaya Park. Live courtside TV scoring, bracket trees, instant player passes & pair registrations.">
   <meta property="og:image" content="/logo.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="S.P. Badminton Tourney Season 3 · Suryodaya Park">
+  <meta name="twitter:title" content="S.M. Badminton Tourney 2 · Suryodaya Park">
   <meta name="twitter:description" content="Men's Doubles knockout tournament. Register your pair, view fixtures, and follow live scores!">
   <meta name="twitter:image" content="/logo.png">
 
@@ -5103,12 +5103,420 @@
     display: none !important;
   }
 }
+
+/* ================= MODERN DARK DESKTOP SIDEBAR (DESKTOP MODE) ================= */
+.desktop-sidebar {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  body {
+    padding-left: 265px !important;
+  }
+  .site-header {
+    display: none !important;
+  }
+  .mobile-bottom-dock {
+    display: none !important;
+  }
+  .desktop-sidebar {
+    display: flex !important;
+    flex-direction: column;
+    width: 265px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1050;
+    background: #111215;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+    padding: 22px 14px 22px 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+  .desktop-sidebar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .desktop-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+  }
+  .desktop-sidebar .sidebar-brand {
+    padding: 2px 4px 18px 2px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 12px;
+  }
+  .desktop-sidebar .brand-link {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    text-decoration: none;
+    color: #ffffff;
+    min-width: 0;
+  }
+  .desktop-sidebar .brand-squircle {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #22252e 0%, #15171c 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+  }
+  .desktop-sidebar .brand-squircle img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+  .desktop-sidebar .brand-text {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+  .desktop-sidebar .brand-text b {
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    line-height: 1.2;
+    text-transform: uppercase;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desktop-sidebar .brand-text span {
+    font-family: 'Space Mono', monospace;
+    color: #22c55e;
+    font-size: 9px;
+    display: block;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desktop-sidebar .sidebar-section-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #71717a;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 14px 10px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+  }
+  .desktop-sidebar .sidebar-section-title .section-action {
+    color: #71717a;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+  .desktop-sidebar .sidebar-section-title .section-action:hover {
+    opacity: 1;
+    color: #ffffff;
+  }
+  .desktop-sidebar .sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .desktop-sidebar .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .desktop-sidebar .sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9.5px 12px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 13px;
+    color: #a1a1aa;
+    text-decoration: none;
+    transition: all .16s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    position: relative;
+    border: 1px solid transparent;
+  }
+  .desktop-sidebar .sidebar-menu li a .nav-icon {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    stroke: #a1a1aa;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    transition: all .16s ease;
+  }
+  .desktop-sidebar .sidebar-menu li a:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f4f4f5;
+  }
+  .desktop-sidebar .sidebar-menu li a:hover .nav-icon {
+    stroke: #f4f4f5;
+    transform: scale(1.05);
+  }
+  .desktop-sidebar .sidebar-menu li a.active {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
+    color: #ffffff;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  }
+  .desktop-sidebar .sidebar-menu li a.active .nav-icon {
+    stroke: #ffffff;
+  }
+  /* Glowing Neon Green Vertical Pill Indicator */
+  .desktop-sidebar .sidebar-menu li a.active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 22px;
+    border-radius: 999px;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e, 0 0 16px rgba(34, 197, 94, 0.5);
+  }
+  /* Subtle Right Chevron */
+  .desktop-sidebar .sidebar-menu li a.active::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-top: 1.8px solid rgba(255, 255, 255, 0.45);
+    border-right: 1.8px solid rgba(255, 255, 255, 0.45);
+    transform: rotate(45deg);
+    margin-left: auto;
+    margin-right: 2px;
+    flex-shrink: 0;
+  }
+  .desktop-sidebar .sidebar-bottom-actions {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .desktop-sidebar .sidebar-reg-btn-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+    cursor: pointer;
+    transition: all .18s ease;
+  }
+  .desktop-sidebar .sidebar-reg-btn-main:hover {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45);
+    transform: translateY(-1px);
+  }
+  .desktop-sidebar .sidebar-quick-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .desktop-sidebar .sidebar-quick-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #d4d4d8;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .desktop-sidebar .sidebar-quick-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+}
 </style>
 
 </head>
 
 <body>
   <div class="bg-dots"></div>
+
+  <!-- ================= DESKTOP SIDEBAR NAVIGATION (MODERN DARK THEME) ================= -->
+  <aside class="desktop-sidebar" id="desktopSidebar">
+    <div class="sidebar-brand">
+      <a href="#" class="brand-link">
+        <div class="brand-squircle">
+          <img id="deskSidebarLogoImg" src="logo.png" alt="S.M. Badminton Tourney 2 Logo" class="mark dyn-tourney-logo" />
+        </div>
+        <div class="brand-text">
+          <b id="deskSidebarBrandName" class="dyn-tourney-name">S.M. BADMINTON TOURNEY 2</b>
+          <span id="deskSidebarBrandSub" class="dyn-tourney-sub">SEASON 2 · 2026</span>
+        </div>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-title">
+        <span>MAIN MENU</span>
+      </div>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="#" class="active" data-section="home">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Home</span>
+          </a>
+        </li>
+        <li>
+          <a href="#categories" data-section="categories">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+              <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+              <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+            </svg>
+            <span>Categories</span>
+          </a>
+        </li>
+        <li>
+          <a href="#schedule" data-section="schedule">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Schedule</span>
+          </a>
+        </li>
+        <li>
+          <a href="#draws" data-section="draws">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <polygon points="6 2 18 2 18 6 6 6"></polygon>
+              <rect x="3" y="6" width="18" height="13" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Draws</span>
+          </a>
+        </li>
+        <li>
+          <a href="#rules-faq" data-section="rules-faq">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Rules &amp; FAQ</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-section-title">
+        <span>LIVE DESK &amp; PORTAL</span>
+        <span class="section-action">+</span>
+      </div>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="/tv" target="_blank" onclick="handleTvNav(event)">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+              <polyline points="17 2 12 7 7 2"></polyline>
+            </svg>
+            <span>Courtside Live TV 📺</span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" onclick="openStatusModal()">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Verify Match Pass</span>
+          </a>
+        </li>
+        <li>
+          <a href="#venue" data-section="venue">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>Court Venue</span>
+          </a>
+        </li>
+        <li>
+          <a href="/scorer" onclick="handleScorerNav(event)">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>Live Scorer</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin" onclick="handleAdminNav(event)">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>Admin Gateway</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-bottom-actions">
+      <button class="sidebar-reg-btn-main" onclick="openRegister()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+        <span>Register Pair</span>
+      </button>
+      <div class="sidebar-quick-row">
+        <button class="sidebar-quick-btn theme-toggle-btn" onclick="toggleDarkTheme()" title="Toggle Dark/Light Mode">
+          <span class="theme-icon">🌙</span> <span class="theme-text">Dark</span>
+        </button>
+        <button class="sidebar-quick-btn" onclick="requestPublicPushSubscription('ALL')" title="Live Match Push Alerts">
+          <span>🔔</span> <span>Alerts</span>
+        </button>
+      </div>
+    </div>
+  </aside>
 
   <!-- LIVE SCORE TICKER -->
   <div id="liveScoreTicker" class="live-score-ticker" style="display:none;">
@@ -5147,7 +5555,7 @@
           <div class="flash-banner-branding">
             <img src="logo.png" alt="Tournament Logo" class="flash-banner-logo dyn-tourney-logo" onerror="this.style.display='none'">
             <div>
-              <div class="flash-banner-tourney dyn-tourney-name">S.P. BADMINTON TOURNEY 3</div>
+              <div class="flash-banner-tourney dyn-tourney-name">S.M. BADMINTON TOURNEY 2</div>
               <div class="flash-banner-sub dyn-tourney-sub">OFFICIAL TOURNAMENT UPDATE</div>
             </div>
           </div>
@@ -5222,8 +5630,8 @@
           class="mark dyn-tourney-logo"
           style="width:38px; height:38px; object-fit:contain; border-radius:50%; flex-shrink:0; display:block;" />
         <div>
-          <b id="mobileSidebarBrandName" class="dyn-tourney-name" style="font-family:'Outfit','Inter',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.04em; line-height:1.2; display:block;">SURYODAYA PARK</b>
-          <span id="mobileSidebarBrandSub" class="dyn-tourney-sub" style="font-family:'Space Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:0.1em; display:block;">TOURNEY 2026</span>
+          <b id="mobileSidebarBrandName" class="dyn-tourney-name" style="font-family:'Outfit','Inter',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.04em; line-height:1.2; display:block;">S.M. BADMINTON TOURNEY 2</b>
+          <span id="mobileSidebarBrandSub" class="dyn-tourney-sub" style="font-family:'Space Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:0.1em; display:block;">SEASON 2 · 2026</span>
         </div>
       </div>
       <button class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="Close Sidebar">&times;</button>
@@ -5345,7 +5753,7 @@
           src="logo.png"
           alt="Tournament Logo" class="mark dyn-tourney-logo"
           style="width:38px; height:38px; object-fit:contain; border-radius:50%;" />
-        <div><b id="mainHeaderTourneyName" class="dyn-tourney-name">SURYODAYA PARK</b><span id="mainHeaderTourneySub" class="dyn-tourney-sub">TOURNEY&nbsp;2026</span></div>
+        <div><b id="mainHeaderTourneyName" class="dyn-tourney-name">S.M. BADMINTON TOURNEY 2</b><span id="mainHeaderTourneySub" class="dyn-tourney-sub">SEASON&nbsp;2 · 2026</span></div>
       </a>
       <ul class="navlinks">
         <li>
@@ -5690,7 +6098,7 @@
         <div class="eyebrow"><span class="dot"></span> AGE CATEGORIES</div>
         <h2 class="sec-heading">TWO BANDS.<br>ONE BRACKET EACH.</h2>
         <p class="sec-subtext">
-          Age is calculated as of 15 Aug 2026. Both partners in a pair must fall in the exact same age band &mdash; the
+          Age is strictly calculated as of <strong>1st January 2027</strong> (Cutoff Date). Both partners in a pair must fall in the exact same age band &mdash; the
           registration form checks and locks this automatically.
         </p>
       </div>
@@ -5976,8 +6384,8 @@
             <span class="faq-toggle-icon">+</span>
           </button>
           <div class="faq-answer-box">
-            Age is calculated as of <strong>15 Aug 2026</strong> based on the player's official Date of Birth. The
-            registration system automatically calculates exact ages.
+            Age is strictly calculated as of <strong>1st January 2027</strong> based on the player's official Date of Birth. The
+            registration system automatically calculates exact ages according to this cutoff date to determine tournament category eligibility.
           </div>
         </div>
 
@@ -6552,8 +6960,8 @@
         </div>
 
         <div style="margin-bottom:14px;">
-          <h4 style="margin:0 0 4px 0; color:var(--court-deep); font-size:14px; font-weight:800; text-transform:uppercase;">1. Age &amp; Category Eligibility</h4>
-          <p style="margin:0; font-size:13px; color:#475569;">Both players of a pair must strictly belong to the <strong>exact same age category</strong> (Both Below 35 OR Both 35 &amp; Above) determined by their official Date of Birth (DOB). Original Government-issued Photo ID (Aadhaar / Driving License / Passport) is <strong>mandatory</strong> for desk verification before your first match.</p>
+          <h4 style="margin:0 0 4px 0; color:var(--court-deep); font-size:14px; font-weight:800; text-transform:uppercase;">1. Age &amp; Category Eligibility (Cutoff Date: 1 Jan 2027)</h4>
+          <p style="margin:0; font-size:13px; color:#475569;">Player age will be strictly calculated as of <strong>1st January 2027 (01/01/2027)</strong>. You are only eligible to participate in the tournament category corresponding to your age on this cutoff date. Both players of a pair must strictly belong to the <strong>exact same age category</strong> (Both Below 35 OR Both 35 &amp; Above) as of 1 Jan 2027. Original Government-issued Photo ID (Aadhaar / Driving License / Passport) is <strong>mandatory</strong> for desk verification before your first match.</p>
         </div>
 
         <div style="margin-bottom:14px;">
@@ -6607,6 +7015,15 @@
         <button class="modal-close-btn" onclick="closeModals()">&times;</button>
       </div>
       <div class="modal-content">
+
+        <!-- Live Closed Banner Notice -->
+        <div style="background:rgba(239, 68, 68, 0.08); border:1.5px solid rgba(239, 68, 68, 0.3); border-radius:12px; padding:12px 16px; margin-bottom:16px; display:flex; align-items:center; gap:12px; color:#ef4444;">
+          <span style="font-size:22px;">⛔</span>
+          <div style="font-size:13px; line-height:1.4;">
+            <strong style="text-transform:uppercase; letter-spacing:0.04em;">Registrations are Closed</strong><br>
+            <span style="font-size:12px; color:#7f1d1d; opacity:0.9;">Tournament slots are closed. Form is open for viewing details only. Payment QR is hidden and registration button is blocked.</span>
+          </div>
+        </div>
 
         <!-- Live Duplicate Warning Alert -->
         <div class="alert-box alert-error" id="duplicateAlert">
@@ -6687,10 +7104,10 @@
               <!-- PAYMENT REFERENCE & SCREENSHOT -->
               <div class="form-sec-title">PAYMENT &amp; VERIFICATION</div>
 
-              <!-- OFFICIAL PHONEPE / UPI QR CODE CARD -->
-              <div class="payment-qr-card">
+              <!-- OFFICIAL PHONEPE / UPI QR CODE CARD (HIDDEN WHEN CLOSED) -->
+              <div class="payment-qr-card" style="display:none !important;">
                 <div class="qr-img-wrapper">
-                  <img src="/qr_code.png" id="officialUpiQrImg" alt="Official Tournament UPI QR" class="qr-img" onerror="if(!this._hasRetried){this._hasRetried=true; const upi=document.getElementById('displayUpiId')?.innerText||'blistedx@okhdfcbank'; const name=document.getElementById('displayPayeeName')?.innerText||'S.P. Badminton Club'; this.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='+encodeURIComponent('upi://pay?pa='+upi+'&pn='+encodeURIComponent(name)+'&am=1000&cu=INR');}">
+                  <img src="/qr_code.png" id="officialUpiQrImg" alt="Official Tournament UPI QR" class="qr-img">
                   <div class="qr-brand-badge">PhonePe · GPay · Paytm · UPI</div>
                 </div>
                 <div class="payment-qr-info">
@@ -6705,6 +7122,13 @@
                     <span style="color:#777; font-size:11px;">Scan QR using any UPI app to pay entry fee</span>
                   </div>
                 </div>
+              </div>
+
+              <!-- REPLACEMENT LOCKED NOTICE FOR PAYMENT QR -->
+              <div style="background:rgba(239, 68, 68, 0.06); border:1.5px dashed rgba(239, 68, 68, 0.35); border-radius:12px; padding:20px 16px; text-align:center; color:#f87171; margin-bottom:16px;">
+                <div style="font-size:26px; margin-bottom:4px;">🔒</div>
+                <div style="font-weight:800; font-size:14px; text-transform:uppercase; color:#dc2626;">Payment QR Code Hidden</div>
+                <div style="font-size:12px; color:#64748b; margin-top:4px;">Registrations are closed. Payment transfers are not being accepted.</div>
               </div>
 
               <div class="form-group">
@@ -6753,9 +7177,9 @@
                 <span style="font-size:12px; color:var(--court-deep); background:rgba(30,122,69,0.1); border:1px solid rgba(30,122,69,0.25); padding:4px 10px; border-radius:6px; font-weight:700; white-space:nowrap;">📋 View &amp; Accept &rarr;</span>
               </div>
 
-              <button type="submit" class="btn solid" id="submitBtn"
-                style="width:100%; justify-content:center; margin-top:6px; padding:13px 20px; font-size:15px;">
-                Submit Registration &rarr;
+              <button type="button" class="btn solid" id="submitBtn" disabled
+                style="width:100%; justify-content:center; margin-top:6px; padding:13px 20px; font-size:15px; opacity:0.55; cursor:not-allowed; background:#475569 !important; border-color:#475569 !important; pointer-events:none;">
+                ⛔ Registrations Closed (Submission Blocked)
               </button>
             </div>
           </div>
@@ -7049,21 +7473,21 @@
     let isAgeValid = false;
     let isDuplicateFound = false;
 
-    // Detailed Real Age calculation helper (Years, Months, Days)
+    // Detailed Real Age calculation helper (Years, Months, Days) as of Cutoff: 1 Jan 2027
     function getDetailedAge(dobString) {
       if (!dobString) return null;
       const birth = new Date(dobString);
-      const today = new Date();
+      const cutoff = new Date(2027, 0, 1); // 1st January 2027
 
-      if (isNaN(birth.getTime()) || birth > today) return null;
+      if (isNaN(birth.getTime()) || birth > cutoff) return null;
 
-      let years = today.getFullYear() - birth.getFullYear();
-      let months = today.getMonth() - birth.getMonth();
-      let days = today.getDate() - birth.getDate();
+      let years = cutoff.getFullYear() - birth.getFullYear();
+      let months = cutoff.getMonth() - birth.getMonth();
+      let days = cutoff.getDate() - birth.getDate();
 
       if (days < 0) {
         months--;
-        const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        const prevMonth = new Date(cutoff.getFullYear(), cutoff.getMonth(), 0);
         days += prevMonth.getDate();
       }
       if (months < 0) {
@@ -7082,7 +7506,7 @@
         years: years,
         months: months,
         days: days,
-        formatted: parts.join(" ")
+        formatted: parts.join(" ") + " (as on 1 Jan 2027)"
       };
     }
 
@@ -7278,8 +7702,8 @@
       const defaultConfig = {
         success: true,
         settings: {
-          tournament_name: "S.P. BADMINTON TOURNEY 3",
-          tournament_subtitle: "Men's Doubles · Knockout · Suryodaya Park",
+          tournament_name: "S.M. Badminton Tourney 2",
+          tournament_subtitle: "Men's Doubles · Season 2",
           venue: "Suryodaya Park Court",
           dates: "28–30 Aug 2026",
           flash_message: "Registrations are CLOSED. Limited team slots filled.",
@@ -7483,8 +7907,8 @@
       }
 
       // 3. Tournament Name, Subtitle & Branding Logo
-      const tName = settings.tournament_name || "S.P. BADMINTON TOURNEY 3";
-      const tSub = settings.tournament_subtitle || "Men's Doubles · Knockout · Suryodaya Park";
+      const tName = settings.tournament_name || "S.M. Badminton Tourney 2";
+      const tSub = settings.tournament_subtitle || "Men's Doubles · Season 2";
       const tLogo = settings.logo_url || settings.logoUrl || "/logo.png";
 
       document.title = tName;
@@ -7649,17 +8073,6 @@
     }
 
     function openRegister(prefCat) {
-      if (isRegistrationClosed()) {
-        const cfg = publicConfigCache || {};
-        const s = cfg.settings || cfg || {};
-        const tName = s.tournament_name || "S.P. Badminton Tourney 3";
-        if (typeof showToast === 'function') {
-          showToast("Registrations for " + tName + " are currently CLOSED.", "error");
-        } else {
-          alert("Registrations for " + tName + " are currently CLOSED.");
-        }
-        return;
-      }
       document.getElementById('regModal').classList.add('open');
       if (prefCat && prefCat.toLowerCase().includes('above')) {
         const r = document.querySelector('input[name="modalCatRadio"][value="Above 35"]');
@@ -8639,6 +9052,8 @@
     // Submit Handler
     function submitForm(e) {
       e.preventDefault();
+      alert("Tournament registrations are currently CLOSED. Form submissions are disabled.");
+      return false;
 
       const p1Phone = (document.getElementById('p1Phone')?.value || '').replace(/\D/g, '').slice(-10);
       const p2Phone = (document.getElementById('p2Phone')?.value || '').replace(/\D/g, '').slice(-10);
@@ -9869,6 +10284,43 @@
         });
       } catch (e) { }
     }
+  </script>
+  <script>
+    // Desktop Sidebar Active Link & Scrollspy
+    (function initDesktopSidebarSpy() {
+      const links = document.querySelectorAll('.desktop-sidebar .sidebar-menu li a[data-section]');
+      if (!links.length) return;
+
+      links.forEach(link => {
+        link.addEventListener('click', function() {
+          links.forEach(l => l.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+
+      const sectionIds = ['venue', 'rules-faq', 'draws', 'schedule', 'categories'];
+      window.addEventListener('scroll', function() {
+        if (window.innerWidth < 1025) return;
+        if (window.scrollY < 200) {
+          links.forEach(l => l.classList.remove('active'));
+          const homeLink = document.querySelector('.desktop-sidebar .sidebar-menu li a[data-section="home"]');
+          if (homeLink) homeLink.classList.add('active');
+          return;
+        }
+        for (const id of sectionIds) {
+          const el = document.getElementById(id);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top <= 260 && rect.bottom >= 120) {
+              links.forEach(l => l.classList.remove('active'));
+              const match = document.querySelector(`.desktop-sidebar .sidebar-menu li a[data-section="${id}"]`);
+              if (match) match.classList.add('active');
+              break;
+            }
+          }
+        }
+      }, { passive: true });
+    })();
   </script>
   <script src="/cookie-consent.js" defer></script>
   <script src="/pwa-install.js" defer></script>

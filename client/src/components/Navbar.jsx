@@ -18,7 +18,7 @@ export default function Navbar({ currentTab, setCurrentTab }) {
         </div>
         <div>
           <h2 style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.02em', background: 'linear-gradient(90deg, #ffffff, #86efac)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            S.P. Badminton 3
+            S.M. Badminton Tourney 2
           </h2>
           <span style={{ fontSize: '12px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }}></span>

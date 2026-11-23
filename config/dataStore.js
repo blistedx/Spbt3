@@ -6,8 +6,8 @@ const { query } = require('./postgres');
 
 // Default initial fallbacks while initial sync completes
 const DEFAULT_SETTINGS = {
-  tournament_name: "S.P. BADMINTON TOURNEY 3",
-  tournament_subtitle: "Men's Doubles · Knockout · Suryodaya Park",
+  tournament_name: "S.M. Badminton Tourney 2",
+  tournament_subtitle: "Men's Doubles · Season 2",
   venue: "Suryodaya Park Court",
   dates: "28–30 Aug 2026",
   flash_message: "Registrations are OPEN! Limited team slots available.",
@@ -23,8 +23,8 @@ const DEFAULT_SETTINGS = {
   stat_players: "50+",
   stat_days: "03",
   categories: [
-    { name: "Below 35", status: "INACTIVE", fee: "1000", maxPairs: "32" },
-    { name: "Above 35", status: "INACTIVE", fee: "1000", maxPairs: "32" }
+    { name: "Below 35", status: "ACTIVE", fee: "1000", maxPairs: "32" },
+    { name: "Above 35", status: "ACTIVE", fee: "1000", maxPairs: "32" }
   ]
 };
 
@@ -410,9 +410,15 @@ const dataStore = {
     return [...matchesCache];
   },
   addOrUpdateMatch(match) {
-    const matchId = match.matchId || match.id || '';
-    if (!matchId || matchId === 'Court 1' || matchId === 'Court 2') {
-      return null;
+    let matchId = match.matchId || match.id || '';
+    if (!matchId) {
+      matchId = `MATCH-${Date.now()}`;
+      match.matchId = matchId;
+      match.id = matchId;
+    } else if ((matchId === 'Court 1' || matchId === 'Court 2') && (match.status === 'COMPLETED' || match.isComplete)) {
+      matchId = `M-${matchId.replace(/\s+/g, '')}-${Date.now().toString().slice(-6)}`;
+      match.matchId = matchId;
+      match.id = matchId;
     }
     const idx = matchesCache.findIndex(m => (m.matchId === matchId || m.id === matchId));
     let existing = idx >= 0 ? matchesCache[idx] : null;

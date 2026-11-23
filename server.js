@@ -183,8 +183,8 @@ async function handleActionBridge(req, res, next) {
         return res.json({
           success: true,
           settings: {
-            tournament_name: currentSettings.tournament_name || "S.P. BADMINTON TOURNEY 3",
-            tournament_subtitle: currentSettings.tournament_subtitle || "Men's Doubles · Knockout · Suryodaya Park",
+            tournament_name: currentSettings.tournament_name || "S.M. Badminton Tourney 2",
+            tournament_subtitle: currentSettings.tournament_subtitle || "Men's Doubles · Season 2",
             venue: currentSettings.venue || "Suryodaya Park Court",
             dates: currentSettings.dates || "28–30 Aug 2026",
             flash_message: currentSettings.flash_message || "Registrations are OPEN! Limited team slots available.",
@@ -205,8 +205,8 @@ async function handleActionBridge(req, res, next) {
             { name: "Above 35", status: "ACTIVE", fee: "500", maxPairs: "32" }
           ],
           config: {
-            tournamentName: currentSettings.tournament_name || "S.P. BADMINTON TOURNEY 3",
-            subtitle: currentSettings.tournament_subtitle || "Men's Doubles · Knockout · Suryodaya Park",
+            tournamentName: currentSettings.tournament_name || "S.M. Badminton Tourney 2",
+            subtitle: currentSettings.tournament_subtitle || "Men's Doubles · Season 2",
             dates: currentSettings.dates || "28–30 Aug 2026",
             venue: currentSettings.venue || "Suryodaya Park Court",
             flashAnnouncement: currentSettings.flash_message || "Registrations are OPEN! Limited team slots available.",
@@ -531,8 +531,8 @@ async function handleActionBridge(req, res, next) {
         return res.json({
           success: true,
           settings: {
-            tournament_name: currentSettings.tournament_name || "S.P. BADMINTON TOURNEY 3",
-            tournament_subtitle: currentSettings.tournament_subtitle || "Men's Doubles · Knockout · Suryodaya Park",
+            tournament_name: currentSettings.tournament_name || "S.M. Badminton Tourney 2",
+            tournament_subtitle: currentSettings.tournament_subtitle || "Men's Doubles · Season 2",
             venue: currentSettings.venue || "Suryodaya Park Court",
             dates: currentSettings.dates || "28–30 Aug 2026",
             flash_message: currentSettings.flash_message || "Registrations are OPEN! Limited team slots available.",
@@ -937,29 +937,141 @@ async function handleActionBridge(req, res, next) {
         return res.json({ success: true, liveMatch: globalLiveMatchState || dataStore.getLiveMatch() });
       }
 
-      case 'getAllMatchesReport': {
-        const allMatches = dataStore.getMatches();
-        const completed = allMatches.filter(m =>
-          (m.status || '').toUpperCase() === 'COMPLETED' ||
-          m.isComplete === true ||
-          (m.winner && m.winner.trim() !== '')
-        );
+      case 'saveMatchReport':
+      case 'saveMatch': {
+        const incoming = req.body.match || req.body.payload || req.body || {};
+        let mid = incoming.matchId || incoming.id;
+        const status = incoming.status || (incoming.isComplete ? 'COMPLETED' : 'IN PROGRESS');
+        const isCompleted = status === 'COMPLETED' || incoming.isComplete === true;
 
-        const reports = completed.map(m => ({
-          recordId: m.matchId || m.id,
-          matchId: m.matchId || m.id,
-          category: m.category || 'Below 35',
-          round: m.round || 'Knockout',
-          court: m.court || 'Court 1',
-          p1Name: m.p1Name || m.pair1 || m.team1_p1 || m.team1_name || 'Team 1',
-          p2Name: m.p2Name || m.pair2 || m.team2_p1 || m.team2_name || 'Team 2',
-          winner: m.winner || '',
-          score: m.score || '',
-          games: m.scores || m.games || [],
-          setsWon: m.sets || m.setsWon || [0, 0],
-          durationFormatted: m.durationFormatted || (m.durationMinutes ? `${m.durationMinutes} Mins` : ''),
-          completedAt: m.updatedAt || new Date().toISOString()
-        }));
+        if (!mid || ((mid === 'Court 1' || mid === 'Court 2') && isCompleted)) {
+          mid = `M-${(incoming.category || 'B35').replace(/[^a-zA-Z0-9]/g, '')}-${Date.now().toString().slice(-6)}`;
+        }
+
+        const p1 = incoming.p1Name || incoming.team1_name || incoming.player1 || incoming.pair1 || 'Team 1';
+        const p2 = incoming.p2Name || incoming.team2_name || incoming.player2 || incoming.pair2 || 'Team 2';
+        const sets = (incoming.sets && Array.isArray(incoming.sets)) ? incoming.sets : ((incoming.setsWon && Array.isArray(incoming.setsWon)) ? incoming.setsWon : [0, 0]);
+        const games = incoming.scores || incoming.games || [];
+        const winner = incoming.winner || (isCompleted ? (sets[0] > sets[1] ? p1 : (sets[1] > sets[0] ? p2 : '')) : '');
+
+        let scoreStr = incoming.score || '';
+        if (!scoreStr && Array.isArray(games) && games.length > 0) {
+          scoreStr = games.filter(g => g && (g[0] > 0 || g[1] > 0)).map(g => `${g[0]}-${g[1]}`).join(', ');
+        }
+
+        const matchRecord = {
+          matchId: mid,
+          id: mid,
+          category: incoming.category || 'Below 35',
+          court: incoming.court || 'Court 1',
+          round: incoming.round || 'Tournament Match',
+          p1Name: p1,
+          p2Name: p2,
+          team1_name: p1,
+          team2_name: p2,
+          team1Name: p1,
+          team2Name: p2,
+          winner,
+          status,
+          score: scoreStr || `${sets[0]}-${sets[1]} Sets`,
+          scores: games,
+          games,
+          sets,
+          setsWon: sets,
+          durationFormatted: incoming.durationFormatted || '',
+          durationMinutes: incoming.durationMinutes || 0,
+          isComplete: isCompleted,
+          updatedAt: new Date().toISOString()
+        };
+
+        dataStore.addOrUpdateMatch(matchRecord);
+
+        try {
+          const io = req.app.get('io');
+          if (io) {
+            io.emit('schedule_updated', { schedule: dataStore.getMatches() });
+            io.emit('score_updated', { matchId: mid, match: matchRecord });
+          }
+        } catch (e) {}
+
+        return res.json({ success: true, message: 'Match successfully saved in tournament database', match: matchRecord });
+      }
+
+      case 'getAllMatchesReport': {
+        let allMatches = dataStore.getMatches();
+
+        // Also include active live match if it has player data and not yet in matches list
+        const live = dataStore.getLiveMatch();
+        if (live && (live.p1Name || live.team1 || live.pair1) && (live.p2Name || live.team2 || live.pair2)) {
+          const liveMid = live.matchId || 'Court 1';
+          const exists = allMatches.some(m => (m.matchId === liveMid || m.id === liveMid));
+          if (!exists) {
+            allMatches = [
+              {
+                matchId: liveMid,
+                id: liveMid,
+                category: live.category || 'Below 35',
+                round: live.round || 'Live Court',
+                court: live.court || 'Court 1',
+                team1_name: live.p1Name || live.team1,
+                team2_name: live.p2Name || live.team2,
+                p1Name: live.p1Name || live.team1,
+                p2Name: live.p2Name || live.team2,
+                status: live.status || (live.isLive ? 'LIVE' : 'IN PROGRESS'),
+                winner: live.winner || '',
+                scores: live.games || [],
+                sets: live.setsWon || [0, 0],
+                durationFormatted: live.durationFormatted || '',
+                durationMinutes: live.durationMinutes || 0,
+                updatedAt: new Date(live.updatedAt || Date.now()).toISOString()
+              },
+              ...allMatches
+            ];
+          }
+        }
+
+        // Return all matches whether complete, in-progress, or scheduled
+        const reports = allMatches.map((m, index) => {
+          const num = index + 1;
+          const mid = m.matchId || m.id || (`M-${num}`);
+          const cat = m.category || 'Below 35';
+          const rnd = m.round || 'Knockout';
+          const crt = m.court || 'Court 1';
+          const p1 = m.p1Name || m.pair1 || m.team1_p1 || m.team1_name || m.team1Name || 'Team 1';
+          const p2 = m.p2Name || m.pair2 || m.team2_p1 || m.team2_name || m.team2Name || 'Team 2';
+          const status = (m.status || (m.isLive ? 'LIVE' : (m.isComplete ? 'COMPLETED' : 'SCHEDULED'))).toUpperCase();
+          const rawSets = (m.sets && Array.isArray(m.sets)) ? m.sets : ((m.setsWon && Array.isArray(m.setsWon)) ? m.setsWon : [0, 0]);
+          const safeSets = [(rawSets && rawSets[0]) || 0, (rawSets && rawSets[1]) || 0];
+
+          const games = m.scores || m.games || [];
+          let scoreStr = m.score || '';
+          if (!scoreStr && Array.isArray(games) && games.length > 0) {
+            const validSets = games.filter(g => g && (g[0] > 0 || g[1] > 0));
+            if (validSets.length > 0) {
+              scoreStr = validSets.map(g => `${g[0]}-${g[1]}`).join(', ');
+            }
+          }
+
+          const winner = m.winner || (status === 'COMPLETED' ? (safeSets[0] > safeSets[1] ? p1 : (safeSets[1] > safeSets[0] ? p2 : '')) : (status === 'LIVE' || status === 'IN PROGRESS' ? (safeSets[0] > safeSets[1] ? `${p1} (Leading)` : (safeSets[1] > safeSets[0] ? `${p2} (Leading)` : 'Tied')) : 'TBD'));
+
+          return {
+            recordId: mid,
+            matchId: mid,
+            category: cat,
+            round: rnd,
+            court: crt,
+            p1Name: p1,
+            p2Name: p2,
+            status: status,
+            isComplete: status === 'COMPLETED' || m.isComplete === true,
+            winner: winner,
+            score: scoreStr || `${safeSets[0]}-${safeSets[1]} Sets`,
+            games: games,
+            setsWon: safeSets,
+            durationFormatted: m.durationFormatted || (m.durationMinutes ? `${m.durationMinutes} Mins` : 'N/A'),
+            completedAt: m.updatedAt || m.completedAt || new Date().toISOString()
+          };
+        });
 
         return res.json({ success: true, reports });
       }
@@ -987,17 +1099,24 @@ async function handleActionBridge(req, res, next) {
       }
 
       case 'clearAllMatchReports': {
+        dataStore.clearAllMatches();
         try {
           if (mongoose.connection.readyState === 1) {
-            await MatchHistory.deleteMany({});
-            await Match.updateMany(
-              { status: { $in: ['COMPLETED', 'Completed'] } },
-              { $set: { status: 'UPCOMING', isComplete: false, isLive: false, winner: '' } }
-            );
+            if (typeof MatchHistory !== 'undefined') await MatchHistory.deleteMany({});
+            if (typeof Match !== 'undefined') await Match.deleteMany({});
           }
         } catch (clearErr) {
           console.warn('Clear all match reports notice:', clearErr.message);
         }
+        try {
+          const io = req.app.get('io');
+          if (io) {
+            io.emit('schedule_update', { schedule: [] });
+            io.emit('score_update', dataStore.getLiveMatch());
+            io.emit('tv_score_update', dataStore.getLiveMatch());
+            io.emit('match_state', dataStore.getLiveMatch());
+          }
+        } catch (e) {}
         return res.json({ success: true, message: 'All tournament match history cleared from database.' });
       }
 

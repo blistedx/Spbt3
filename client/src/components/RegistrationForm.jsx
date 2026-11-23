@@ -44,19 +44,19 @@ export default function RegistrationForm({ config }) {
     }
   }, [config]);
 
-  // Calculate Real Age
+  // Calculate Real Age as of Cutoff: 1 Jan 2027
   const handleDobChange = (e, player) => {
     const dob = e.target.value;
     let ageStr = '';
     if (dob) {
       const birth = new Date(dob);
-      const today = new Date();
-      let years = today.getFullYear() - birth.getFullYear();
-      let m = today.getMonth() - birth.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      const cutoff = new Date(2027, 0, 1);
+      let years = cutoff.getFullYear() - birth.getFullYear();
+      let m = cutoff.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && cutoff.getDate() < birth.getDate())) {
         years--;
       }
-      ageStr = `${years} years`;
+      ageStr = `${years} years (as on 1 Jan 2027)`;
     }
 
     if (player === 1) {
@@ -99,6 +99,8 @@ export default function RegistrationForm({ config }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    alert('Tournament registrations are currently CLOSED. Form submissions are disabled.');
+    return;
     if (!formData.p1Name || !formData.p1Phone || !formData.p1Dob || !formData.p1Email) {
       alert('Please fill out all mandatory Player 1 details.');
       return;
@@ -192,7 +194,7 @@ export default function RegistrationForm({ config }) {
             🏆 Official Player Registration
           </h2>
           <p style={{ fontSize: '13px', color: '#94a3b8', marginTop: '4px' }}>
-            S.P. Badminton Tourney 3 · Live Automated Verification
+            S.M. Badminton Tourney 2 · Live Automated Verification
           </p>
         </div>
 
@@ -289,31 +291,10 @@ export default function RegistrationForm({ config }) {
             <QrCode size={18} /> Entry Fee Payment (₹{formData.paymentAmount})
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', alignItems: 'center' }}>
-            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', textAlign: 'center' }}>
-              <img src="/qr_code.png" alt="UPI QR" style={{ width: '150px', height: '150px', objectFit: 'contain', borderRadius: '8px', background: '#fff', padding: '6px' }} />
-              <div style={{ marginTop: '10px', fontSize: '13px', fontWeight: 600, color: '#f8fafc' }}>
-                UPI: hemantkalra2006-1@okhdfcbank
-              </div>
-              <span style={{ fontSize: '12px', color: '#94a3b8' }}>Payee: Hemant Kalra · S.P. Badminton</span>
-            </div>
-
-            <div>
-              <div style={{ marginBottom: '14px' }}>
-                <label className="input-label">UPI Reference / UTR Number</label>
-                <input type="text" className="input-field font-mono" placeholder="12-digit UTR (e.g. 423456789012)" value={formData.paymentUtr} onChange={e => setFormData({ ...formData, paymentUtr: e.target.value })} />
-              </div>
-
-              <div>
-                <label className="input-label">Upload Payment Screenshot / Receipt</label>
-                <input type="file" accept="image/*" className="input-field" onChange={handleFileChange} />
-                {receiptPreview && (
-                  <div style={{ marginTop: '8px' }}>
-                    <img src={receiptPreview} alt="Receipt Preview" style={{ height: '60px', borderRadius: '6px', border: '1px solid #22c55e' }} />
-                  </div>
-                )}
-              </div>
-            </div>
+          <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1.5px dashed rgba(239, 68, 68, 0.35)', borderRadius: '14px', padding: '22px 16px', textAlign: 'center', color: '#f87171', marginBottom: '16px' }}>
+            <div style={{ fontSize: '26px', marginBottom: '4px' }}>🔒</div>
+            <div style={{ fontWeight: 800, fontSize: '14px', textTransform: 'uppercase', color: '#ef4444', letterSpacing: '0.04em' }}>Payment QR Code Hidden</div>
+            <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>Tournament slots are closed. Payment transfers are not being accepted.</div>
           </div>
         </div>
 
@@ -346,8 +327,8 @@ export default function RegistrationForm({ config }) {
           </span>
         </div>
 
-        <button type="submit" disabled={submitting} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '16px' }}>
-          {submitting ? 'Submitting Registration to MongoDB...' : `Complete Registration & Pay ₹${formData.paymentAmount} →`}
+        <button type="button" disabled={true} className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '16px', opacity: 0.55, cursor: 'not-allowed', background: '#475569', borderColor: '#475569', pointerEvents: 'none' }}>
+          ⛔ Registrations Closed (Submission Blocked)
         </button>
       </form>
 
@@ -361,8 +342,8 @@ export default function RegistrationForm({ config }) {
             </div>
             <div style={{ overflowY: 'auto', fontSize: '13.5px', lineHeight: 1.6, color: '#cbd5e1', paddingRight: '8px', flex: 1 }}>
               <div style={{ marginBottom: '14px' }}>
-                <h4 style={{ color: '#4ade80', margin: '0 0 4px', fontSize: '14px' }}>1. Age &amp; Category Eligibility</h4>
-                <p style={{ margin: 0 }}>Both players of a pair must belong to the same age category. Original Govt Photo ID (Aadhaar / Driving License / Passport) is mandatory for desk verification.</p>
+                <h4 style={{ color: '#4ade80', margin: '0 0 4px', fontSize: '14px' }}>1. Age &amp; Category Eligibility (Cutoff Date: 1 Jan 2027)</h4>
+                <p style={{ margin: 0 }}>Player age is strictly calculated as of <strong>1st January 2027 (01/01/2027)</strong>. You are only eligible to participate in the tournament category corresponding to your age as on this cutoff date. Both players of a pair must belong to the exact same age category. Original Govt Photo ID (Aadhaar / Driving License / Passport) is mandatory for desk verification.</p>
               </div>
               <div style={{ marginBottom: '14px' }}>
                 <h4 style={{ color: '#4ade80', margin: '0 0 4px', fontSize: '14px' }}>2. Single Team Entry Policy</h4>
