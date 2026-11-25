@@ -8313,6 +8313,20 @@
       document.getElementById('statusModal').classList.add('open');
     }
 
+    (function handleDeepLinkModals() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const openTarget = params.get('open');
+        if (openTarget === 'register' || openTarget === 'status') {
+          window.addEventListener('DOMContentLoaded', () => {
+            if (openTarget === 'register') openRegister();
+            if (openTarget === 'status') openStatusModal();
+            try { history.replaceState({}, '', window.location.pathname + window.location.hash); } catch (e) {}
+          });
+        }
+      } catch (e) {}
+    })();
+
     function handleAdminNav(e) {
       if (typeof google !== 'undefined' && google.script && google.script.host && google.script.host.setQueryParameters) {
         if (e) e.preventDefault();
