@@ -78,7 +78,9 @@ app.use(express.static(path.join(__dirname), {
   extensions: ['html'],
   maxAge: '1d',
   setHeaders: (res, filePath) => {
-    if (/\.(png|jpg|jpeg|gif|ico|svg|webp)$/i.test(filePath)) {
+    if (/\.html$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    } else if (/\.(png|jpg|jpeg|gif|ico|svg|webp)$/i.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
     } else if (/\.(css|js)$/i.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=86400');

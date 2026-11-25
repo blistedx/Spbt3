@@ -8318,11 +8318,16 @@
         const params = new URLSearchParams(window.location.search);
         const openTarget = params.get('open');
         if (openTarget === 'register' || openTarget === 'status') {
-          window.addEventListener('DOMContentLoaded', () => {
+          const runOpen = () => {
             if (openTarget === 'register') openRegister();
             if (openTarget === 'status') openStatusModal();
             try { history.replaceState({}, '', window.location.pathname + window.location.hash); } catch (e) {}
-          });
+          };
+          if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', runOpen);
+          } else {
+            runOpen();
+          }
         }
       } catch (e) {}
     })();
