@@ -162,11 +162,11 @@
     color: #4ade80 !important;
   }
 
-  /* Mobile Drawer Sidebar in Dark Theme */
+  /* Mobile Drawer Sidebar matches Modern Dark Desktop Sidebar */
   [data-theme="dark"] .mobile-sidebar {
-    background: #090e0c !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.7) !important;
+    background: #111215 !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.55) !important;
   }
   [data-theme="dark"] .sidebar-head,
   [data-theme="dark"] .sidebar-header {
@@ -3107,46 +3107,237 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: 300px;
+    width: 280px;
     max-width: 85vw;
-    background: #ffffff;
+    background: #111215;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
     z-index: 1250;
-    box-shadow: -10px 0 35px rgba(0, 0, 0, 0.2);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.45);
     display: flex;
     flex-direction: column;
+    padding: 20px 14px 22px 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    font-family: 'Inter', -apple-system, sans-serif;
     transform: translateX(100%);
     transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .mobile-sidebar.open {
     transform: translateX(0);
   }
-
-  .sidebar-head {
+  .mobile-sidebar .sidebar-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 22px;
-    border-bottom: 1px solid var(--line);
+    gap: 10px;
+    padding: 2px 4px 18px 2px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 12px;
+    background: transparent !important;
   }
-  .sidebar-close-btn {
-    background: var(--paper);
-    border: 1px solid var(--line);
+  .mobile-sidebar .brand-link {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    text-decoration: none;
+    color: #ffffff;
+    min-width: 0;
+    flex: 1;
+  }
+  .mobile-sidebar .brand-squircle {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
-    font-size: 20px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #22252e 0%, #15171c 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+  }
+  .mobile-sidebar .brand-squircle img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+  .mobile-sidebar .brand-text {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+  .mobile-sidebar .brand-text b {
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    line-height: 1.2;
+    text-transform: uppercase;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mobile-sidebar .brand-text span {
+    font-family: 'Space Mono', monospace;
+    color: #22c55e;
+    font-size: 9px;
+    display: block;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mobile-sidebar .sidebar-close-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    font-size: 18px;
     line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: var(--ink);
+    color: #a1a1aa;
+    flex-shrink: 0;
     transition: all .15s;
   }
-  .sidebar-close-btn:hover {
-    background: #fee2e2;
-    color: #dc2626;
-    border-color: #fca5a5;
+  .mobile-sidebar .sidebar-close-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+  .mobile-sidebar .sidebar-section-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #71717a;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 14px 10px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+  }
+  .mobile-sidebar .sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .mobile-sidebar .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .mobile-sidebar .sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9.5px 12px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 13px;
+    color: #a1a1aa;
+    text-decoration: none;
+    transition: all .16s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    position: relative;
+    border: 1px solid transparent;
+  }
+  .mobile-sidebar .sidebar-menu li a .nav-icon {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    stroke: #a1a1aa;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    transition: all .16s ease;
+  }
+  .mobile-sidebar .sidebar-menu li a:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f4f4f5;
+  }
+  .mobile-sidebar .sidebar-menu li a:hover .nav-icon {
+    stroke: #f4f4f5;
+  }
+  .mobile-sidebar .sidebar-menu li a.active {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
+    color: #ffffff;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  }
+  .mobile-sidebar .sidebar-menu li a.active .nav-icon {
+    stroke: #ffffff;
+  }
+  .mobile-sidebar .sidebar-menu li a.active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 22px;
+    border-radius: 999px;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e, 0 0 16px rgba(34, 197, 94, 0.5);
+  }
+  .mobile-sidebar .sidebar-bottom-actions {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mobile-sidebar .sidebar-reg-btn-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+    cursor: pointer;
+  }
+  .mobile-sidebar .sidebar-quick-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .mobile-sidebar .sidebar-quick-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #d4d4d8;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
   }
 
   .sidebar-navlinks {
@@ -5469,7 +5660,7 @@
               <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
               <polyline points="17 2 12 7 7 2"></polyline>
             </svg>
-            <span>Courtside Live TV 📺</span>
+            <span>Courtside Live TV</span>
           </a>
         </li>
         <li>
@@ -5517,10 +5708,12 @@
       </button>
       <div class="sidebar-quick-row">
         <button class="sidebar-quick-btn theme-toggle-btn" onclick="toggleDarkTheme()" title="Toggle Dark/Light Mode">
-          <span class="theme-icon">🌙</span> <span class="theme-text">Dark</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          <span class="theme-text">Theme</span>
         </button>
         <button class="sidebar-quick-btn" onclick="requestPublicPushSubscription('ALL')" title="Live Match Push Alerts">
-          <span>🔔</span> <span>Alerts</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Alerts</span>
         </button>
       </div>
     </div>
@@ -5531,7 +5724,7 @@
     <div class="ticker-inner">
       <div class="ticker-left">
         <span class="ticker-live-pill"><span class="dot"></span> LIVE MATCH</span>
-        <span class="ticker-match-title" id="tickerMatchTitle">Singh / Patel vs Kumar / Reddy</span>
+        <span class="ticker-match-title" id="tickerMatchTitle">Tournament Live Court</span>
         <span class="ticker-score-tag" id="tickerScoreTag">G1 · 0 - 0</span>
         <span class="ticker-meta-tag" id="tickerCourtMeta">Court 1 · Below 35</span>
       </div>      <div class="ticker-actions">
@@ -5626,134 +5819,117 @@
     })();
   </script>
 
-  <!-- ================= MOBILE OFF-CANVAS SIDEBAR ================= -->
+  <!-- ================= MOBILE OFF-CANVAS SIDEBAR (MODERN DARK THEME) ================= -->
   <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
   <aside class="mobile-sidebar" id="mobileSidebar">
     <div class="sidebar-head">
-      <div class="brand" style="display:flex; align-items:center; gap:10px;">
-        <img
-          id="mobileSidebarLogoImg"
-          src="logo.png"
-          alt="Tournament Logo"
-          class="mark dyn-tourney-logo"
-          style="width:38px; height:38px; object-fit:contain; border-radius:50%; flex-shrink:0; display:block;" />
-        <div>
-          <b id="mobileSidebarBrandName" class="dyn-tourney-name" style="font-family:'Outfit','Inter',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.04em; line-height:1.2; display:block;">S.M. BADMINTON TOURNEY 2</b>
-          <span id="mobileSidebarBrandSub" class="dyn-tourney-sub" style="font-family:'Space Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:0.1em; display:block;">SEASON 2 · 2026</span>
+      <a href="#" class="brand-link" onclick="closeMobileSidebar()">
+        <div class="brand-squircle">
+          <img id="mobileSidebarLogoImg" src="logo.png" alt="S.M. Badminton Tourney 2 Logo" class="mark dyn-tourney-logo" />
         </div>
-      </div>
+        <div class="brand-text">
+          <b id="mobileSidebarBrandName" class="dyn-tourney-name">S.M. BADMINTON TOURNEY 2</b>
+          <span id="mobileSidebarBrandSub" class="dyn-tourney-sub">SEASON 2 · 2026</span>
+        </div>
+      </a>
       <button class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="Close Sidebar">&times;</button>
     </div>
 
-    <ul class="sidebar-navlinks">
-      <li><a href="#" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg></span> Home</a></li>
-      <li><a href="#categories" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg></span> Age Categories</a></li>
-      <li><a href="#schedule" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg></span> Match Schedule &amp; Fixtures</a></li>
-      <li><a href="#rules-faq" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="16" y1="13" x2="8" y2="13" />
-              <line x1="16" y1="17" x2="8" y2="17" />
-            </svg></span> Rules &amp; FAQ</a></li>
-      <li><a href="#team" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg></span> Organizing Team</a></li>
-      <li><a href="#community" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path
-                d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-            </svg></span> WhatsApp Groups</a></li>
-      <li><a href="#helpdesk" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path
-                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-            </svg></span> Helpdesk Support</a></li>
-      <li><a href="https://maps.app.goo.gl/QnaBgoVEJa7tdQfx7" target="_blank" rel="noopener noreferrer" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="vertical-align:middle; display:inline-block;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/><circle cx="12" cy="9" r="3" fill="#FFFFFF"/><circle cx="12" cy="9" r="1.5" fill="#4285F4"/></svg></span> Court Location (Maps)</a></li>
-      <li><a href="/smriti" onclick="closeMobileSidebar()"><span class="icon"><svg width="16" height="16"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg></span> Smriti (Memorial)</a></li>
-      <li><a href="javascript:void(0)" onclick="closeMobileSidebar(); openStatusModal()"><span class="icon"><svg
-              width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg></span> Verify Status</a></li>
-      <li><a href="javascript:void(0)" onclick="closeMobileSidebar(); handleScorerNav(event)"><span class="icon"><svg
-              width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg></span> Live Scorer</a></li>
-      <li><a href="javascript:void(0)" id="sidebarLiveLink" onclick="closeMobileSidebar(); handleTvNav(event)"><span class="icon"><svg
-              width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="7" width="20" height="15" rx="2" ry="2" />
-              <polyline points="17 2 12 7 7 2" />
-            </svg></span> Courtside TV <span class="sidebar-live-tag" id="sidebarLiveTag" style="display:none;">● LIVE</span></a></li>
-      <li><a href="javascript:void(0)" id="adminSidebarLink" onclick="closeMobileSidebar(); handleAdminNav(event)"
-          class="admin-link"><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg></span> Admin Portal</a></li>
-    </ul>
-
-    <div class="sidebar-footer">
-      <div class="sidebar-social-row">
-        <a href="https://www.instagram.com/sm_badminton_tournament_13?stkn=ZDVwcmpyOWU2cTlj" target="_blank" rel="noopener noreferrer" class="sidebar-social-btn insta" title="Follow on Instagram">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-          <span>Instagram</span>
-        </a>
-        <a href="https://youtube.com/@suryodaybadmintonclub?si=ej3mvLa6angJnqVj" target="_blank" rel="noopener noreferrer" class="sidebar-social-btn yt" title="Subscribe on YouTube">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-          <span>YouTube</span>
-        </a>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-title">
+        <span>MAIN MENU</span>
       </div>
-      <button id="btnSidebarPushAlerts" class="theme-toggle-btn full-width" onclick="requestPublicPushSubscription('ALL')" style="justify-content:center; margin-bottom:10px; display:inline-flex; align-items:center; gap:8px;" title="Enable Live Push Alerts">
-        <span style="font-size:15px;">🔔</span> <span id="sidebarPushText">Enable Match Alerts</span>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="#" class="active" onclick="closeMobileSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Home</span>
+          </a>
+        </li>
+        <li>
+          <a href="#categories" onclick="closeMobileSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
+            <span>Categories</span>
+          </a>
+        </li>
+        <li>
+          <a href="#schedule" onclick="closeMobileSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>Schedule</span>
+          </a>
+        </li>
+        <li>
+          <a href="#draws" onclick="closeMobileSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><polygon points="6 2 18 2 18 6 6 6"></polygon><rect x="3" y="6" width="18" height="13" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <span>Draws</span>
+          </a>
+        </li>
+        <li>
+          <a href="#rules-faq" onclick="closeMobileSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>Rules &amp; FAQ</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-section-title">
+        <span>LIVE DESK &amp; PORTAL</span>
+      </div>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="/smriti" onclick="closeMobileSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <span>Smriti (Memorial)</span>
+          </a>
+        </li>
+        <li>
+          <a href="/tv" target="_blank" id="sidebarLiveLink" onclick="closeMobileSidebar(); handleTvNav(event)">
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+            <span>Courtside Live TV <span class="sidebar-live-tag" id="sidebarLiveTag" style="display:none;">● LIVE</span></span>
+          </a>
+        </li>
+        <li>
+          <a href="javascript:void(0)" onclick="closeMobileSidebar(); openStatusModal()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>Verify Match Pass</span>
+          </a>
+        </li>
+        <li>
+          <a href="#venue" onclick="closeMobileSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span>Court Venue</span>
+          </a>
+        </li>
+        <li>
+          <a href="/scorer" onclick="closeMobileSidebar(); handleScorerNav(event)">
+            <svg class="nav-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>Live Scorer</span>
+          </a>
+        </li>
+        <li>
+          <a href="/admin" id="adminSidebarLink" onclick="closeMobileSidebar(); handleAdminNav(event)">
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>Admin Gateway</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-bottom-actions">
+      <button id="sidebarRegBtn" class="sidebar-reg-btn-main" onclick="closeMobileSidebar(); openRegister()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+        <span>Register Pair</span>
       </button>
-      <button class="theme-toggle-btn full-width" onclick="toggleDarkTheme()" style="justify-content:center; margin-bottom:10px;" title="Toggle Dark/Light Mode">
-        <span class="theme-icon">🌙</span> <span class="theme-text">Dark Theme</span>
-      </button>
-      <button id="sidebarRegBtn" class="btn solid full-width sidebar-reg-btn" onclick="closeMobileSidebar(); openRegister()">
-        Register Your Pair &rarr;
-      </button>
-      <a href="https://maps.app.goo.gl/QnaBgoVEJa7tdQfx7" target="_blank" rel="noopener noreferrer" class="sidebar-caption" title="Open Suryodaya Park on Google Maps">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="vertical-align:middle; display:inline-block; flex-shrink:0;">
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/>
-          <circle cx="12" cy="9" r="3" fill="#FFFFFF"/>
-          <circle cx="12" cy="9" r="1.5" fill="#4285F4"/>
-        </svg>
-        <span>Suryodaya Park (Google Maps) &rarr;</span>
-      </a>
+      <div class="sidebar-quick-row">
+        <button class="sidebar-quick-btn theme-toggle-btn" onclick="toggleDarkTheme()" title="Toggle Dark/Light Mode">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          <span class="theme-text">Theme</span>
+        </button>
+        <button id="btnSidebarPushAlerts" class="sidebar-quick-btn" onclick="requestPublicPushSubscription('ALL')" title="Enable Live Push Alerts">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span id="sidebarPushText">Alerts</span>
+        </button>
+      </div>
     </div>
   </aside>
 
