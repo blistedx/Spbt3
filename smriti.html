@@ -72,15 +72,18 @@
       color: var(--ink);
       line-height: 1.7;
       min-height: 100vh;
+      padding-top: 62px;
       padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
       -webkit-font-smoothing: antialiased;
     }
 
     /* Header */
     .smriti-header {
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 100;
+      left: 0;
+      right: 0;
+      z-index: 1050;
       background: rgba(246, 245, 238, 0.90);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);

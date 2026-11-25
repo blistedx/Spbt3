@@ -956,12 +956,12 @@
 
   /* ================= FROZEN STICKY LIGHT-GREEN GLASSMORHPIC HEADER ================= */
   .site-header {
-    position: sticky;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     width: 100%;
-    z-index: 1000;
+    z-index: 1050;
     background: rgba(240, 249, 243, 0.88);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -3461,7 +3461,10 @@
   }
 
   /* Tablets & Mobile Screens (<= 1023px) */
-  @media (max-width: 1023px) {
+  @media (max-width: 1024px) {
+    body {
+      padding-top: 56px !important;
+    }
     .site-header nav {
       padding: 8px 14px;
     }
