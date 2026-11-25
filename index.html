@@ -8317,10 +8317,11 @@
       try {
         const params = new URLSearchParams(window.location.search);
         const openTarget = params.get('open');
-        if (openTarget === 'register' || openTarget === 'status') {
+        if (openTarget === 'register' || openTarget === 'status' || openTarget === 'alerts') {
           const runOpen = () => {
             if (openTarget === 'register') openRegister();
             if (openTarget === 'status') openStatusModal();
+            if (openTarget === 'alerts' && typeof requestPublicPushSubscription === 'function') requestPublicPushSubscription('ALL');
             try { history.replaceState({}, '', window.location.pathname + window.location.hash); } catch (e) {}
           };
           if (document.readyState === 'loading') {
