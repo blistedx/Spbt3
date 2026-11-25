@@ -5594,6 +5594,189 @@
 }
 </style>
 
+<!-- Memorial Section Styles -->
+<style>
+  .memorial-section {
+    padding: 64px 0;
+    border-top: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(30, 122, 69, 0.03) 0%, transparent 100%);
+  }
+  [data-theme="dark"] .memorial-section {
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.04) 0%, transparent 100%);
+  }
+  .memorial-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .memorial-lang-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #ffffff;
+    color: var(--ink);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .memorial-lang-btn:hover {
+    border-color: var(--court);
+    transform: translateY(-1px);
+  }
+  [data-theme="dark"] .memorial-lang-btn {
+    background: #111815;
+    color: #f8fafc;
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+  .memorial-card {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 26px 20px;
+    box-shadow: 0 14px 36px -14px rgba(18, 63, 38, 0.14);
+    margin-bottom: 20px;
+  }
+  [data-theme="dark"] .memorial-card {
+    background: #111815;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.55);
+  }
+  @media (min-width: 860px) {
+    .memorial-card {
+      grid-template-columns: 280px 1fr;
+      gap: 38px;
+      padding: 36px 38px;
+      align-items: center;
+    }
+  }
+  .memorial-portrait-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .memorial-portrait-frame {
+    width: min(255px, 72vw);
+    background: #ffffff;
+    padding: 6px;
+    border-radius: 20px;
+    box-shadow: 8px -8px 0 0 var(--court), 0 16px 36px -12px rgba(18, 63, 38, 0.25);
+    margin-bottom: 14px;
+  }
+  .memorial-portrait-frame img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 15px;
+  }
+  .memorial-portrait-caption {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--court-deep);
+    letter-spacing: 0.02em;
+  }
+  [data-theme="dark"] .memorial-portrait-caption { color: #86efac; }
+  .memorial-portrait-sub {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .memorial-title {
+    font-size: clamp(26px, 5vw, 36px);
+    font-weight: 900;
+    line-height: 1.18;
+    color: var(--court-deep);
+    margin-bottom: 8px;
+  }
+  [data-theme="dark"] .memorial-title { color: #ffffff; }
+  .memorial-lead {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--court);
+    margin-bottom: 16px;
+  }
+  .memorial-body p {
+    font-size: 14.5px;
+    line-height: 1.8;
+    color: #334155;
+    margin-bottom: 12px;
+  }
+  [data-theme="dark"] .memorial-body p { color: #cbd5e1; }
+  .memorial-quote {
+    background: rgba(30, 122, 69, 0.08);
+    border-left: 4px solid var(--court);
+    border-radius: 0 12px 12px 0;
+    padding: 13px 16px;
+    margin: 16px 0;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  [data-theme="dark"] .memorial-quote {
+    background: rgba(34, 197, 94, 0.12);
+    color: #f8fafc;
+  }
+  .memorial-signoff {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .memorial-signoff strong {
+    display: block;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .memorial-pillars {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  @media (min-width: 720px) {
+    .memorial-pillars { grid-template-columns: repeat(3, 1fr); }
+  }
+  .memorial-pillar {
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px 18px;
+    text-align: center;
+    box-shadow: 0 6px 18px -10px rgba(18, 63, 38, 0.1);
+  }
+  [data-theme="dark"] .memorial-pillar {
+    background: #111815;
+    border-color: rgba(255, 255, 255, 0.09);
+  }
+  .memorial-pillar h4 {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--court);
+    margin-bottom: 6px;
+  }
+  .memorial-pillar p {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+  }
+  [data-theme="dark"] .memorial-pillar p { color: #94a3b8; }
+</style>
+
 </head>
 
 <body>
@@ -5678,6 +5861,14 @@
         <span class="section-action">+</span>
       </div>
       <ul class="sidebar-menu">
+        <li>
+          <a href="#memorial" data-section="memorial">
+            <svg class="nav-icon" viewBox="0 0 24 24">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span>Memorial</span>
+          </a>
+        </li>
         <li>
           <a href="/tv" target="_blank" onclick="handleTvNav(event)">
             <svg class="nav-icon" viewBox="0 0 24 24">
@@ -5900,6 +6091,12 @@
         <span>LIVE DESK &amp; PORTAL</span>
       </div>
       <ul class="sidebar-menu">
+        <li>
+          <a href="#memorial" onclick="closeMobileSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <span>Memorial</span>
+          </a>
+        </li>
         <li>
           <a href="/tv" target="_blank" id="sidebarLiveLink" onclick="closeMobileSidebar(); handleTvNav(event)">
             <svg class="nav-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
@@ -6299,6 +6496,72 @@
     </a>
   </div>
 
+
+  <!-- ================= SARASWATI MEMORIAL SECTION ================= -->
+  <section class="memorial-section" id="memorial">
+    <div class="container">
+      <div class="memorial-top-row">
+        <div class="eyebrow" style="margin-bottom:0;"><span class="dot"></span> <span class="mem-tr" data-hi="स्मृति · श्रद्धांजलि" data-en="IN LOVING MEMORY · TRIBUTE">स्मृति · श्रद्धांजलि</span></div>
+        <button type="button" class="memorial-lang-btn" onclick="toggleMemorialLang()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <span id="memLangLabel">Read in English</span>
+        </button>
+      </div>
+
+      <div class="memorial-card">
+        <div class="memorial-portrait-col">
+          <div class="memorial-portrait-frame">
+            <img src="/memorial-portrait.jpg" alt="Saraswati Memorial Portrait" loading="lazy">
+          </div>
+          <div class="memorial-portrait-caption mem-tr" data-hi="स्व. श्रीमती सरस्वती देवी" data-en="Late Smt. Saraswati Devi">स्व. श्रीमती सरस्वती देवी</div>
+          <div class="memorial-portrait-sub mem-tr" data-hi="स्नेह, संस्कार और आशीर्वाद की अमर स्मृति" data-en="In Eternal Remembrance &amp; Blessings">स्नेह, संस्कार और आशीर्वाद की अमर स्मृति</div>
+        </div>
+
+        <div class="memorial-body">
+          <h2 class="memorial-title mem-tr" data-hi="सरस्वती मेमोरियल" data-en="Saraswati Memorial">सरस्वती मेमोरियल</h2>
+          <div class="memorial-lead mem-tr" data-hi="यह टूर्नामेंट एक नाम की याद में है — हर रैली, हर स्मैश और हर जीत के पीछे एक स्मृति है।" data-en="This tournament is dedicated to a cherished memory — behind every rally, smash, and victory lives her blessing.">यह टूर्नामेंट एक नाम की याद में है — हर रैली, हर स्मैश और हर जीत के पीछे एक स्मृति है।</div>
+
+          <p class="mem-tr"
+             data-hi="यह टूर्नामेंट हमने उनकी पावन स्मृति में शुरू किया है। वे आज हमारे बीच नहीं हैं, लेकिन उनका स्नेह, उनके संस्कार और उनकी सीख हर कदम पर हमारे साथ चलती है। जब हम कोर्ट पर रोशनी जलाते हैं, तो लगता है जैसे वे आज भी आसपास से हमें देख रही हैं और आशीर्वाद दे रही हैं।"
+             data-en="We started this tournament in her loving memory. Though she is no longer physically with us, her warmth, values, and teachings guide us every single day. Whenever the floodlights brighten the court, it feels as though she is watching over us and blessing every player.">
+            यह टूर्नामेंट हमने उनकी पावन स्मृति में शुरू किया है। वे आज हमारे बीच नहीं हैं, लेकिन उनका स्नेह, उनके संस्कार और उनकी सीख हर कदम पर हमारे साथ चलती है। जब हम कोर्ट पर रोशनी जलाते हैं, तो लगता है जैसे वे आज भी आसपास से हमें देख रही हैं और आशीर्वाद दे रही हैं।
+          </p>
+
+          <div class="memorial-quote mem-tr"
+               data-hi="हम चाहते हैं कि उनका नाम सिर्फ़ तस्वीर और यादों तक सीमित न रहे, बल्कि खेल, मेल-जोल और अपनापन बनकर हर साल ज़िंदा रहे।"
+               data-en="We want her name not to remain confined to a photograph or memories alone, but to live on every year as sport, togetherness, and warmth.">
+            हम चाहते हैं कि उनका नाम सिर्फ़ तस्वीर और यादों तक सीमित न रहे, बल्कि खेल, मेल-जोल और अपनापन बनकर हर साल ज़िंदा रहे।
+          </div>
+
+          <p class="mem-tr"
+             data-hi="खेल लोगों को जोड़ता है। इस टूर्नामेंट में उतरने वाला हर खिलाड़ी, तालियाँ बजाने वाला हर दर्शक और इसे सँभालने वाला हर साथी इस जीवंत श्रद्धांजलि का हिस्सा है। आइए, इस सीज़न में साथ मिलकर खेलें और उनका नाम रोशन करें।"
+             data-en="Sport brings people together. Every player who steps onto the court, every spectator who cheers, and every organizer behind the scenes becomes part of this living tribute. Come, let us play together this season and keep her name shining bright.">
+            खेल लोगों को जोड़ता है। इस टूर्नामेंट में उतरने वाला हर खिलाड़ी, तालियाँ बजाने वाला हर दर्शक और इसे सँभालने वाला हर साथी इस जीवंत श्रद्धांजलि का हिस्सा है। आइए, इस सीज़न में साथ मिलकर खेलें और उनका नाम रोशन करें।
+          </p>
+
+          <div class="memorial-signoff">
+            <strong class="mem-tr" data-hi="आयोजक समिति" data-en="Organizing Committee">आयोजक समिति</strong>
+            <span class="mem-tr" data-hi="S.M. Badminton Tourney 2 · सरस्वती मेमोरियल" data-en="S.M. Badminton Tourney 2 · Saraswati Memorial">S.M. Badminton Tourney 2 · सरस्वती मेमोरियल</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="memorial-pillars">
+        <div class="memorial-pillar">
+          <h4 class="mem-tr" data-hi="याद" data-en="Remembrance">याद</h4>
+          <p class="mem-tr" data-hi="एक स्नेहमयी स्मृति, जिसे हम हर साल कोर्ट पर फिर जीते हैं।" data-en="A cherished memory that we relive together on the court every year.">एक स्नेहमयी स्मृति, जिसे हम हर साल कोर्ट पर फिर जीते हैं।</p>
+        </div>
+        <div class="memorial-pillar">
+          <h4 class="mem-tr" data-hi="मेल-जोल" data-en="Togetherness">मेल-जोल</h4>
+          <p class="mem-tr" data-hi="खेल के बहाने पूरा समुदाय एक जगह इकट्ठा होता है।" data-en="Through the spirit of sport, the community comes together as one.">खेल के बहाने पूरा समुदाय एक जगह इकट्ठा होता है।</p>
+        </div>
+        <div class="memorial-pillar">
+          <h4 class="mem-tr" data-hi="श्रद्धांजलि" data-en="Tribute">श्रद्धांजलि</h4>
+          <p class="mem-tr" data-hi="सबसे सच्ची श्रद्धांजलि वही है जो लोगों को जोड़े।" data-en="The truest tribute is the one that brings people closer together.">सबसे सच्ची श्रद्धांजलि वही है जो लोगों को जोड़े।</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ================= CATEGORY INFO SECTION ================= -->
   <section class="category-section" id="categories">
@@ -10488,7 +10751,7 @@
         });
       });
 
-      const sectionIds = ['venue', 'rules-faq', 'draws', 'schedule', 'categories'];
+      const sectionIds = ['venue', 'rules-faq', 'draws', 'schedule', 'categories', 'memorial'];
       window.addEventListener('scroll', function() {
         if (window.innerWidth < 1025) return;
         if (window.scrollY < 200) {
@@ -10511,6 +10774,18 @@
         }
       }, { passive: true });
     })();
+  </script>
+  <script>
+    let memorialLang = 'hi';
+    function toggleMemorialLang() {
+      memorialLang = memorialLang === 'hi' ? 'en' : 'hi';
+      document.querySelectorAll('#memorial .mem-tr').forEach(el => {
+        const txt = el.getAttribute('data-' + memorialLang);
+        if (txt !== null) el.textContent = txt;
+      });
+      const lbl = document.getElementById('memLangLabel');
+      if (lbl) lbl.textContent = memorialLang === 'hi' ? 'Read in English' : 'हिन्दी में पढ़ें';
+    }
   </script>
   <script src="/cookie-consent.js" defer></script>
   <script src="/pwa-install.js" defer></script>
