@@ -9190,47 +9190,6 @@
     // ================= TOURNAMENT KNOCKOUT BRACKET ENGINE =================
     let currentBracketCat = 'Below 35';
 
-    const defaultBracketData = {
-      'Below 35': {
-        qf: [
-          { id: 'QF 1', court: 'Court 1', p1: 'Sharma / Verma', seed1: '#1', p2: 'Gupta / Rao', seed2: '#8', score1: '21, 21', score2: '16, 14', winner: 1, status: 'DONE' },
-          { id: 'QF 2', court: 'Court 1', p1: 'Mehta / Sen', seed1: '#4', p2: 'Patel / Desai', seed2: '#5', score1: '21, 19, 21', score2: '18, 21, 17', winner: 1, status: 'DONE' },
-          { id: 'QF 3', court: 'Court 1', p1: 'Reddy / Nair', seed1: '#3', p2: 'Chopra / Joshi', seed2: '#6', score1: '21, 21', score2: '12, 15', winner: 1, status: 'DONE' },
-          { id: 'QF 4', court: 'Court 1', p1: 'Singh / Gill', seed1: '#2', p2: 'Yadav / Kumar', seed2: '#7', score1: '21, 21', score2: '19, 15', winner: 1, status: 'DONE' }
-        ],
-        sf: [
-          { id: 'SF 1', court: 'Court 1', p1: 'Sharma / Verma', seed1: '#1', p2: 'Mehta / Sen', seed2: '#4', score1: '21, 21', score2: '19, 18', winner: 1, status: 'DONE' },
-          { id: 'SF 2', court: 'Court 1', p1: 'Reddy / Nair', seed1: '#3', p2: 'Singh / Gill', seed2: '#2', score1: '20, 18', score2: '22, 21', winner: 2, status: 'DONE' }
-        ],
-        finals: [
-          { id: 'FINAL', court: 'Court 1 · Center', p1: 'Sharma / Verma', seed1: '#1', p2: 'Singh / Gill', seed2: '#2', score1: '21, 18, 22', score2: '17, 21, 20', winner: 1, status: 'LIVE' }
-        ],
-        champion: {
-          pair: 'Sharma / Verma',
-          subtitle: 'S.P. Tourney 3 Below-35 Champions'
-        }
-      },
-      'Above 35': {
-        qf: [
-          { id: 'QF 1', court: 'Court 1', p1: 'Bose / Roy', seed1: '#1', p2: 'Kapoor / Malhotra', seed2: '#8', score1: '21, 21', score2: '14, 15', winner: 1, status: 'DONE' },
-          { id: 'QF 2', court: 'Court 1', p1: 'Iyer / Venkat', seed1: '#4', p2: 'Saxena / Mathur', seed2: '#5', score1: '18, 21, 21', score2: '21, 16, 14', winner: 1, status: 'DONE' },
-          { id: 'QF 3', court: 'Court 1', p1: 'Chawla / Grover', seed1: '#3', p2: 'Bhat / Hegde', seed2: '#6', score1: '21, 21', score2: '17, 19', winner: 1, status: 'DONE' },
-          { id: 'QF 4', court: 'Court 1', p1: 'Deshmukh / Patil', seed1: '#2', p2: 'Nambiar / Pillai', seed2: '#7', score1: '21, 21', score2: '11, 13', winner: 1, status: 'DONE' }
-        ],
-        sf: [
-          { id: 'SF 1', court: 'Court 1', p1: 'Bose / Roy', seed1: '#1', p2: 'Iyer / Venkat', seed2: '#4', score1: '21, 21', score2: '16, 17', winner: 1, status: 'DONE' },
-          { id: 'SF 2', court: 'Court 1', p1: 'Chawla / Grover', seed1: '#3', p2: 'Deshmukh / Patil', seed2: '#2', score1: '19, 20', score2: '21, 22', winner: 2, status: 'DONE' }
-        ],
-        finals: [
-          { id: 'FINAL', court: 'Court 1 · Center', p1: 'Bose / Roy', seed1: '#1', p2: 'Deshmukh / Patil', seed2: '#2', score1: '—', score2: '—', winner: null, status: 'UPCOMING' }
-        ],
-        champion: {
-          pair: 'Awaiting Final Match',
-          subtitle: 'Championship Match Upcoming'
-        }
-      }
-    };
-
     function formatFullTeamNames(pairText) {
       if (!pairText) return '<span class="tbd-team">TBD</span>';
       const clean = String(pairText).trim();

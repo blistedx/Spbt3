@@ -5373,7 +5373,10 @@
         }
 
         function exportCsv() {
-            if (!allRegistrations || allRegistrations.length === 0) allRegistrations = getSampleData();
+            if (!allRegistrations || allRegistrations.length === 0) {
+                showToast("No registrations available to export.");
+                return;
+            }
             const headers = ["Registration ID", "Category", "Status", "Timestamp", "Player 1 Name", "Player 2 Name"];
             const rows = allRegistrations.map(r => [r.regId, r.category, r.status, r.timestamp, r.player1Name, r.player2Name]);
             const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
@@ -5528,53 +5531,8 @@
                 }
             }
 
-            // Fallback default sample preview
-            const data = {
-                'Below 35': {
-                    qf: [
-                        { id: 'QF 1', court: 'Court 1', p1: 'Sharma / Verma', seed1: '#1', p2: 'Gupta / Rao', seed2: '#8', score1: '21, 21', score2: '16, 14', winner: 1, status: 'DONE' },
-                        { id: 'QF 2', court: 'Court 1', p1: 'Mehta / Sen', seed1: '#4', p2: 'Patel / Desai', seed2: '#5', score1: '21, 19, 21', score2: '18, 21, 17', winner: 1, status: 'DONE' },
-                        { id: 'QF 3', court: 'Court 1', p1: 'Reddy / Nair', seed1: '#3', p2: 'Chopra / Joshi', seed2: '#6', score1: '21, 21', score2: '12, 15', winner: 1, status: 'DONE' },
-                        { id: 'QF 4', court: 'Court 1', p1: 'Singh / Gill', seed1: '#2', p2: 'Yadav / Kumar', seed2: '#7', score1: '21, 21', score2: '19, 15', winner: 1, status: 'DONE' }
-                    ],
-                    sf: [
-                        { id: 'SF 1', court: 'Court 1', p1: 'Sharma / Verma', seed1: '#1', p2: 'Mehta / Sen', seed2: '#4', score1: '21, 21', score2: '19, 18', winner: 1, status: 'DONE' },
-                        { id: 'SF 2', court: 'Court 1', p1: 'Reddy / Nair', seed1: '#3', p2: 'Singh / Gill', seed2: '#2', score1: '20, 18', score2: '22, 21', winner: 2, status: 'DONE' }
-                    ],
-                    finals: [
-                        { id: 'FINAL', court: 'Court 1', p1: 'Sharma / Verma', seed1: '#1', p2: 'Singh / Gill', seed2: '#2', score1: '21, 18, 22', score2: '17, 21, 20', winner: 1, status: 'LIVE' }
-                    ]
-                },
-                'Above 35': {
-                    qf: [
-                        { id: 'QF 1', court: 'Court 1', p1: 'Bose / Roy', seed1: '#1', p2: 'Kapoor / Malhotra', seed2: '#8', score1: '21, 21', score2: '14, 15', winner: 1, status: 'DONE' },
-                        { id: 'QF 2', court: 'Court 1', p1: 'Iyer / Venkat', seed1: '#4', p2: 'Saxena / Mathur', seed2: '#5', score1: '18, 21, 21', score2: '21, 16, 14', winner: 1, status: 'DONE' },
-                        { id: 'QF 3', court: 'Court 1', p1: 'Chawla / Grover', seed1: '#3', p2: 'Bhat / Hegde', seed2: '#6', score1: '21, 21', score2: '17, 19', winner: 1, status: 'DONE' },
-                        { id: 'QF 4', court: 'Court 1', p1: 'Deshmukh / Patil', seed1: '#2', p2: 'Nambiar / Pillai', seed2: '#7', score1: '21, 21', score2: '11, 13', winner: 1, status: 'DONE' }
-                    ],
-                    sf: [
-                        { id: 'SF 1', court: 'Court 1', p1: 'Bose / Roy', seed1: '#1', p2: 'Iyer / Venkat', seed2: '#4', score1: '21, 21', score2: '16, 17', winner: 1, status: 'DONE' },
-                        { id: 'SF 2', court: 'Court 1', p1: 'Chawla / Grover', seed1: '#3', p2: 'Deshmukh / Patil', seed2: '#2', score1: '19, 20', score2: '21, 22', winner: 2, status: 'DONE' }
-                    ],
-                    finals: [
-                        { id: 'FINAL', court: 'Court 1', p1: 'Bose / Roy', seed1: '#1', p2: 'Deshmukh / Patil', seed2: '#2', score1: '—', score2: '—', winner: null, status: 'UPCOMING' }
-                    ]
-                }
-            }[adminBracketCat];
-
-            container.innerHTML = `
-            <div class="bracket-round">
-                <div class="bracket-round-title">Quarter-Finals (QF)</div>
-                <div class="bracket-matches">${data.qf.map(createMatchCard).join('')}</div>
-            </div>
-            <div class="bracket-round">
-                <div class="bracket-round-title">Semi-Finals (SF)</div>
-                <div class="bracket-matches">${data.sf.map(createMatchCard).join('')}</div>
-            </div>
-            <div class="bracket-round">
-                <div class="bracket-round-title">Final</div>
-                <div class="bracket-matches">${data.finals.map(createMatchCard).join('')}</div>
-            </div>`;
+            // Clean empty state when no matches are scheduled
+            container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:42px 20px; background:var(--paper); border-radius:16px; border:1px solid var(--line); color:var(--text-muted);">🏸 No knockout bracket matches scheduled yet for <strong>${adminBracketCat}</strong>.</div>`;
         }
 
         function switchAdminBracketCat(cat) {
@@ -5638,7 +5596,7 @@
                 sessionStorage.setItem('sp3_admin_auth', 'true');
                 if (err) err.style.display = 'none';
                 if (modal) modal.style.display = 'none';
-                allRegistrations = getSampleData();
+                allRegistrations = [];
                 initDashboardUI(allRegistrations);
                 fetchAdminRegistrations();
                 fetchTournamentSettings();
@@ -7020,7 +6978,7 @@
 
         window.addEventListener('DOMContentLoaded', function () {
             if (!checkAdminAuth()) return;
-            allRegistrations = getSampleData();
+            allRegistrations = [];
             initDashboardUI(allRegistrations);
             fetchAdminRegistrations();
             fetchTournamentSettings();
