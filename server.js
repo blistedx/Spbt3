@@ -97,9 +97,6 @@ app.get('/scorer', (req, res) => res.sendFile(path.join(__dirname, 'scorer.html'
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'privacy.html')));
 app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
-app.get('/smriti', (req, res) => res.sendFile(path.join(__dirname, 'smriti.html')));
-app.get('/smriti.html', (req, res) => res.sendFile(path.join(__dirname, 'smriti.html')));
-app.get('/smriti-portrait.jpg', (req, res) => res.sendFile(path.join(__dirname, 'smriti-portrait.jpg')));
 
 // Database middleware (Neon PostgreSQL online connection pool)
 app.use(async (req, res, next) => {

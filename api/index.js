@@ -25,7 +25,6 @@ module.exports = async (req, res) => {
     req.url === '/scorer' || 
     req.url === '/privacy' || 
     req.url === '/terms' ||
-    req.url === '/smriti' ||
     /\.(html|css|js|png|jpg|jpeg|svg|ico|webp|json|txt|woff2?)$/i.test(req.url.split('?')[0])
   );
 
