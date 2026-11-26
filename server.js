@@ -294,6 +294,9 @@ async function handleActionBridge(req, res, next) {
         } catch (e) {}
 
         if (!reg) {
+          if (!dataStore.isSynced) {
+            try { await dataStore.syncFromDb(); } catch (e) {}
+          }
           const allRegs = dataStore.getRegistrations();
           reg = allRegs.find(r => {
             const rId = (r.regId || '').toLowerCase();

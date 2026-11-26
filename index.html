@@ -7673,14 +7673,13 @@
           to check approval status.
         </div>
 
-        <div style="display:flex; gap:8px; margin-bottom:18px;">
+        <form onsubmit="event.preventDefault(); handleCheckStatus();" style="display:flex; gap:8px; margin-bottom:18px;">
           <input type="text" class="form-input" id="statusQueryInput" placeholder="Enter Registration ID or Mobile..."
-            style="text-transform:uppercase;" onkeyup="if(event.key==='Enter') handleCheckStatus()">
-          <button class="btn solid" style="white-space:nowrap; padding:11px 18px;" id="checkStatusBtn"
-            onclick="handleCheckStatus()">
+            style="text-transform:uppercase;" autocomplete="off">
+          <button type="submit" class="btn solid" style="white-space:nowrap; padding:11px 18px;" id="checkStatusBtn">
             Check &rarr;
           </button>
-        </div>
+        </form>
 
         <!-- Result Container -->
         <div id="statusResultBox" style="display:none;">
@@ -8612,48 +8611,59 @@
     function handleCheckStatus() {
       const inputEl = document.getElementById('statusQueryInput');
       const q = (inputEl ? inputEl.value : '').trim();
-      if (!q) {
-        alert("Please enter your Registration ID or Mobile Number.");
-        return;
-      }
-
-      const btn = document.getElementById('checkStatusBtn');
-      btn.disabled = true;
-      btn.innerHTML = "Verifying...";
-
       const resBox = document.getElementById('statusResultBox');
       const notFound = document.getElementById('statusNotFoundMsg');
       if (resBox) resBox.style.display = "none";
       if (notFound) notFound.style.display = "none";
 
+      if (!q) {
+        if (notFound) {
+          notFound.innerText = "Please enter your Registration ID or 10-digit Mobile Number.";
+          notFound.style.display = "block";
+        }
+        return;
+      }
+
+      const btn = document.getElementById('checkStatusBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "Verifying...";
+      }
+
       const onSuccess = function (res) {
-        btn.disabled = false;
-        btn.innerHTML = "Check &rarr;";
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = "Check &rarr;";
+        }
         if (res && (res.found || res.success) && res.registration) {
           renderStatusResult(res.registration);
-        } else {
+          if (resBox) resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else if (notFound) {
           notFound.innerText = res && res.message ? res.message : "No registration found matching this ID or Mobile number. Please check again.";
           notFound.style.display = "block";
+          notFound.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
       };
 
       const onError = function (err) {
-        btn.disabled = false;
-        btn.innerHTML = "Check &rarr;";
-        alert("Error checking status: " + (err ? (err.message || err.toString()) : "Network error"));
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = "Check &rarr;";
+        }
+        if (notFound) {
+          notFound.innerText = "Unable to verify right now (" + (err ? (err.message || "Network error") : "Network error") + "). Please try again.";
+          notFound.style.display = "block";
+        }
       };
 
-      if (SCRIPT_URL) {
-        fetch(SCRIPT_URL + "?action=checkStatus&query=" + encodeURIComponent(q) + "&_=" + Date.now(), { cache: "no-store" })
-          .then(r => r.json())
-          .then(onSuccess)
-          .catch(onError);
-      } else {
-        btn.disabled = false;
-        btn.innerHTML = "Check &rarr;";
-        notFound.innerText = "Connection error. Please try again in a few moments.";
-        notFound.style.display = "block";
-      }
+      const statusUrl = (SCRIPT_URL || (window.location.origin + "/exec")) + "?action=checkStatus&query=" + encodeURIComponent(q) + "&_=" + Date.now();
+      fetch(statusUrl, { cache: "no-store" })
+        .then(r => {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(onSuccess)
+        .catch(onError);
     }
 
     let activeVerifiedRegistration = null;
