@@ -7593,8 +7593,8 @@
               <!-- PAYMENT REFERENCE & SCREENSHOT -->
               <div class="form-sec-title">PAYMENT &amp; VERIFICATION</div>
 
-              <!-- OFFICIAL PHONEPE / UPI QR CODE CARD (HIDDEN WHEN CLOSED) -->
-              <div class="payment-qr-card" style="display:none !important;">
+              <!-- OFFICIAL PHONEPE / UPI QR CODE CARD (DYNAMIC BASED ON REGISTRATION STATUS) -->
+              <div class="payment-qr-card" id="regQrCard" style="display:none;">
                 <div class="qr-img-wrapper">
                   <img src="/qr_code.png" id="officialUpiQrImg" alt="Official Tournament UPI QR" class="qr-img">
                   <div class="qr-brand-badge">PhonePe · GPay · Paytm · UPI</div>
@@ -7614,7 +7614,7 @@
               </div>
 
               <!-- REPLACEMENT LOCKED NOTICE FOR PAYMENT QR -->
-              <div style="background:rgba(239, 68, 68, 0.06); border:1.5px dashed rgba(239, 68, 68, 0.35); border-radius:12px; padding:20px 16px; text-align:center; color:#f87171; margin-bottom:16px;">
+              <div id="regClosedQrNotice" style="background:rgba(239, 68, 68, 0.06); border:1.5px dashed rgba(239, 68, 68, 0.35); border-radius:12px; padding:20px 16px; text-align:center; color:#f87171; margin-bottom:16px;">
                 <div style="font-size:26px; margin-bottom:4px;">🔒</div>
                 <div style="font-weight:800; font-size:14px; text-transform:uppercase; color:#dc2626;">Payment QR Code Hidden</div>
                 <div style="font-size:12px; color:#64748b; margin-top:4px;">Registrations are closed. Payment transfers are not being accepted.</div>
@@ -7666,9 +7666,9 @@
                 <span style="font-size:12px; color:var(--court-deep); background:rgba(30,122,69,0.1); border:1px solid rgba(30,122,69,0.25); padding:4px 10px; border-radius:6px; font-weight:700; white-space:nowrap;">📋 View &amp; Accept &rarr;</span>
               </div>
 
-              <button type="button" class="btn solid" id="submitBtn" disabled
-                style="width:100%; justify-content:center; margin-top:6px; padding:13px 20px; font-size:15px; opacity:0.55; cursor:not-allowed; background:#475569 !important; border-color:#475569 !important; pointer-events:none;">
-                ⛔ Registrations Closed (Submission Blocked)
+              <button type="submit" class="btn solid" id="submitBtn" disabled
+                style="width:100%; justify-content:center; margin-top:6px; padding:13px 20px; font-size:15px;">
+                COMPLETE PAIR REGISTRATION &rarr;
               </button>
             </div>
           </div>
@@ -8155,7 +8155,11 @@
     function checkFormEnableState() {
       const submitBtn = document.getElementById('submitBtn');
       if (submitBtn) {
-        submitBtn.disabled = (!isAgeValid || isDuplicateFound);
+        if (isRegistrationClosed()) {
+          submitBtn.disabled = true;
+        } else {
+          submitBtn.disabled = (!isAgeValid || isDuplicateFound);
+        }
       }
     }
 
@@ -8489,11 +8493,30 @@
         }
       }
 
-      // Modal submit button state
+      // Modal QR card & submit button state (dynamic OPEN / CLOSED)
+      const regQrCard = document.getElementById('regQrCard');
+      const regClosedQrNotice = document.getElementById('regClosedQrNotice');
       const modalSubBtn = document.getElementById('submitBtn');
-      if (modalSubBtn && isClosed) {
-        modalSubBtn.disabled = true;
-        modalSubBtn.innerText = "Registrations Closed";
+      if (regQrCard) regQrCard.style.display = isClosed ? 'none' : 'flex';
+      if (regClosedQrNotice) regClosedQrNotice.style.display = isClosed ? 'block' : 'none';
+      if (modalSubBtn) {
+        if (isClosed) {
+          modalSubBtn.disabled = true;
+          modalSubBtn.style.opacity = '0.55';
+          modalSubBtn.style.cursor = 'not-allowed';
+          modalSubBtn.style.pointerEvents = 'none';
+          modalSubBtn.style.background = '#475569';
+          modalSubBtn.style.borderColor = '#475569';
+          modalSubBtn.innerText = '⛔ Registrations Closed (Submission Blocked)';
+        } else {
+          modalSubBtn.style.opacity = '1';
+          modalSubBtn.style.cursor = 'pointer';
+          modalSubBtn.style.pointerEvents = 'auto';
+          modalSubBtn.style.background = '';
+          modalSubBtn.style.borderColor = '';
+          modalSubBtn.innerHTML = 'COMPLETE PAIR REGISTRATION &rarr;';
+          if (typeof checkFormEnableState === 'function') checkFormEnableState();
+        }
       }
 
       // 6. Dynamic Categories (Fee & Max Pairs & Status)

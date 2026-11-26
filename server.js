@@ -150,10 +150,10 @@ async function generateUniqueRegId(p1Phone, p1Dob) {
 let globalSettingsState = dataStore.getSettings();
 let globalLiveMatchState = dataStore.getLiveMatch();
 
-function getMergedSettings() {
+async function getMergedSettings() {
   try {
-    if (!dataStore.isSynced || Date.now() - (dataStore.lastSyncTime || 0) > 60000) {
-      dataStore.syncFromDb().catch(() => {});
+    if (!dataStore.isSynced || Date.now() - (dataStore.lastSyncTime || 0) > 15000) {
+      await dataStore.syncFromDb().catch(() => {});
     }
   } catch (e) {}
   return dataStore.getSettings();
@@ -625,8 +625,8 @@ async function handleActionBridge(req, res, next) {
           categories: rawCats || currentSettings.categories
         };
 
-        // Save to persistent file storage
-        dataStore.saveSettings(updatedSettings);
+        // Save to persistent PostgreSQL storage (awaited for serverless reliability)
+        await dataStore.saveSettings(updatedSettings);
         globalSettingsState = updatedSettings;
 
         try {

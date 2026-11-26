@@ -240,10 +240,11 @@ const dataStore = {
     } catch(e) {}
     return { ...settingsCache };
   },
-  saveSettings(newSettings) {
+  async saveSettings(newSettings) {
     settingsCache = { ...settingsCache, ...newSettings };
 
-    query(`
+    try {
+      await query(`
       INSERT INTO settings (id, tournament_name, tournament_subtitle, venue, dates, flash_message, flash_active, registration_status, admin_pin, upi_id, upi_name, upi_qr_url, logo_url, entry_fee, stat_categories, stat_players, stat_days, categories, updated_at)
       VALUES ('current', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW())
       ON CONFLICT (id) DO UPDATE SET
@@ -283,7 +284,10 @@ const dataStore = {
       settingsCache.stat_players,
       settingsCache.stat_days,
       JSON.stringify(settingsCache.categories || [])
-    ]).catch(e => console.error('[PostgreSQL] saveSettings error:', e.message));
+    ]);
+    } catch (e) {
+      console.error('[PostgreSQL] saveSettings error:', e.message);
+    }
 
     return { ...settingsCache };
   },

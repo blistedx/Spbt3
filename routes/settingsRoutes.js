@@ -125,8 +125,8 @@ router.put('/', requireAdmin, async (req, res) => {
     const updateData = req.body.settings || req.body;
     updateData.updatedAt = new Date();
 
-    // Sync with persistent dataStore
-    dataStore.saveSettings(updateData);
+    // Sync with persistent dataStore (awaited for serverless reliability)
+    await dataStore.saveSettings(updateData);
 
     let settings = null;
     if (mongoose.connection.readyState === 1) {
