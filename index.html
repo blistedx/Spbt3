@@ -7251,7 +7251,10 @@
             <div style="font-weight:800; font-size:15px; color:var(--ink);" class="dyn-venue">Suryodaya Park Court</div>
             <div style="font-size:12.5px; color:var(--text-muted);">Official Tournament Venue · Outdoor Floodlight Court</div>
           </div>
-          <a href="https://maps.app.goo.gl/QnaBgoVEJa7tdQfx7" target="_blank" rel="noopener noreferrer" class="btn solid dyn-maps-link">
+          <a href="https://maps.app.goo.gl/QnaBgoVEJa7tdQfx7" target="_blank" rel="noopener"
+             onclick="try{ var w = window.open(this.href, '_blank'); if (w) { return false; } }catch(e){}"
+             style="position:relative; z-index:5; cursor:pointer;"
+             class="btn solid dyn-maps-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
             <span>Open in Google Maps &rarr;</span>
           </a>
