@@ -2783,7 +2783,7 @@
                             </div>
                             <div>
                                 <label>Tournament Dates</label>
-                                <input type="text" id="cfg_dates" value="28–30 Aug 2026" placeholder="28–30 Aug 2026">
+                                <input type="text" id="cfg_dates" value="15–17 Jan 2027" placeholder="15–17 Jan 2027">
                             </div>
                         </div>
 
@@ -3689,7 +3689,7 @@
             if (document.getElementById('cfg_tournament_name')) document.getElementById('cfg_tournament_name').value = tName;
             if (document.getElementById('cfg_tournament_subtitle')) document.getElementById('cfg_tournament_subtitle').value = currentSettings.tournament_subtitle || "Men's Doubles · Knockout · Suryodaya Park";
             if (document.getElementById('cfg_venue')) document.getElementById('cfg_venue').value = currentSettings.venue || "Suryodaya Park Court";
-            if (document.getElementById('cfg_dates')) document.getElementById('cfg_dates').value = currentSettings.dates || "28–30 Aug 2026";
+            if (document.getElementById('cfg_dates')) document.getElementById('cfg_dates').value = currentSettings.dates || "15–17 Jan 2027";
             if (document.getElementById('cfg_flash_message')) document.getElementById('cfg_flash_message').value = currentSettings.flash_message || "Registrations are OPEN! Limited team slots available.";
             if (document.getElementById('cfg_flash_active')) document.getElementById('cfg_flash_active').value = currentSettings.flash_active || "YES";
             if (document.getElementById('cfg_registration_status')) document.getElementById('cfg_registration_status').value = currentSettings.registration_status || "OPEN";
@@ -4901,7 +4901,7 @@
                     team2Id: t2 ? t2.regId : '',
                     status: 'UPCOMING',
                     day: 'Day 1',
-                    date: '28 Oct 2026'
+                    date: '15 Jan 2027'
                 });
             }
 
@@ -5289,7 +5289,7 @@
             const tName = (document.getElementById('cfg_tournament_name') && document.getElementById('cfg_tournament_name').value.trim()) || (currentSettings && currentSettings.tournament_name) || "S.M. Badminton Tourney 2";
             const tSub = (document.getElementById('cfg_tournament_subtitle') && document.getElementById('cfg_tournament_subtitle').value.trim()) || (currentSettings && currentSettings.tournament_subtitle) || "Men's Doubles · Knockout · Suryodaya Park";
             const tVenue = (document.getElementById('cfg_venue') && document.getElementById('cfg_venue').value.trim()) || (currentSettings && currentSettings.venue) || "Suryodaya Park Court";
-            const tDates = (document.getElementById('cfg_dates') && document.getElementById('cfg_dates').value.trim()) || (currentSettings && currentSettings.dates) || "28–30 Aug 2026";
+            const tDates = (document.getElementById('cfg_dates') && document.getElementById('cfg_dates').value.trim()) || (currentSettings && currentSettings.dates) || "15–17 Jan 2027";
             const tFlashMsg = (document.getElementById('cfg_flash_message') && document.getElementById('cfg_flash_message').value.trim()) || (currentSettings && currentSettings.flash_message) || "Registrations are OPEN! Limited team slots available.";
             const tUpiId = (document.getElementById('cfg_upi_id') && document.getElementById('cfg_upi_id').value.trim()) || (currentSettings && currentSettings.upi_id) || "blistedx@okhdfcbank";
             const tUpiName = (document.getElementById('cfg_upi_name') && document.getElementById('cfg_upi_name').value.trim()) || (currentSettings && currentSettings.upi_name) || "S.P. Badminton Club";

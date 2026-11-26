@@ -9,11 +9,11 @@ const { requireAdmin } = require('../middleware/auth');
 const DEFAULT_CONFIG = {
   tournamentName: 'S.P. Badminton Tourney 3',
   subtitle: 'Official Championship 2026',
-  dates: '28–30 Aug 2026',
+  dates: '15–17 Jan 2027',
   venue: 'Suryodaya Park Court',
   courtMapsUrl: 'https://maps.app.goo.gl/QnaBgoVEJa7tdQfx7',
   registrationStatus: 'CLOSED',
-  registrationCloseDate: '27th Aug 2026, 11:59 PM',
+  registrationCloseDate: '14th Jan 2027, 11:59 PM',
   flashAnnouncement: '🏸 Registrations are CLOSED. Limited team slots filled.',
   flashActive: false,
   upiId: 'blistedx@okhdfcbank',

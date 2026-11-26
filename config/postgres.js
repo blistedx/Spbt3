@@ -91,7 +91,7 @@ async function initPostgres() {
       tournament_name VARCHAR(255) NOT NULL DEFAULT 'S.P. BADMINTON TOURNEY 3',
       tournament_subtitle VARCHAR(255) DEFAULT 'Men''s Doubles · Knockout · Suryodaya Park',
       venue VARCHAR(255) DEFAULT 'Suryodaya Park Court',
-      dates VARCHAR(100) DEFAULT '28–30 Aug 2026',
+      dates VARCHAR(100) DEFAULT '15–17 Jan 2027',
       flash_message TEXT DEFAULT 'Registrations are OPEN! Limited team slots available.',
       flash_active VARCHAR(10) DEFAULT 'NO',
       registration_status VARCHAR(20) DEFAULT 'OPEN',

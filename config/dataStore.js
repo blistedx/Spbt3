@@ -9,7 +9,7 @@ const DEFAULT_SETTINGS = {
   tournament_name: "S.M. Badminton Tourney 2",
   tournament_subtitle: "Men's Doubles · Season 2",
   venue: "Suryodaya Park Court",
-  dates: "28–30 Aug 2026",
+  dates: "15–17 Jan 2027",
   flash_message: "Registrations are OPEN! Limited team slots available.",
   flash_active: "NO",
   registration_status: "CLOSED",
