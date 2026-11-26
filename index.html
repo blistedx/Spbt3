@@ -7505,8 +7505,8 @@
       </div>
       <div class="modal-content">
 
-        <!-- Live Closed Banner Notice -->
-        <div style="background:rgba(239, 68, 68, 0.08); border:1.5px solid rgba(239, 68, 68, 0.3); border-radius:12px; padding:12px 16px; margin-bottom:16px; display:flex; align-items:center; gap:12px; color:#ef4444;">
+        <!-- Live Closed Banner Notice (Dynamic based on registration_status) -->
+        <div id="regClosedTopBanner" style="display:none; background:rgba(239, 68, 68, 0.08); border:1.5px solid rgba(239, 68, 68, 0.3); border-radius:12px; padding:12px 16px; margin-bottom:16px; align-items:center; gap:12px; color:#ef4444;">
           <span style="font-size:22px;">⛔</span>
           <div style="font-size:13px; line-height:1.4;">
             <strong style="text-transform:uppercase; letter-spacing:0.04em;">Registrations are Closed</strong><br>
@@ -8493,10 +8493,12 @@
         }
       }
 
-      // Modal QR card & submit button state (dynamic OPEN / CLOSED)
+      // Modal QR card, top closed banner & submit button state (dynamic OPEN / CLOSED)
+      const regClosedTopBanner = document.getElementById('regClosedTopBanner');
       const regQrCard = document.getElementById('regQrCard');
       const regClosedQrNotice = document.getElementById('regClosedQrNotice');
       const modalSubBtn = document.getElementById('submitBtn');
+      if (regClosedTopBanner) regClosedTopBanner.style.display = isClosed ? 'flex' : 'none';
       if (regQrCard) regQrCard.style.display = isClosed ? 'none' : 'flex';
       if (regClosedQrNotice) regClosedQrNotice.style.display = isClosed ? 'block' : 'none';
       if (modalSubBtn) {
@@ -9595,8 +9597,10 @@
     // Submit Handler
     function submitForm(e) {
       e.preventDefault();
-      alert("Tournament registrations are currently CLOSED. Form submissions are disabled.");
-      return false;
+      if (isRegistrationClosed()) {
+        alert("Tournament registrations are currently CLOSED. Form submissions are disabled.");
+        return false;
+      }
 
       const p1Phone = (document.getElementById('p1Phone')?.value || '').replace(/\D/g, '').slice(-10);
       const p2Phone = (document.getElementById('p2Phone')?.value || '').replace(/\D/g, '').slice(-10);
