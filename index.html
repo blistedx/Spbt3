@@ -8625,6 +8625,7 @@
       }
 
       const btn = document.getElementById('checkStatusBtn');
+      if (inputEl) inputEl.blur();
       if (btn) {
         btn.disabled = true;
         btn.innerHTML = "Verifying...";

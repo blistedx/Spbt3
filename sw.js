@@ -1,5 +1,5 @@
 // S.P. Badminton Tourney 3 · Service Worker
-const CACHE_NAME = 'sp3-cache-v4';
+const CACHE_NAME = 'sp3-cache-v5';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -53,11 +53,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first for dynamic API endpoints and exec bridge
-  if (url.pathname.startsWith('/api/') || url.pathname === '/exec') {
+  // Network-first for dynamic API endpoints, exec bridge, and HTML navigations
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.pathname === '/exec' ||
+    request.mode === 'navigate' ||
+    url.pathname === '/' ||
+    url.pathname.endsWith('.html')
+  ) {
     event.respondWith(
-      fetch(request).catch(() => {
-        return caches.match(request);
+      fetch(request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && !url.pathname.startsWith('/api/') && url.pathname !== '/exec') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
+        }
+        return networkResponse;
+      }).catch(() => {
+        return caches.match(request).then((cached) => cached || (request.mode === 'navigate' ? caches.match('/index.html') : undefined));
       })
     );
     return;
