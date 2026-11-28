@@ -2913,30 +2913,34 @@
                         const srvKey = srvInt.key || (srvInt.type + '_' + (srvInt.startTime || ''));
                         const nowTs = Date.now();
 
-                        // Establish canonical endTime
-                        let targetEndTime = srvInt.endTime;
-                        if (!targetEndTime) {
-                            let sec = (typeof srvInt.secondsLeft === 'number') ? srvInt.secondsLeft : total;
-                            sec = Math.min(total, Math.max(0, sec));
-                            targetEndTime = nowTs + sec * 1000;
+                        // Compute remaining time using scorer's own clock (avoids cross-device clock skew!)
+                        let scorerRemainingMs = null;
+                        if (srvInt.endTime && incomingTs > 0) {
+                            scorerRemainingMs = Math.max(0, srvInt.endTime - incomingTs);
+                        } else if (typeof srvInt.secondsLeft === 'number') {
+                            scorerRemainingMs = Math.max(0, srvInt.secondsLeft * 1000);
+                        } else {
+                            scorerRemainingMs = total * 1000;
                         }
+                        scorerRemainingMs = Math.min(total * 1000, scorerRemainingMs);
+                        const targetEndTime = nowTs + scorerRemainingMs;
 
                         const currentSecsRemaining = srvInt.paused
                             ? (srvInt.pausedSecondsLeft || srvInt.secondsLeft || 0)
-                            : Math.max(0, Math.ceil((targetEndTime - nowTs) / 1000));
+                            : Math.max(0, Math.ceil(scorerRemainingMs / 1000));
 
                         if (currentSecsRemaining > 0) {
                             if (!liveState.interval || !liveState.interval.active || liveState.interval.key !== srvKey) {
                                 window.startTVInterval(srvInt.type, srvInt.title, total, srvKey, targetEndTime);
                             } else {
-                                // Already active: preserve monotonic ticking and only sync pause or explicit extensions
+                                // Already active: preserve monotonic ticking and only sync pause or explicit extensions (+15s)
                                 liveState.interval.paused = !!srvInt.paused;
                                 if (srvInt.title) liveState.interval.title = srvInt.title;
                                 liveState.interval.totalSeconds = total;
 
-                                // If scorer explicitly added time (+15s), update canonical endTime
-                                if (srvInt.endTime && Math.abs(liveState.interval.endTime - srvInt.endTime) > 1500) {
-                                    liveState.interval.endTime = srvInt.endTime;
+                                const localRemainingMs = Math.max(0, (liveState.interval.endTime || nowTs) - nowTs);
+                                if (Math.abs(localRemainingMs - scorerRemainingMs) > 2500) {
+                                    liveState.interval.endTime = targetEndTime;
                                 }
                                 if (srvInt.paused) {
                                     liveState.interval.secondsLeft = currentSecsRemaining;
