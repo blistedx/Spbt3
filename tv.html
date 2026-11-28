@@ -2338,7 +2338,21 @@
             };
 
             // ─── RENDER ENGINE ──────────────────────────────────────────
+            let _lastRenderSig = '';
             function renderTV() {
+                // Skip render if nothing changed (prevents flicker from rapid polling)
+                // Interval secondsLeft is excluded; renderIntervalOverlay() handles that via 250ms tick
+                const sig = JSON.stringify([
+                    liveState.p1Name, liveState.p2Name,
+                    liveState.games, liveState.setsWon,
+                    liveState.currentGame, liveState.server,
+                    liveState.isLive, liveState.isComplete, liveState.status,
+                    liveState.customMessage, liveState.setWonJustNow, liveState.winner,
+                    liveState.interval && liveState.interval.active,
+                    liveState.targetPoints, liveState.category, liveState.matchId
+                ]);
+                if (sig === _lastRenderSig) return;
+                _lastRenderSig = sig;
                 const tvNoticeFullscreen = document.getElementById('tvNoticeFullscreen');
                 const tvNoticeMainText = document.getElementById('tvNoticeMainText');
                 const tvNoticeCourtMeta = document.getElementById('tvNoticeCourtMeta');
@@ -2756,19 +2770,24 @@
                 const curPts = (curGScore[0] || 0) + (curGScore[1] || 0);
                 const incPts = (incGScore[0] || 0) + (incGScore[1] || 0);
 
-                // Anti-stale packet check:
-                // 1. Explicit actions (Match Setup, Reset to 0-0, Upcoming) -> ALWAYS ACCEPT
-                // 2. Score advancing (next game, or higher points in current game) -> ALWAYS ACCEPT IMMEDIATELY (NEVER DROP A POINT!)
-                // 3. Only if incoming score is lower in the same game, guard against old stale echoes:
-                const isExplicitAction = (d.status === 'UPCOMING' || (d.status === 'LIVE' && incGScore[0] === 0 && incGScore[1] === 0));
+                // Anti-stale packet check: reject any packet older than our latest timestamp
+                if (!isFirstPacket && incomingTs > 0 && liveState.lastDataTimestamp) {
+                    if (incomingTs < liveState.lastDataTimestamp) {
+                        return;
+                    }
+                    if (incomingTs === liveState.lastDataTimestamp) {
+                        return;
+                    }
+                }
+
+                // Fallback guard when incoming packet has no timestamp
+                const isExplicitAction = (incomingTs === 0 || !liveState.lastDataTimestamp || incomingTs >= liveState.lastDataTimestamp) &&
+                    (d.status === 'UPCOMING' || (d.status === 'LIVE' && incGScore[0] === 0 && incGScore[1] === 0));
                 const isScoreAdvancing = (incomingGame > checkG) || (incomingGame === checkG && incPts > curPts);
 
-                if (!isNewMatch && !isFirstPacket && !isExplicitAction && !isScoreAdvancing && liveState.games) {
+                if (!isNewMatch && !isFirstPacket && !isExplicitAction && !isScoreAdvancing && liveState.games && incomingTs === 0) {
                     if (incomingGame === checkG && incPts < curPts) {
-                        // Reject only if this packet with a lower score is older than our last data by > 10000ms
-                        if (incomingTs > 0 && liveState.lastDataTimestamp && incomingTs < (liveState.lastDataTimestamp - 10000)) {
-                            return;
-                        }
+                        return;
                     }
                 }
 
@@ -3000,7 +3019,7 @@
                 }
             });
 
-            // 2. High-speed Local Storage Watcher (every 50ms)
+            // 2. Local Storage Watcher (1000ms fallback; storage event handles instant same-device updates)
             setInterval(() => {
                 try {
                     const raw = localStorage.getItem('sp3_tourney_live_data');
@@ -3012,7 +3031,7 @@
                         }
                     }
                 } catch (e) { }
-            }, 50);
+            }, 1000);
 
             // 3. Broadcast Channel Listener (Instant in-memory)
             let tvBc = null;
@@ -3027,7 +3046,7 @@
                     tvBc.postMessage({ type: 'REQUEST_LIVE_STATE' });
                     setInterval(() => {
                         try { tvBc.postMessage({ type: 'REQUEST_LIVE_STATE' }); } catch (e) { }
-                    }, 1000);
+                    }, 5000);
                 } catch (e) { }
             }
 
@@ -3149,20 +3168,6 @@
             setTimeout(() => sendTvPresenceHeartbeat('ONLINE'), 1000);
             window.addEventListener('beforeunload', () => sendTvPresenceHeartbeat('OFFLINE'));
 
-            // ─── 0MS INSTANT LOCAL BROADCAST SYNC (TAB-TO-TAB) ───────────
-            if (window.BroadcastChannel) {
-                try {
-                    const bc = new BroadcastChannel('sp3_tourney_live');
-                    bc.onmessage = function (ev) {
-                        if (ev.data && (ev.data.type === 'SCORE_UPDATE' || ev.data.type === 'LIVE_STATE')) {
-                            if (ev.data.data) processRawUpdate(ev.data.data);
-                        }
-                    };
-                    // Request latest score immediately from scorer if active
-                    bc.postMessage({ type: 'REQUEST_LIVE_STATE' });
-                } catch (e) {}
-            }
-
             // ─── REAL-TIME WEBSOCKET SYNC (SOCKET.IO 0MS DIRECT) ────────
             let tvSocket = null;
             try {
@@ -3171,9 +3176,9 @@
                         transports: ['websocket', 'polling'],
                         reconnection: true,
                         reconnectionAttempts: Infinity,
-                        reconnectionDelay: 200,
-                        reconnectionDelayMax: 1000,
-                        timeout: 4000
+                        reconnectionDelay: 2000,
+                        reconnectionDelayMax: 10000,
+                        timeout: 5000
                     });
 
                     tvSocket.on('connect', function () {
@@ -3364,8 +3369,8 @@
             fetchLiveScoreFromServer();
             renderTV();
 
-            // Continuous High-Speed Real-Time Sync Polling (guarantees cross-device sync even without WebSockets)
-            setInterval(fetchLiveScoreFromServer, 500);
+            // Continuous Cross-Device Sync Polling (3s fallback; Socket.io+MQTT handle real-time)
+            setInterval(fetchLiveScoreFromServer, 3000);
 
         })();
     </script>

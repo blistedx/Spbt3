@@ -1931,9 +1931,9 @@
                             transports: ['websocket', 'polling'],
                             reconnection: true,
                             reconnectionAttempts: Infinity,
-                            reconnectionDelay: 200,
-                            reconnectionDelayMax: 1000,
-                            timeout: 4000
+                            reconnectionDelay: 2000,
+                            reconnectionDelayMax: 10000,
+                            timeout: 5000
                         });
 
                         scorerSocket.on('connect', function () {
@@ -2147,7 +2147,7 @@
                 if (localHasLiveProgress && serverTs > 0 && serverTs < localTs) {
                     return;
                 }
-                if (serverTs > 0 && state.lastSyncedUpdatedAt && serverTs < state.lastSyncedUpdatedAt) {
+                if (serverTs > 0 && state.lastSyncedUpdatedAt && serverTs <= state.lastSyncedUpdatedAt) {
                     return;
                 }
                 state.lastSyncedUpdatedAt = serverTs || now;
@@ -2504,12 +2504,7 @@
                 if (modalMatchId) modalMatchId.value = match.matchId || match.id;
             };
 
-            // ─── 2-SECOND CONTINUOUS LIVE SCORE SYNC POLLING (HOST & CLIENTS) ───
-            setInterval(() => {
-                if (!state.isLive && (!state.rallyLog || state.rallyLog.length === 0)) {
-                    loadLiveMatchFromSheet();
-                }
-            }, 2000);
+            // (Consolidated into single 3000ms fallback poll below)
 
             // ─── REAL-TIME MULTI-BROKER MQTT WEBSOCKET ENGINE (0MS CROSS-DEVICE) ─
             const MQTT_TOPIC = 'sp3_tournament_live_2026/scores';
@@ -2892,7 +2887,17 @@
             }
 
             // ─── UI RENDER HELPER ───
+            let _lastScorerRenderSig = '';
             function updateUI() {
+                const sig = JSON.stringify([
+                    state.p1Name, state.p2Name, state.category, state.matchId,
+                    state.targetPoints, state.games, state.currentGame,
+                    state.setsWon, state.server, state.isLive, state.isComplete,
+                    state.status, state.rallyLog && state.rallyLog.length,
+                    state.interval && state.interval.active
+                ]);
+                if (sig === _lastScorerRenderSig) return;
+                _lastScorerRenderSig = sig;
                 const g = state.currentGame;
                 const p1Score = state.games[g][0];
                 const p2Score = state.games[g][1];
@@ -3808,13 +3813,13 @@
                 }
             }
 
-            // Continuous High-Speed Real-Time Sync Polling across all scorer mobile devices
+            // Fallback Sync Polling across scorer devices (Socket.io + MQTT handle real-time)
             setInterval(() => {
                 const now = Date.now();
                 if (!state.lastLocalTap || (now - state.lastLocalTap > 4000)) {
                     loadLiveMatchFromSheet();
                 }
-            }, 1200);
+            }, 3000);
 
             // ─── ADMIN PORTAL NAVIGATION (DIRECT ACCESS) ───
             window.handleAdminNav = function (e) {
