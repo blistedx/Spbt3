@@ -1315,6 +1315,18 @@ async function processLegacyRegistration(body, res) {
     const p1Email = body.p1Email || body.player1Email;
     const category = body.category || 'Below 35';
 
+    const curSettings = await dataStore.getSettingsAsync();
+    const globalRegStatus = String((curSettings && (curSettings.registration_status || curSettings.registrationStatus)) || 'OPEN').toUpperCase();
+    if (globalRegStatus === 'CLOSED') {
+      return res.status(403).json({ success: false, error: 'Tournament registrations are currently CLOSED.' });
+    }
+    const catsList = (curSettings && Array.isArray(curSettings.categories)) ? curSettings.categories : [];
+    const catKey = category.toLowerCase().includes('below') ? 'below' : (category.toLowerCase().includes('above') ? 'above' : category.toLowerCase());
+    const matchedCat = catsList.find(c => (c.name || '').toLowerCase().includes(catKey));
+    if (matchedCat && ['INACTIVE', 'CLOSED'].includes(String(matchedCat.status || '').toUpperCase())) {
+      return res.status(403).json({ success: false, error: `Registrations for ${category} are currently CLOSED.` });
+    }
+
     if (!p1Name || !p1Phone) {
       return res.status(400).json({ success: false, error: 'Please provide Player 1 Full Name and Mobile Number.' });
     }

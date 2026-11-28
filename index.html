@@ -8357,6 +8357,20 @@
       return (rawStatus === 'CLOSED') || allCatsInactive;
     }
 
+    function isCategoryClosed(catName, customCfg) {
+      if (isRegistrationClosed(customCfg)) return true;
+      const cfg = customCfg || publicConfigCache || {};
+      const settings = cfg.settings || cfg || {};
+      const categories = window._cachedCategories || cfg.categories || settings.categories || [];
+      if (!Array.isArray(categories) || categories.length === 0) return false;
+      const target = (catName || '').toLowerCase();
+      const key = target.includes('below') ? 'below' : (target.includes('above') ? 'above' : target);
+      const match = categories.find(c => (c.name || '').toLowerCase().includes(key));
+      if (!match) return false;
+      const st = (match.status || 'ACTIVE').toUpperCase();
+      return st === 'INACTIVE' || st === 'CLOSED';
+    }
+
     function applyPublicConfig(cfg) {
       if (!cfg) return;
       const settings = cfg.settings || cfg || {};
@@ -8590,10 +8604,49 @@
             }
           }
         });
+
+        // Sync modal category radio buttons with active/closed status
+        const bClosed = isCategoryClosed('Below 35', cfg);
+        const aClosed = isCategoryClosed('Above 35', cfg);
+        const bRadio = document.querySelector('input[name="modalCatRadio"][value="Below 35"]');
+        const aRadio = document.querySelector('input[name="modalCatRadio"][value="Above 35"]');
+        const bLabel = document.getElementById('catLabelBelow35');
+        const aLabel = document.getElementById('catLabelAbove35');
+        if (bRadio) bRadio.disabled = bClosed;
+        if (aRadio) aRadio.disabled = aClosed;
+        if (bLabel) {
+          bLabel.style.opacity = bClosed ? '0.48' : '1';
+          bLabel.style.cursor = bClosed ? 'not-allowed' : 'pointer';
+          bLabel.title = bClosed ? 'Below 35 registration is currently CLOSED' : '';
+        }
+        if (aLabel) {
+          aLabel.style.opacity = aClosed ? '0.48' : '1';
+          aLabel.style.cursor = aClosed ? 'not-allowed' : 'pointer';
+          aLabel.title = aClosed ? 'Above 35 registration is currently CLOSED' : '';
+        }
+        const curSelected = (document.getElementById('finalCategory') && document.getElementById('finalCategory').value) || 'Below 35';
+        if (curSelected.toLowerCase().includes('below') && bClosed && !aClosed) {
+          if (aRadio) aRadio.checked = true;
+          handleModalCatChange('Above 35');
+        } else if (curSelected.toLowerCase().includes('above') && aClosed && !bClosed) {
+          if (bRadio) bRadio.checked = true;
+          handleModalCatChange('Below 35');
+        }
       }
     }
 
     function handleModalCatChange(cat) {
+      if (isCategoryClosed(cat) && !isRegistrationClosed()) {
+        alert("Registrations for " + cat + " are currently CLOSED.");
+        const fallback = cat.toLowerCase().includes('below') ? 'Above 35' : 'Below 35';
+        if (!isCategoryClosed(fallback)) {
+          const r = document.querySelector('input[name="modalCatRadio"][value="' + fallback + '"]');
+          if (r) r.checked = true;
+          cat = fallback;
+        } else {
+          return;
+        }
+      }
       document.getElementById('finalCategory').value = cat;
       const bLabel = document.getElementById('catLabelBelow35');
       const aLabel = document.getElementById('catLabelAbove35');
@@ -8607,8 +8660,16 @@
     }
 
     function openRegister(prefCat) {
+      if (prefCat && isCategoryClosed(prefCat) && !isRegistrationClosed()) {
+        alert("Registrations for " + prefCat + " are currently CLOSED.");
+        return;
+      }
       document.getElementById('regModal').classList.add('open');
-      if (prefCat && prefCat.toLowerCase().includes('above')) {
+      let targetCat = prefCat;
+      if (!targetCat) {
+        targetCat = !isCategoryClosed('Below 35') ? 'Below 35' : (!isCategoryClosed('Above 35') ? 'Above 35' : 'Below 35');
+      }
+      if (targetCat.toLowerCase().includes('above')) {
         const r = document.querySelector('input[name="modalCatRadio"][value="Above 35"]');
         if (r) r.checked = true;
         handleModalCatChange('Above 35');
@@ -9620,6 +9681,11 @@
       e.preventDefault();
       if (isRegistrationClosed()) {
         alert("Tournament registrations are currently CLOSED. Form submissions are disabled.");
+        return false;
+      }
+      const selectedCatCheck = (document.getElementById('finalCategory')?.value || "Below 35");
+      if (isCategoryClosed(selectedCatCheck)) {
+        alert("Registrations for " + selectedCatCheck + " are currently CLOSED. Please choose an open category.");
         return false;
       }
 

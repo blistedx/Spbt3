@@ -161,6 +161,13 @@ router.post('/submit', upload.single('paymentScreenshot'), async (req, res) => {
     if (regStatus.toUpperCase() === 'CLOSED') {
       return res.status(400).json({ success: false, error: 'Registrations are currently closed for this tournament.' });
     }
+    const reqCat = String(body.category || body.categoryName || 'Below 35');
+    const catKey = reqCat.toLowerCase().includes('below') ? 'below' : (reqCat.toLowerCase().includes('above') ? 'above' : reqCat.toLowerCase());
+    const catsList = (settings && Array.isArray(settings.categories)) ? settings.categories : [];
+    const matchedCat = catsList.find(c => (c.name || '').toLowerCase().includes(catKey));
+    if (matchedCat && ['INACTIVE', 'CLOSED'].includes(String(matchedCat.status || '').toUpperCase())) {
+      return res.status(403).json({ success: false, error: `Registrations for ${reqCat} are currently closed.` });
+    }
 
     const p1Name = (body.p1Name || body.player1Name || '').trim();
     const p1Phone = (body.p1Phone || body.player1Phone || '').trim();
