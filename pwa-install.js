@@ -45,9 +45,20 @@
     window.navigator.standalone === true ||
     document.referrer.includes('android-app://');
 
-  // If already installed and launched standalone, check if alerts are enabled
+  // Show install promotion on load even on browsers where beforeinstallprompt doesn't fire (iOS Safari, etc.)
+  if (!isStandalone) {
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        showInstallPromotion();
+      }, 2000);
+    });
+  }
+
+  // If already installed and launched standalone, hide hero install btn & check if alerts are enabled
   if (isStandalone) {
     window.addEventListener('load', () => {
+      const heroBtn = document.getElementById('heroInstallAppBtn');
+      if (heroBtn) heroBtn.style.display = 'none';
       const alreadySubscribed = localStorage.getItem('sp3_player_push_subscribed') === 'true';
       const isDismissed = sessionStorage.getItem('sp3_pwa_alert_prompt_dismissed') === 'true';
       const isDenied = ('Notification' in window) && Notification.permission === 'denied';
@@ -101,16 +112,8 @@
     document.body.appendChild(banner);
 
     document.getElementById('sp3PwaInstallBtn')?.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log('[PWA] User install choice:', outcome);
-        deferredPrompt = null;
-        if (outcome === 'accepted') {
-          setTimeout(() => showPwaAlertPrompt(true), 700);
-        }
-      }
       banner.remove();
+      await triggerInstallOrGuide();
     });
 
     document.getElementById('sp3PwaDismissBtn')?.addEventListener('click', () => {
@@ -521,22 +524,57 @@
   `;
   document.head.appendChild(style);
 
-  // Global manual triggers
-  window.promptPwaInstall = function () {
+  async function triggerInstallOrGuide() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult && choiceResult.outcome === 'accepted') {
-          setTimeout(() => showPwaAlertPrompt(true), 700);
-        }
-      });
-    } else {
-      if (isStandalone) {
-        showPwaAlertPrompt(true);
-      } else {
-        alert('To install the app, tap Share on iOS Safari and "Add to Home Screen", or click Install in your browser address bar!');
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('[PWA] User install choice:', outcome);
+      deferredPrompt = null;
+      if (outcome === 'accepted') {
+        setTimeout(() => showPwaAlertPrompt(true), 700);
       }
+      return;
     }
+    if (isStandalone) {
+      showPwaAlertPrompt(true);
+      return;
+    }
+    showManualInstallGuide();
+  }
+
+  function showManualInstallGuide() {
+    if (document.getElementById('sp3-manual-install-modal')) return;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const stepsHtml = isIOS
+      ? `<div>1. Tap the <strong>Share (⎋)</strong> button at the bottom of Safari</div>
+         <div>2. Scroll down and tap <strong>"Add to Home Screen"</strong></div>
+         <div>3. Tap <strong>Add</strong> in the top-right corner</div>`
+      : `<div>1. Open your browser menu (<strong>⋮</strong> in Chrome/Edge)</div>
+         <div>2. Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong></div>
+         <div>3. On Desktop Chrome/Edge, click the <strong>Install (⊕)</strong> icon in the address bar</div>`;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'sp3-manual-install-modal';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999999;background:rgba(4,9,6,0.82);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Outfit,Inter,sans-serif;';
+    overlay.innerHTML = `
+      <div style="background:linear-gradient(180deg,#111c15 0%,#09120c 100%);border:1.5px solid rgba(34,197,94,0.45);border-radius:22px;max-width:410px;width:100%;padding:24px 20px;text-align:center;color:#f8fafc;box-shadow:0 25px 60px rgba(0,0,0,0.85);">
+        <div style="font-size:32px;margin-bottom:8px;">📱</div>
+        <h3 style="font-size:19px;font-weight:800;margin:0 0 8px;">Install SP Tourney App</h3>
+        <p style="font-size:13px;color:#cbd5e1;margin:0 0 14px;">Quickly add this portal to your home screen for instant live scores &amp; alerts:</p>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(34,197,94,0.25);border-radius:12px;padding:12px 14px;text-align:left;font-size:13px;line-height:1.65;color:#e2e8f0;margin-bottom:16px;">
+          ${stepsHtml}
+        </div>
+        <button id="sp3CloseInstallGuideBtn" style="width:100%;padding:12px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Got It ✓</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    document.getElementById('sp3CloseInstallGuideBtn')?.addEventListener('click', () => overlay.remove());
+  }
+
+  // Global manual triggers
+  window.promptPwaInstall = function () {
+    triggerInstallOrGuide();
   };
 
   window.promptPwaAlertSettings = function () {

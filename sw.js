@@ -1,5 +1,5 @@
 // S.P. Badminton Tourney 3 · Service Worker
-const CACHE_NAME = 'sp3-cache-v5';
+const CACHE_NAME = 'sp3-cache-v6';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
