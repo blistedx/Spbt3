@@ -6373,7 +6373,7 @@
       }
 
       // Parallel immediate fetch
-      fetch('/api/matches/live')
+      fetch('/api/matches/live?_=' + Date.now(), { cache: 'no-store' })
         .then(function (r) { return r.json(); })
         .then(function (res) {
           const lm = (res && res.success && res.liveMatch) ? res.liveMatch : null;
@@ -6385,6 +6385,7 @@
               showCenterLiveCard(lm);
             }
           } else {
+            try { localStorage.removeItem('sp3_cached_live_match'); } catch (e) {}
             hideCenterLiveCard();
             if (typeof updateSlidingLiveWindow === 'function') {
               updateSlidingLiveWindow(false);
@@ -9975,22 +9976,19 @@
     /* ================= DAILY MATCH SCHEDULE & FIXTURES ENGINE ================= */
     let currentScheduleDay = 'Day 1';
     let currentScheduleCat = 'ALL';
-    let allMatchesSchedule = (function () {
-      try {
-        const cached = localStorage.getItem('sp3_cached_schedule');
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-      } catch (e) {}
-      return [];
-    })();
+    let allMatchesSchedule = [];
 
     function fetchAndRenderSchedule() {
       const onSuccess = function (res) {
         if (res && res.success && Array.isArray(res.schedule)) {
           allMatchesSchedule = res.schedule;
-          try { localStorage.setItem('sp3_cached_schedule', JSON.stringify(res.schedule)); } catch (e) {}
+          try {
+            if (res.schedule.length > 0) {
+              localStorage.setItem('sp3_cached_schedule', JSON.stringify(res.schedule));
+            } else {
+              localStorage.removeItem('sp3_cached_schedule');
+            }
+          } catch (e) {}
         }
         renderScheduleGrid();
         renderBracketTree();
@@ -9999,7 +9997,7 @@
         }
       };
 
-      fetch('/api/matches/schedule')
+      fetch('/api/matches/schedule?_=' + Date.now(), { cache: 'no-store' })
         .then(r => r.json())
         .then(onSuccess)
         .catch(() => {
